@@ -15,13 +15,14 @@ A tile-based 2D platformer editor that runs in a single HTML file. Build a level
 5. [Moving platforms](#moving-platforms)
 6. [Character settings](#character-settings)
 7. [Power-ups](#power-ups)
-8. [Game system (score & lives)](#game-system-score--lives)
-9. [Screen & level size](#screen--level-size)
-10. [Cheats](#cheats)
-11. [Controls](#controls)
-12. [Gameplay rules](#gameplay-rules)
-13. [Saving, loading & file format](#saving-loading--file-format)
-14. [Tips](#tips)
+8. [Enemies](#enemies-1)
+9. [Game system (score & lives)](#game-system-score--lives)
+10. [Screen & level size](#screen--level-size)
+11. [Cheats](#cheats)
+12. [Controls](#controls)
+13. [Gameplay rules](#gameplay-rules)
+14. [Saving, loading & file format](#saving-loading--file-format)
+15. [Tips](#tips)
 
 ---
 
@@ -52,6 +53,7 @@ A tile-based 2D platformer editor that runs in a single HTML file. Build a level
 | Button | Shortcut | Description |
 |---|---|---|
 | **▶ Play / ■ Stop** | `Enter` | Switch between editing and playing. Play needs a Start tile. |
+| **❚❚ Pause / ▶ Resume** | `P` | Only shown while playing. Freezes the game until you resume. The game also pauses by itself when the window loses focus. |
 | **↶ Undo** | `Ctrl+Z` | Undo the last paint stroke, clear, resize, load or import (up to 100 steps). |
 | **Clear** | — | Empty the whole level (asks for confirmation; can be undone). |
 | **Save** | — | Save the level to the browser (localStorage). |
@@ -60,7 +62,8 @@ A tile-based 2D platformer editor that runs in a single HTML file. Build a level
 | **Import** | — | Open a `.json` level file. |
 | **🏃 Character** | `C` | Open the Character panel (jump, speed, shots, health). |
 | **⭐ Power-ups** | `U` | Open the Power-ups editor. |
-| **⚙ Game system** | — | Points per coin/enemy and coins needed for an extra life. |
+| **👾 Enemies** | `E` | Open the Enemies editor. |
+| **⚙ Game system** | — | Points per coin and coins needed for an extra life. |
 | **🖥 Screen** | — | Screen resolution and level size. |
 | **🎮 Cheats** | `I` | Toggle invincibility. |
 | **❓ Help** | `H` / `F1` | Open this guide in the game. |
@@ -92,9 +95,7 @@ Select a tile with its key or from the palette. **Middle-click** a tile in the l
 
 ### Enemies
 
-| Tile | Key | Behaviour |
-|---|---|---|
-| **Enemy** | `5` | Walks left and right, turning at walls and ledges. Touching it costs 1 HP. Jump on it (stomp) or shoot it to defeat it. |
+Every enemy type made in the [Enemies editor](#enemies-1) appears here. **✎ Create / edit…** (`E`) opens the editor; `5` selects the last enemy used.
 
 ### Items
 
@@ -211,6 +212,67 @@ Open with **⭐ Power-ups** or `U`. Power-ups are made by you and saved with the
 
 ---
 
+## Enemies
+
+Open with **👾 Enemies** or `E`. Enemy types are made by you and saved with the level, like power-ups. A starter set is created the first time:
+
+| Preset | What it shows |
+|---|---|
+| **Walker** | The classic enemy: walks, turns at walls and ledges. |
+| **Brute** | Size 1.5 tiles, 3 HP, 500 pts. |
+| **Sentry** | Still, 2 HP. |
+| **Spiky** | Can't be stomped: shoot it. |
+| **Hoverer** | Flies back and forth horizontally (A ↔ B). |
+| **Swooper** | Flies back and forth diagonally. |
+| **Dart** | Flies left forever once on screen. |
+| **Turret** | Still, shoots left and right. |
+| **Bomber** | Flies A ↔ B and drops shots downwards. |
+
+### Managing enemies
+
+- Click an enemy in the list to edit it **and** select it for painting.
+- **＋ New** creates one (up to 26). **Duplicate** copies the selected one. **🗑 Delete** removes it and every copy placed in the level.
+- **Name** (16 characters max) and **Colour**.
+- The enemy stands on the tile you paint it on, centred, whatever its size. A ↔ B paths and endless directions are previewed in the editor.
+- Changes apply the next time the level starts (Play, a lost life or `R`).
+
+### Settings
+
+| Setting | Range | Default | Description |
+|---|---|---|---|
+| **Size** | 0.5 – 5 tiles | 0.75 | Width and height of the enemy. |
+| **Health points** | 1 – 20 HP | 1 | Stomps or shots needed to defeat it (each one removes 1 HP). |
+| **Score when defeated** | 0 – 10000 pts | 200 | Points gained when it is defeated. |
+| **🥾 Can be stomped** | on / off | on | Off: landing on it hurts the player (it is drawn with spikes), so it must be shot. |
+| **Speed** | 0.5 – 15 tiles/s | 2 | Walk, A ↔ B and Endless only. |
+| **Distance A → B** | 1 – 30 tiles | 4 | A ↔ B only (per axis on diagonals). |
+
+### Movement
+
+| Mode | Direction | Behaviour |
+|---|---|---|
+| **■ Still** | Facing ← → | Doesn't move (floats where it is placed). |
+| **🚶 Walk** | ← → | Walks with gravity, turning at walls and ledges. |
+| **⇄ A ↔ B** | 8 directions | Flies back and forth between its tile (A) and B, horizontally, vertically or diagonally, through walls. |
+| **➜ Endless** | 8 directions | Flies forever in one direction, through walls. Starts once it comes on screen; gone once it leaves the level. |
+
+### 🔫 Fires projectiles (tick to enable)
+
+| Setting | Range | Default | Description |
+|---|---|---|---|
+| **Direction** | → Facing · ↔ Both sides · ↑ Up · ↓ Down · ↕ Up & down | → Facing | Horizontal or vertical. *Facing* follows where the enemy looks/moves. |
+| **Time between shots** | 0.3 – 10 s | 2 | Delay between two volleys. |
+| **Projectile speed** | 1 – 30 tiles/s | 6 | How fast its projectiles fly. |
+
+Enemies only fire while on screen. Their projectiles fly straight, stop at solid tiles and cost the player 1 HP. Cannons on the enemy show where it fires.
+
+### Combat
+
+- Each **stomp** or player **shot** removes 1 HP. A damaged enemy flashes and shows a health bar; at 0 HP it is defeated and gives its score.
+- Right after a stomp the enemy can't hurt you for a moment, so bouncing off it is safe.
+
+---
+
 ## Game system (score & lives)
 
 Open the **⚙ Game system** menu.
@@ -218,10 +280,9 @@ Open the **⚙ Game system** menu.
 | Setting | Range | Default | Description |
 |---|---|---|---|
 | **Points per coin** | 0 – 10000 | 100 | Score for each coin. |
-| **Points per enemy** | 0 – 10000 | 200 | Score for each enemy defeated (stomp, shot or invincible contact). |
 | **Coins for a life** | 0 – 999 | 100 | Collecting this many coins gives +1 life ("1UP"). 0 = never. |
 
-Health points and starting lives are set in the [Character panel](#character-settings).
+Points per enemy are set for each enemy type in the [Enemies editor](#enemies-1). Health points and starting lives are set in the [Character panel](#character-settings).
 
 ---
 
@@ -270,6 +331,7 @@ Open the **🎮 Cheats** menu or press `I` (works in both modes).
 | Undo | `Ctrl+Z` |
 | Character panel | `C` |
 | Power-ups panel | `U` |
+| Enemies panel | `E` |
 | Invincibility | `I` |
 | Help | `H` / `F1` |
 | Play | `Enter` |
@@ -282,6 +344,7 @@ Open the **🎮 Cheats** menu or press `I` (works in both modes).
 | Move | `←` `→` / `A` `D` (`Q` on AZERTY) |
 | Jump (hold for higher) | `Space` / `W` / `↑` / `Z` |
 | Shoot / throw | `X` / `J` |
+| Pause / resume | `P` |
 | Restart the run | `R` |
 | Invincibility | `I` |
 | Help (pauses the game) | `H` / `F1` |
@@ -292,10 +355,10 @@ Open the **🎮 Cheats** menu or press `I` (works in both modes).
 ## Gameplay rules
 
 - **A run** starts when you press Play and ends at game over. Score and lives carry over between lives; each life restarts the level from the Start tile with full HP.
-- **Getting hit** (spikes, enemies) costs 1 HP, knocks you back and makes you invulnerable (blinking) for 1.2 s. At 0 HP you lose a life.
+- **Getting hit** (spikes, enemies, enemy projectiles) costs 1 HP, knocks you back and makes you invulnerable (blinking) for 1.2 s. At 0 HP you lose a life.
 - **Pits**: falling out of the bottom of the level always costs a whole life, whatever your HP.
-- **Stomping**: landing on an enemy defeats it and bounces you up. Hold jump while stomping for a full-height bounce.
-- **Shots** fly straight, stop at solid tiles, defeat enemies and disappear off screen.
+- **Stomping**: landing on an enemy removes 1 of its HP and bounces you up. Hold jump while stomping for a full-height bounce. Enemies that can't be stomped hurt you instead.
+- **Shots** fly straight, stop at solid tiles, remove 1 HP from the enemy they hit and disappear off screen.
 - **Jump feel**: releasing jump early cuts the jump short. A short grace period lets you jump just after walking off a ledge or just before landing.
 - **Level edges** act as walls on the left and right.
 - **Goal**: touching the flag completes the level. Press `R` to play again or `Enter` to edit.
@@ -306,11 +369,11 @@ Open the **🎮 Cheats** menu or press `I` (works in both modes).
 
 ## Saving, loading & file format
 
-**What the browser remembers automatically**: character settings, game-system settings, power-ups, moving-platform settings, screen size and cheats.
+**What the browser remembers automatically**: character settings, game-system settings, power-ups, enemies, moving-platform settings, screen size and cheats.
 
 **The level itself** is only stored when you click **Save** (browser) or **Export** (file). On start-up, the level saved in the browser is loaded.
 
-Saved and exported levels include the tiles, character settings, game-system settings, moving-platform settings and power-ups, so a level file is self-contained. Loading or importing a level replaces your current character, game-system and power-up settings with the level's.
+Saved and exported levels include the tiles, character settings, game-system settings, moving-platform settings, power-ups and enemies, so a level file is self-contained. Loading or importing a level replaces your current character, game-system, power-up and enemy settings with the level's. Older levels without enemy types still load: their `e` tiles become a Walker.
 
 ### `level.json`
 
@@ -320,9 +383,11 @@ Saved and exported levels include the tiles, character settings, game-system set
   "h": 18,
   "rows": ["....", "..."],
   "char": { "jumpH": 3.4, "jumpW": 4.8, "speed": 7.2, "impact": 0, "projSpeed": 14, "projMax": 3, "hp": 3, "lives": 3 },
-  "sys": { "coinPoints": 100, "enemyPoints": 200, "coinsPerLife": 100 },
+  "sys": { "coinPoints": 100, "coinsPerLife": 100 },
   "meta": { "12,9": { "mode": "h", "dir": "r", "dist": 4, "speed": 2 } },
-  "powerups": [ { "id": "A", "name": "Giant", "color": "#e94560", "size": 160, "speed": 90 } ]
+  "powerups": [ { "id": "A", "name": "Giant", "color": "#e94560", "size": 160, "speed": 90 } ],
+  "enemies": [ { "id": "e", "name": "Walker", "color": "#c94f6d", "size": 0.75, "hp": 1, "points": 200, "stompable": true,
+                 "mode": "walk", "dir": "l", "speed": 2, "dist": 4, "shoot": false, "shotDir": "face", "fireRate": 2, "shotSpeed": 6 } ]
 }
 ```
 
@@ -331,12 +396,14 @@ Each string in `rows` is one row of the level, top to bottom, one character per 
 | Char | Tile | Char | Tile |
 |---|---|---|---|
 | `.` | Empty | `s` | Spikes |
-| `g` | Ground | `e` | Enemy |
+| `g` | Ground | `e`, `a`, `d`, … | Enemy type with that `id` (see below) |
 | `b` | Brick | `c` | Coin |
 | `k` | Breakable | `j` | Spring |
 | `p` | Platform | `P` | Start |
 | `v` | Falling | `f` | Goal |
 | `m` | Moving | `A`–`Z` (not `P`) | Power-up with that `id` |
+
+Enemy `id`s are taken from `eadhilnoqrtuwxyz0123456789`. Enemy `mode` is `still`, `walk`, `path` (A ↔ B) or `line` (endless); `shotDir` is `face`, `lr`, `up`, `down` or `ud`.
 
 `meta` keys are `"x,y"` tile coordinates of moving platforms. `mode` is `h`, `v`, `d` or `c`; `dir` is `r`, `l`, `u`, `d`, `ur`, `dr`, `dl`, `ul`, `cw` or `ccw`.
 

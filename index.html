@@ -66,8 +66,24 @@
   .panel .foot button { background:var(--btn); color:var(--txt); border:0; border-radius:6px; padding:5px 10px; cursor:pointer; font:inherit; }
   .panel .foot button:hover { background:var(--btnh); }
   #charPanel { right:10px; max-height:calc(100vh - 120px); overflow-y:auto; }
+  .panel details.cat { margin:0 -4px 8px; border:1px solid #444a66; border-radius:8px; background:#22263a; }
+  .panel details.cat > summary { list-style:none; cursor:pointer; padding:8px 10px; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; display:flex; align-items:center; gap:8px; border-radius:8px; user-select:none; }
+  .panel details.cat > summary::-webkit-details-marker { display:none; }
+  .panel details.cat > summary:hover { background:var(--btnh); }
+  .panel details.cat > summary::after { content:'▼'; margin-left:auto; font-size:9px; opacity:.6; transition:transform .15s; }
+  .panel details.cat:not([open]) > summary::after { transform:rotate(-90deg); }
+  .panel details.cat > summary small { text-transform:none; letter-spacing:0; font-weight:400; opacity:.55; }
+  .panel details.subcat { margin:0 0 6px; border-radius:6px; background:#1f2232; }
+  .panel details.subcat > summary { list-style:none; cursor:pointer; padding:6px 8px; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; opacity:.85; display:flex; align-items:center; gap:6px; border-radius:6px; user-select:none; }
+  .panel details.subcat > summary::-webkit-details-marker { display:none; }
+  .panel details.subcat > summary:hover { background:var(--btnh); }
+  .panel details.subcat > summary::after { content:'▼'; margin-left:auto; font-size:8px; opacity:.6; transition:transform .15s; }
+  .panel details.subcat:not([open]) > summary::after { transform:rotate(-90deg); }
+  .panel details.subcat > .body { padding:4px 8px 2px; }
+  .panel details.cat > .body { padding:2px 10px 6px; }
+  .panel details.cat .body > h4.sub:first-child, .panel details.cat .body > .sub:first-child { margin-top:4px; padding-top:0; border-top:0; }
   #charPanel h4.sub { margin:14px 0 8px; padding-top:10px; border-top:1px solid #444a66; font-size:11px; text-transform:uppercase; letter-spacing:.06em; opacity:.7; }
-  #movePanel { left:10px; width:280px; }
+  #movePanel, #springPanel { left:10px; width:280px; }
   .panel .seg { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px; }
   .panel .seg button { flex:1; background:var(--btn); color:var(--txt); border:2px solid transparent; border-radius:6px; padding:5px 6px; cursor:pointer; font:inherit; font-size:12px; white-space:nowrap; }
   .panel .seg button:hover { background:var(--btnh); }
@@ -89,6 +105,7 @@
   .panel .ability { padding:6px 8px 1px; margin-bottom:8px; border-radius:6px; background:#1f2232; }
   .panel .ability .row { margin-bottom:6px; }
   .panel .ability.off .row { display:none; }
+  .panel [hidden] { display:none !important; }
   #help { position:absolute; left:10px; bottom:10px; background:#0009; padding:8px 10px; border-radius:6px; font-size:12px; line-height:1.5; pointer-events:none; }
   /* In-game guide (same content as README.md) */
   #guide { position:fixed; inset:0; z-index:20; background:#000a; display:flex; align-items:center; justify-content:center; padding:16px; }
@@ -123,6 +140,7 @@
 <body>
 <div id="bar">
   <button id="play" title="Play / Stop (Enter)">▶ Play</button>
+  <button id="pause" title="Pause / Resume (P)" hidden>❚❚ Pause</button>
   <span class="sep"></span>
   <button id="undo" title="Ctrl+Z">↶ Undo</button>
   <button id="clear">Clear</button>
@@ -179,7 +197,7 @@
       <label class="chk"><input type="checkbox" data-cheat="noAI"> 🧊 No enemy AI <small>N</small></label>
       <div class="note">Invincibility: spikes and enemies can't hurt you; falling into a pit puts you back on the last solid ground.<br>
         Endless time: timed power-ups never run out.<br>
-        No enemy AI: enemies stand still (you can still stomp them, and touching them still hurts).</div>
+        No enemy AI: enemies stand still and don't shoot (you can still stomp them, and touching them still hurts).</div>
     </div>
   </div>
   <span class="sep"></span>
@@ -193,8 +211,14 @@
 <div id="palette"></div>
 <div id="charPanel" class="panel" hidden>
   <h3>Character <button id="charClose" title="Close">✕</button></h3>
-  <div id="charRows"></div>
-  <div class="info" id="charInfo"></div>
+  <details class="cat" id="charMetrics" open>
+    <summary>📏 Metrics <small>jump · speed · shots · health</small></summary>
+    <div class="body"><div id="charRows"></div><div class="info" id="charInfo"></div></div>
+  </details>
+  <details class="cat" id="charPerks" open>
+    <summary>✨ Perks <small id="perkSummary"></small></summary>
+    <div class="body"><div id="perkRows"></div><div class="info" id="perkInfo"></div></div>
+  </details>
   <div class="foot"><button id="charReset">Reset defaults</button><span style="font-size:11px;opacity:.6;align-self:center">Arcs shown on Start tile</span></div>
 </div>
 
@@ -208,12 +232,30 @@
   <div class="info">The tile you place is the start (A). Paint over a placed platform to apply these settings, middle-click one to copy its settings. Neighbouring tiles with the same settings move together.</div>
 </div>
 
+<div id="springPanel" class="panel" hidden>
+  <h3>Spring</h3>
+  <div class="sub">Direction <span style="opacity:.6">(R / Shift+R to rotate)</span></div>
+  <div class="seg" id="springRot"></div>
+  <div class="sub">Trajectory</div>
+  <div class="seg" id="springPath"></div>
+  <div id="springRows"></div>
+  <div class="info" id="springInfo"></div>
+  <div class="info">Paint over a placed spring to apply these settings, middle-click one to copy its settings.</div>
+</div>
+
 <div id="powerPanel" class="panel" hidden>
   <h3>Power-ups <button id="powerClose" title="Close">✕</button></h3>
   <div class="plist" id="powerList"></div>
   <div id="powerEdit">
     <div class="line"><input type="text" id="pwName" maxlength="16" placeholder="Name"><input type="color" id="pwColor" title="Colour"></div>
-    <div id="pwRows"></div>
+    <details class="cat" id="pwCatStats" open>
+      <summary>📏 Stats <small>duration · size · movement</small></summary>
+      <div class="body" id="pwRows"></div>
+    </details>
+    <details class="cat" id="pwCatAbil" open>
+      <summary>✨ Abilities <small id="pwAbilSummary"></small></summary>
+      <div class="body" id="pwAbilRows"></div>
+    </details>
     <div class="info" id="pwInfo"></div>
     <div class="foot"><button id="pwDup">Duplicate</button><button id="pwDel">🗑 Delete</button></div>
   </div>
@@ -225,13 +267,29 @@
   <div class="plist" id="enemyList"></div>
   <div id="enemyEdit">
     <div class="line"><input type="text" id="enName" maxlength="16" placeholder="Name"><input type="color" id="enColor" title="Colour"></div>
-    <div id="enRows"></div>
-    <label class="chk" title="Off: landing on it hurts the player instead of damaging it"><input type="checkbox" id="enStomp"> 🥾 Can be stomped (each stomp = −1 HP)</label>
-    <h4 class="sub">Movement</h4>
-    <div class="seg" id="enMode"></div>
-    <div class="sub" id="enDirLbl">Direction</div>
-    <div class="seg" id="enDir"></div>
-    <div id="enMoveRows"></div>
+    <details class="cat" id="enCatStats" open>
+      <summary>📏 Stats <small>size · health · score</small></summary>
+      <div class="body">
+        <div id="enRows"></div>
+        <label class="chk" title="Off: landing on it hurts the player instead of damaging it"><input type="checkbox" id="enStomp"> 🥾 Can be stomped (each stomp = −1 HP)</label>
+      </div>
+    </details>
+    <details class="cat" id="enCatMove" open>
+      <summary>🚶 Movement <small>path · direction · speed</small></summary>
+      <div class="body">
+        <div class="seg" id="enMode"></div>
+        <div class="sub" id="enDirLbl">Direction</div>
+        <div class="seg" id="enDir"></div>
+        <div id="enMoveRows"></div>
+      </div>
+    </details>
+    <details class="cat" id="enCatShoot" open>
+      <summary>🔫 Shooting <small id="enShootSummary"></small></summary>
+      <div class="body">
+        <div class="ability" id="enShootBox"><label class="chk" title="Fire projectiles that hurt the player"><input type="checkbox" id="enShoot"> 🔫 Fires projectiles</label>
+          <div class="seg" id="enShotDir"></div><div id="enShotRows"></div></div>
+      </div>
+    </details>
     <div class="info" id="enInfo"></div>
     <div class="foot"><button id="enDup">Duplicate</button><button id="enDel">🗑 Delete</button></div>
   </div>
@@ -269,13 +327,15 @@
           <table>
             <tr><th>Button</th><th>Key</th><th>Description</th></tr>
             <tr><td>▶ Play / ■ Stop</td><td><kbd>Enter</kbd></td><td>Switch between editing and playing. Play needs a Start tile.</td></tr>
+            <tr><td>❚❚ Pause / ▶ Resume</td><td><kbd>P</kbd></td><td>Only shown while playing. Freezes the game until you resume. The game also pauses by itself when the window loses focus.</td></tr>
             <tr><td>↶ Undo</td><td><kbd>Ctrl+Z</kbd></td><td>Undo the last paint stroke, clear, resize, load or import (up to 100 steps).</td></tr>
             <tr><td>Clear</td><td></td><td>Empty the whole level (asks first; can be undone).</td></tr>
             <tr><td>Save / Load</td><td></td><td>Save the level to the browser / load it back.</td></tr>
             <tr><td>Export / Import</td><td></td><td>Download the level as <code>level.json</code> / open a <code>.json</code> level file.</td></tr>
             <tr><td>🏃 Character</td><td><kbd>C</kbd></td><td>Jump, speed, shots and health settings.</td></tr>
             <tr><td>⭐ Power-ups</td><td><kbd>U</kbd></td><td>Create and edit power-ups.</td></tr>
-            <tr><td>⚙ Game system</td><td></td><td>Points per coin/enemy and coins needed for an extra life.</td></tr>
+            <tr><td>👾 Enemies</td><td><kbd>E</kbd></td><td>Create and edit enemy types.</td></tr>
+            <tr><td>⚙ Game system</td><td></td><td>Points per coin and coins needed for an extra life.</td></tr>
             <tr><td>🖥 Screen</td><td></td><td>Screen resolution and level size.</td></tr>
             <tr><td>🎮 Cheats</td><td><kbd>I</kbd></td><td>Toggle invincibility.</td></tr>
             <tr><td>❓ Help</td><td><kbd>H</kbd> <kbd>F1</kbd></td><td>This guide.</td></tr>
@@ -311,7 +371,12 @@
         <section data-title="Character">
           <h3>Character settings</h3>
           <p>Open with <b>🏃 Character</b> or <kbd>C</kbd>. Changes apply immediately, even while playing. While the panel is open, dashed <b>jump arcs</b> are drawn from the Start tile so you can check what the player can reach (orange = standing jump, shown when <i>Speed impact</i> is above 0).</p>
+          <p>The panel has two collapsible categories:</p>
+          <h4>📏 Metrics</h4>
           <table data-gen="char"></table>
+          <h4>✨ Perks</h4>
+          <p>Abilities the character always has. Each perk's settings appear once it is ticked. Power-ups can still grant a perk for a while even when it is off here.</p>
+          <table data-gen="charPerks"></table>
           <p><b>Reset defaults</b> restores the default values.</p>
         </section>
 
@@ -334,6 +399,32 @@
             <li>Power-ups are <b>lost when you lose a life</b>; pick-ups come back with the level.</li>
             <li>A timed power-up's headband blinks during its last 2 seconds.</li>
             <li>Editing a power-up while playing updates it live.</li>
+          </ul>
+        </section>
+
+        <section data-title="Enemies">
+          <h3>Enemies</h3>
+          <p>Open with <b>👾 Enemies</b> or <kbd>E</kbd>. Enemy types are made by you and saved with the level, like power-ups. A starter set is created the first time: <b>Walker</b>, <b>Brute</b> (big, 3 HP), <b>Sentry</b> (still), <b>Spiky</b> (can't be stomped), <b>Hoverer</b> (A ↔ B), <b>Swooper</b> (diagonal), <b>Dart</b> (endless), <b>Turret</b> (shoots left and right) and <b>Bomber</b> (drops shots).</p>
+          <ul>
+            <li>Click an enemy in the list to edit it <b>and</b> select it for painting. <b>＋ New</b>, <b>Duplicate</b> and <b>🗑 Delete</b> work like for power-ups (delete also removes every copy placed in the level).</li>
+            <li>The enemy stands on the tile you paint it on, centred, whatever its size. A–B paths and endless directions are previewed in the editor.</li>
+            <li>Changes apply the next time the level starts (Play, a lost life or <kbd>R</kbd>).</li>
+          </ul>
+          <h4>Settings</h4>
+          <table data-gen="enemy"></table>
+          <h4>Movement</h4>
+          <table>
+            <tr><th>Mode</th><th>Behaviour</th></tr>
+            <tr><td>■ Still</td><td>Doesn't move (floats where it is placed). <i>Facing</i> sets where it looks and fires.</td></tr>
+            <tr><td>🚶 Walk</td><td>Walks left or right with gravity, turning at walls and ledges.</td></tr>
+            <tr><td>⇄ A ↔ B</td><td>Flies back and forth between its tile (A) and B, <i>Distance</i> tiles away horizontally, vertically or diagonally, through walls.</td></tr>
+            <tr><td>➜ Endless</td><td>Flies forever in one of 8 directions, through walls. It starts once it comes on screen and is gone once it leaves the level.</td></tr>
+          </table>
+          <h4>Combat</h4>
+          <ul>
+            <li><b>Health points</b>: each stomp or player shot removes 1 HP. A damaged enemy flashes and shows a health bar; at 0 HP it is defeated and gives its <b>Score when defeated</b>.</li>
+            <li><b>🥾 Can be stomped</b> (on by default). Turn it off for an enemy you can't jump on (drawn with spikes): landing on it hurts the player like touching its side, so it must be shot.</li>
+            <li><b>🔫 Fires projectiles</b>: while on screen, fires every <i>Time between shots</i> seconds, horizontally (→ Facing, ↔ Both sides) or vertically (↑ Up, ↓ Down, ↕ Up &amp; down). Projectiles fly straight, stop at solid tiles and cost the player 1 HP. Cannons on the enemy show where it fires.</li>
           </ul>
         </section>
 
@@ -382,7 +473,7 @@
             <tr><td>Select tile</td><td><kbd>1</kbd>–<kbd>9</kbd> <kbd>0</kbd> <kbd>B</kbd> <kbd>F</kbd> <kbd>M</kbd></td></tr>
             <tr><td>Scroll</td><td>Arrows / <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> (<kbd>Z</kbd><kbd>Q</kbd> on AZERTY) · wheel · <kbd>Shift</kbd>+wheel: vertical</td></tr>
             <tr><td>Undo</td><td><kbd>Ctrl+Z</kbd></td></tr>
-            <tr><td>Panels</td><td><kbd>C</kbd> Character · <kbd>U</kbd> Power-ups</td></tr>
+            <tr><td>Panels</td><td><kbd>C</kbd> Character · <kbd>U</kbd> Power-ups · <kbd>E</kbd> Enemies</td></tr>
             <tr><td>Invincibility</td><td><kbd>I</kbd></td></tr>
             <tr><td>Help</td><td><kbd>H</kbd> / <kbd>F1</kbd></td></tr>
             <tr><td>Play</td><td><kbd>Enter</kbd></td></tr>
@@ -394,6 +485,7 @@
             <tr><td>Move</td><td><kbd>←</kbd> <kbd>→</kbd> / <kbd>A</kbd> <kbd>D</kbd> (<kbd>Q</kbd> on AZERTY)</td></tr>
             <tr><td>Jump (hold for higher)</td><td><kbd>Space</kbd> / <kbd>W</kbd> / <kbd>↑</kbd> / <kbd>Z</kbd></td></tr>
             <tr><td>Shoot / throw</td><td><kbd>X</kbd> / <kbd>J</kbd></td></tr>
+            <tr><td>Pause / resume</td><td><kbd>P</kbd></td></tr>
             <tr><td>Restart the run</td><td><kbd>R</kbd></td></tr>
             <tr><td>Invincibility</td><td><kbd>I</kbd></td></tr>
             <tr><td>Help (pauses)</td><td><kbd>H</kbd> / <kbd>F1</kbd></td></tr>
@@ -407,8 +499,8 @@
             <li><b>A run</b> lasts from pressing Play until game over. Score and lives carry over between lives; each life restarts the level from the Start tile with full HP.</li>
             <li><b>Getting hit</b> (spikes, enemies) costs 1 HP, knocks you back and makes you invulnerable (blinking) for 1.2 s. At 0 HP you lose a life.</li>
             <li><b>Pits</b>: falling out of the level always costs a whole life, whatever your HP.</li>
-            <li><b>Stomping</b> an enemy defeats it and bounces you up; hold jump for a full-height bounce.</li>
-            <li><b>Shots</b> fly straight, stop at solid tiles, defeat enemies and disappear off screen.</li>
+            <li><b>Stomping</b> an enemy removes 1 of its HP and bounces you up; hold jump for a full-height bounce. Enemies that can't be stomped hurt you instead.</li>
+            <li><b>Shots</b> fly straight, stop at solid tiles, remove 1 HP from the enemy they hit and disappear off screen. <b>Enemy projectiles</b> cost you 1 HP.</li>
             <li><b>Jump feel</b>: releasing jump early cuts the jump short. A short grace period lets you jump just after leaving a ledge or just before landing.</li>
             <li><b>Breakable</b> blocks and <b>Falling</b> platforms come back on each new life.</li>
             <li><b>Goal</b>: touching the flag completes the level. <kbd>R</kbd> plays again, <kbd>Enter</kbd> goes back to editing.</li>
@@ -467,19 +559,24 @@ const TOOLS = [
 // speed: top run speed in tiles/second.
 // impact: % by which a jump from standstill shrinks (height and air time); 0 = speed doesn't matter.
 const CHAR_FIELDS = [
-  { k:'jumpH',  name:'Jump height', unit:'tiles',   min:0.5, max:20,  step:0.1, tip:'Peak height of a full jump at top speed' },
+  { k:'jumpH',  name:'Jump height', unit:'tiles',   min:0.5, max:20,  step:0.1, section:'🦘 Jump & speed', tip:'Peak height of a full jump at top speed' },
   { k:'jumpW',  name:'Jump width',  unit:'tiles',   min:1,   max:30,  step:0.1, tip:'Horizontal distance from take-off to landing (same level) at top speed' },
   { k:'speed',  name:'Speed',       unit:'tiles/s', min:1,   max:30,  step:0.1, tip:'Top running speed' },
   { k:'impact', name:'Speed impact on jump', unit:'%', min:0, max:100, step:1, tip:'How much a jump shrinks when not running: 0% = same jump at any speed, 100% = standing jump is tiny' },
-  { k:'projSpeed', name:'Projectile speed', unit:'tiles/s', min:2, max:60, step:0.5, section:'Projectile', tip:'How fast shots fly (X or J to shoot)' },
+  { k:'projSpeed', name:'Projectile speed', unit:'tiles/s', min:2, max:60, step:0.5, section:'🎯 Projectile', tip:'How fast shots fly (X or J to shoot)' },
   { k:'projMax',   name:'Projectiles on screen', unit:'max', min:0, max:10, step:1, tip:'How many shots can be on screen at the same time (0 = shooting disabled)' },
-  { k:'hp',    name:'Health points', unit:'HP',    min:1, max:10, step:1, section:'Health', tip:'Hits from spikes or enemies the character can take before losing a life' },
+  { k:'hp',    name:'Health points', unit:'HP',    min:1, max:10, step:1, section:'❤️ Health', tip:'Hits from spikes or enemies the character can take before losing a life' },
   { k:'lives', name:'Lives',         unit:'start', min:1, max:99, step:1, tip:'Lives at the start of a run; when the last one is lost it is game over' },
+  { k:'wallJump',  type:'bool', perk:true, name:'🧗 Wall jump', tip:'Jump off walls while in the air; hold toward a wall to slide down it slowly' },
+  { k:'wallSlide', perk:'wallJump', name:'Wall slide speed', unit:'tiles/s', min:0.5, max:20, step:0.5, tip:'Fall speed while holding toward a wall (when wall jump is on)' },
+  { k:'glide',     type:'bool', perk:true, name:'🪂 Glide', tip:'Hold jump while falling to float down slowly' },
+  { k:'glideFall', perk:'glide', name:'Glide fall speed', unit:'tiles/s', min:0.5, max:8, step:0.5, tip:'Fall speed while gliding (when glide is on)' },
 ];
-const CHAR_DEFAULTS = { jumpH:3.4, jumpW:4.8, speed:7.2, impact:0, projSpeed:14, projMax:3, hp:3, lives:3 };
+const CHAR_DEFAULTS = { jumpH:3.4, jumpW:4.8, speed:7.2, impact:0, projSpeed:14, projMax:3, hp:3, lives:3, wallJump:false, wallSlide:3, glide:false, glideFall:2 };
 let charCfg = { ...CHAR_DEFAULTS };
 function setCharCfg(c) {
   for (const f of CHAR_FIELDS) {
+    if (f.type === 'bool') { if (c[f.k] !== undefined) charCfg[f.k] = !!c[f.k]; continue; }
     const v = +c[f.k];
     if (c[f.k] !== undefined && c[f.k] !== '' && Number.isFinite(v)) charCfg[f.k] = Math.max(f.min, Math.min(f.max, f.step === 1 ? Math.round(v) : v));
   }
@@ -533,6 +630,28 @@ const MOVE_FIELDS = [
 const MOVE_DEFAULTS = { mode:'h', dir:'r', dist:4, speed:2 };
 const DIR_VEC = { r:[1,0], l:[-1,0], u:[0,-1], d:[0,1], ur:[1,-1], dr:[1,1], dl:[-1,1], ul:[-1,-1] };
 let moveCfg = { ...MOVE_DEFAULTS };
+// ---------- Springs ----------
+// Each 'j' tile can have its own settings in `meta` ("x,y" -> cfg):
+//   rot: direction in 45° steps clockwise from straight up (0..7)
+//   path 'arc': launched with gravity — h / w size the arc (in tiles) like a jump
+//   path 'line': flies in a straight line, no gravity, for `dist` tiles at `speed` tiles/s
+const SPRING_FIELDS = [
+  { k:'h',     path:'arc',  name:'Height',   unit:'tiles',   min:1, max:40, step:0.5, tip:'Peak height of an upward bounce above the spring' },
+  { k:'w',     path:'arc',  name:'Width',    unit:'tiles',   min:1, max:40, step:0.5, tip:'Horizontal distance from take-off to landing (same level) at top speed' },
+  { k:'dist',  path:'line', name:'Distance', unit:'tiles',   min:1, max:40, step:0.5, tip:'How far the straight launch goes before gravity takes over' },
+  { k:'speed', path:'line', name:'Speed',    unit:'tiles/s', min:2, max:60, step:1,   tip:'Speed of the straight launch' },
+];
+const SPRING_DEFAULTS = { h:9, w:8, rot:0, path:'arc', dist:6, speed:20 };
+const SPRING_ROTS = ['↑', '↗', '→', '↘', '↓', '↙', '←', '↖'];
+let springCfg = { ...SPRING_DEFAULTS };
+function springOf(x, y) { return { ...SPRING_DEFAULTS, ...meta[x + ',' + y] }; }
+function springDir(rot) { const a = rot * Math.PI / 4; return [Math.sin(a), -Math.cos(a)]; }
+// Launch velocity and gravity (world px/s) for a bounce of the given size, like charPhys() does for jumps.
+function springPhys(c) {
+  const run = charCfg.speed * T, h = c.h * T, tUp = (c.w * T / run) / 2;
+  const grav = 2 * h / (tUp * tUp);
+  return { v0: 2 * h / tUp + grav / 240, grav, tAir: 2 * tUp, run };
+}
 let meta = {};
 // Offset (world px) of a moving platform from its start position at time t.
 function moverOffset(c, t) {
@@ -570,18 +689,21 @@ const POWER_ABILITIES = [
     { k:'airJumps', name:'Extra jumps in the air', unit:'jumps', min:1, max:5, step:1 } ] },
   { k:'glide', name:'🪂 Glide', tip:'Hold jump while falling to float down slowly', fields:[
     { k:'glideFall', name:'Glide fall speed', unit:'tiles/s', min:0.5, max:8, step:0.5 } ] },
+  { k:'wallJump', name:'🧗 Wall jump', tip:'Jump off walls in mid-air; hold toward a wall to slide down it slowly', fields:[
+    { k:'wallSlide', name:'Wall slide speed', unit:'tiles/s', min:0.5, max:20, step:0.5 } ] },
   { k:'projectile', name:'🔥 Projectile throwing', tip:'Throw projectiles with X or J (replaces the character\'s normal shots while active)', fields:[
     { k:'projMax',    name:'Projectiles on screen', unit:'max', min:1, max:10, step:1 },
     { k:'projSpeed',  name:'Throw speed', unit:'tiles/s', min:2, max:40, step:0.5 },
     { k:'projBounce', name:'Bounce height', unit:'tiles · 0 = fly straight', min:0, max:4, step:0.25 } ] },
 ];
 const POWER_DEFAULTS = { name:'Power-up', color:'#ff6b9a', duration:0, size:100, jumpH:100, jumpW:100, speed:100,
-  doubleJump:false, airJumps:1, glide:false, glideFall:2, projectile:false, projMax:2, projSpeed:12, projBounce:1 };
+  doubleJump:false, airJumps:1, glide:false, glideFall:2, wallJump:false, wallSlide:3, projectile:false, projMax:2, projSpeed:12, projBounce:1 };
 const POWER_PRESETS = [   // starter set, created the first time the editor runs
   { name:'Giant',   color:'#e94560', size:160, speed:90 },
   { name:'Tiny',    color:'#4fc3f7', size:55, jumpH:120, speed:115 },
   { name:'Wings',   color:'#b388ff', doubleJump:true },
   { name:'Feather', color:'#f0f0f0', glide:true },
+  { name:'Climber', color:'#8bc34a', wallJump:true },
   { name:'Fire',    color:'#ff8c1a', projectile:true },
 ];
 let powerDefs = [];
@@ -616,6 +738,7 @@ function describePower(d) {
   pct('size', 'size'); pct('jumpH', 'jump height'); pct('jumpW', 'jump width'); pct('speed', 'speed');
   if (d.doubleJump) out.push(d.airJumps > 1 ? `${d.airJumps} air jumps` : 'double jump');
   if (d.glide) out.push('glide');
+  if (d.wallJump) out.push('wall jump');
   if (d.projectile) out.push(d.projBounce ? 'bouncing projectiles' : 'projectiles');
   return (out.length ? out.join(' · ') : 'No effect yet') + '<br>' + (d.duration ? `Lasts ${d.duration} s` : 'Lasts until you die') + ' · picking up another power-up replaces it';
 }
@@ -641,7 +764,14 @@ const ENEMY_MOVE_FIELDS = [
   { k:'speed', name:'Speed',          unit:'tiles/s', min:0.5, max:15, step:0.5, modes:['walk','path','line'], tip:'Movement speed' },
   { k:'dist',  name:'Distance A → B', unit:'tiles',   min:1,   max:30, step:0.5, modes:['path'], tip:'Length of the trip (per axis on diagonals)' },
 ];
-const ENEMY_DEFAULTS = { name:'Enemy', color:'#c94f6d', size:0.75, hp:1, points:200, stompable:true, mode:'walk', dir:'l', speed:2, dist:4 };
+// Shooting: enemies on screen fire every `fireRate` seconds, horizontally or vertically.
+const ENEMY_SHOT_DIRS = [['face','→ Facing'], ['lr','↔ Both sides'], ['up','↑ Up'], ['down','↓ Down'], ['ud','↕ Up & down']];
+const ENEMY_SHOT_FIELDS = [
+  { k:'fireRate',  name:'Time between shots', unit:'s',       min:0.3, max:10, step:0.1, tip:'Seconds between two volleys' },
+  { k:'shotSpeed', name:'Projectile speed',   unit:'tiles/s', min:1,   max:30, step:0.5, tip:'How fast its projectiles fly' },
+];
+const ENEMY_DEFAULTS = { name:'Enemy', color:'#c94f6d', size:0.75, hp:1, points:200, stompable:true, mode:'walk', dir:'l', speed:2, dist:4,
+  shoot:false, shotDir:'face', fireRate:2, shotSpeed:6 };
 const ENEMY_PRESETS = [   // starter set, created the first time the editor runs
   { name:'Walker',  color:'#c94f6d' },
   { name:'Brute',   color:'#8a4fc9', size:1.5, hp:3, speed:1, points:500 },
@@ -650,6 +780,8 @@ const ENEMY_PRESETS = [   // starter set, created the first time the editor runs
   { name:'Hoverer', color:'#2fae8a', mode:'path', dir:'r', dist:4, speed:2 },
   { name:'Swooper', color:'#e07a2f', mode:'path', dir:'dr', dist:3, speed:3 },
   { name:'Dart',    color:'#6d6d7a', mode:'line', dir:'l', size:0.6, speed:5, points:100 },
+  { name:'Turret',  color:'#9a9aa8', mode:'still', hp:3, points:400, shoot:true, shotDir:'lr', fireRate:2, shotSpeed:6 },
+  { name:'Bomber',  color:'#3d5a80', mode:'path', dir:'r', dist:6, speed:2, shoot:true, shotDir:'down', fireRate:1.5, shotSpeed:5 },
 ];
 let enemyDefs = [], enemyMap = new Map();
 function indexEnemies() { enemyMap = new Map(enemyDefs.map(d => [d.id, d])); }
@@ -658,11 +790,13 @@ function normEnemy(d, id) {
   const o = { ...ENEMY_DEFAULTS, id };
   o.name = String(d.name ?? o.name).slice(0, 16);
   if (/^#[0-9a-f]{6}$/i.test(d.color)) o.color = d.color;
-  for (const f of [...ENEMY_FIELDS, ...ENEMY_MOVE_FIELDS]) {
+  for (const f of [...ENEMY_FIELDS, ...ENEMY_MOVE_FIELDS, ...ENEMY_SHOT_FIELDS]) {
     const v = +d[f.k];
     if (d[f.k] !== undefined && d[f.k] !== '' && Number.isFinite(v)) o[f.k] = Math.max(f.min, Math.min(f.max, f.step === 1 ? Math.round(v) : v));
   }
   o.stompable = !!(d.stompable ?? o.stompable);
+  o.shoot = !!(d.shoot ?? o.shoot);
+  if (ENEMY_SHOT_DIRS.some(x => x[0] === d.shotDir)) o.shotDir = d.shotDir;
   if (ENEMY_MODES[d.mode]) o.mode = d.mode;
   const dirs = ENEMY_MODES[o.mode].dirs;
   o.dir = dirs.some(x => x[0] === d.dir) ? d.dir : dirs[0][0];
@@ -679,6 +813,7 @@ function describeEnemy(d) {
     line:  `Flies ${dn} at ${sp} through everything once it comes on screen, and never comes back`,
   }[d.mode];
   return `${move}<br>${d.size} × ${d.size} tiles · ${d.hp} HP · ${d.points} pts when defeated<br>` +
+    (d.shoot ? `Fires ${{ face:'towards where it faces', lr:'left and right', up:'up', down:'down', ud:'up and down' }[d.shotDir]} every ${d.fireRate} s while on screen<br>` : '') +
     (d.stompable ? `Stomp it or shoot it: each hit removes 1 HP${d.hp > 1 ? ` (${d.hp} hits)` : ''}` : 'Can\'t be stomped: landing on it hurts. Shoot it instead') +
     '<br><span style="opacity:.7">Edits apply the next time the level (re)starts.</span>';
 }
@@ -711,11 +846,18 @@ function defaultLevel() {
   return g;
 }
 function cloneGrid(g) { return g.map(r => r.slice()); }
-function liveMeta() {   // only keep settings of tiles that are still moving platforms
+// meta also holds what is hidden inside Breakable bricks: "x,y" -> { item: 'c' or a power-up id }
+function liveMeta() {   // only keep settings of tiles that still use them
   const m = {};
-  for (const k in meta) { const [x, y] = k.split(',').map(Number); if (grid[y]?.[x] === 'm') m[k] = meta[k]; }
+  for (const k in meta) {
+    const [x, y] = k.split(',').map(Number), c = grid[y]?.[x];
+    if (c === 'm' || c === 'j' || (c === 'k' && meta[k]?.item)) m[k] = meta[k];
+  }
   return m;
 }
+// Items and power-ups can be hidden inside Breakable bricks.
+function hideable(id) { return TOOLS.find(t => t.id === id)?.cat === 'item' || !!powerById(id); }
+function hiddenItem(x, y) { return grid[y]?.[x] === 'k' ? meta[x + ',' + y]?.item : undefined; }
 function serialize() { return JSON.stringify({ w:W, h:H, rows: grid.map(r => r.join('')), char: charCfg, sys: sysCfg, meta: liveMeta(), powerups: powerDefs, enemies: enemyDefs }); }
 function deserialize(s) {
   const d = JSON.parse(s);
@@ -866,15 +1008,39 @@ function status(msg) { document.getElementById('status').textContent = msg; }
 function updateHelp() {
   document.getElementById('help').innerHTML = mode === 'edit'
     ? 'Left click: paint · Right click: erase · Middle click: pick · 1–0, B, F, M: tools · C: character · U: power-ups · E: enemies<br>Cheats — I: invincibility · T: endless time · N: no enemy AI · Arrows/WASD or wheel (Shift+wheel: vertical): scroll · Enter: play · H: help'
-    : '←/→ or A/D: move · Space/W/↑: jump · X/J: shoot · R: restart run · I / T / N: cheats · Enter/Esc: back to editor · H: help';
+    : '←/→ or A/D: move · Space/W/↑: jump · X/J: shoot · P: pause · R: restart run · I / T / N: cheats · Enter/Esc: back to editor · H: help';
 }
+document.getElementById('pause').onclick = e => { togglePause(); e.currentTarget.blur(); };
 
 // Character panel
-const charPanel = document.getElementById('charPanel'), charInputs = {};
+// Two collapsible categories: Metrics (numbers) and Perks (on/off abilities, each in its own box
+// whose settings are hidden while the perk is off).
+const charPanel = document.getElementById('charPanel'), charInputs = {}, perkBoxes = {};
+let charSub = null;   // body of the current Metrics sub-category; fields without a section go into the previous one
 CHAR_FIELDS.forEach(f => {
-  if (f.section) {
+  if (f.section && !f.perk) {   // each Metrics section is its own collapsible sub-category
+    const d = document.createElement('details');
+    d.className = 'subcat'; d.open = true;
+    d.id = 'charSub-' + f.section.replace(/[^a-z]/gi, '');
+    d.innerHTML = `<summary>${f.section}</summary><div class="body"></div>`;
+    document.getElementById('charRows').appendChild(d);
+    charSub = d.querySelector('.body');
+  }
+  let parent = f.perk ? document.getElementById('perkRows') : (charSub || document.getElementById('charRows'));
+  if (typeof f.perk === 'string') parent = perkBoxes[f.perk];
+  if (f.section && f.perk) {
     const h = document.createElement('h4'); h.className = 'sub'; h.textContent = f.section;
-    document.getElementById('charRows').appendChild(h);
+    parent.appendChild(h);
+  }
+  if (f.type === 'bool') {
+    if (f.perk) { const box = document.createElement('div'); box.className = 'ability'; parent.appendChild(box); perkBoxes[f.k] = parent = box; }
+    const lab = document.createElement('label'); lab.className = 'chk'; lab.title = f.tip;
+    lab.innerHTML = `<input type="checkbox"> ${f.name}`;
+    const chk = lab.querySelector('input');
+    chk.onchange = () => { setCharCfg({ [f.k]: chk.checked }); saveCharCfg(); chk.blur(); };
+    charInputs[f.k] = { chk };
+    parent.appendChild(lab);
+    return;
   }
   const row = document.createElement('div'); row.className = 'row'; row.title = f.tip;
   row.innerHTML = `<label>${f.name} <span style="opacity:.6">(${f.unit})</span></label>
@@ -887,10 +1053,21 @@ CHAR_FIELDS.forEach(f => {
   range.oninput = onInput;
   num.onchange = e => { onInput(e); num.value = charCfg[f.k]; };
   charInputs[f.k] = { range, num };
-  document.getElementById('charRows').appendChild(row);
+  parent.appendChild(row);
+});
+// Remember which categories are open.
+document.querySelectorAll('.panel details.cat[id], .panel details.subcat[id]').forEach(d => {
+  const id = d.id;
+  try { const v = localStorage.getItem('platformer-maker-' + id); if (v !== null) d.open = v === '1'; } catch {}
+  d.addEventListener('toggle', () => { try { localStorage.setItem('platformer-maker-' + id, d.open ? '1' : '0'); } catch {} });
 });
 function refreshCharUI() {
   for (const f of CHAR_FIELDS) {
+    if (f.type === 'bool') {
+      charInputs[f.k].chk.checked = charCfg[f.k];
+      perkBoxes[f.k]?.classList.toggle('off', !charCfg[f.k]);
+      continue;
+    }
     const { range, num } = charInputs[f.k];
     range.value = charCfg[f.k];
     if (document.activeElement !== num) num.value = charCfg[f.k];
@@ -901,6 +1078,12 @@ function refreshCharUI() {
     (charCfg.impact > 0 ? `Standing jump: ${(charCfg.jumpH * f0).toFixed(1)} tiles high, ${(air * f0).toFixed(2)} s in the air` : 'Jump height is the same at any speed') +
     `<br>${charCfg.projMax ? `Shoot with X or J · up to ${charCfg.projMax} shot${charCfg.projMax > 1 ? 's' : ''} at once` : 'Shooting disabled'}` +
     `<br>${charCfg.hp} HP per life (${charCfg.hp > 1 ? `${charCfg.hp} hits` : 'one hit'} to lose a life; pits always cost a life) · starts with ${charCfg.lives} li${charCfg.lives > 1 ? 'ves' : 'fe'}`;
+  document.getElementById('perkInfo').innerHTML =
+    `${charCfg.wallJump ? `Wall jump on · slides down walls at ${charCfg.wallSlide} tiles/s` : 'Wall jump off'}` +
+    `<br>${charCfg.glide ? `Glide on · hold jump while falling to drop at ${charCfg.glideFall} tiles/s` : 'Glide off'}` +
+    `<br><span style="opacity:.8">Perks are always on; power-ups can still grant them temporarily.</span>`;
+  const on = CHAR_FIELDS.filter(f => f.perk === true && charCfg[f.k]).map(f => f.name.replace(/^\S+\s/, '').toLowerCase());
+  document.getElementById('perkSummary').textContent = on.length ? on.join(' · ') : 'none active';
 }
 // Moving platform panel
 const movePanel = document.getElementById('movePanel'), moveInputs = {};
@@ -940,7 +1123,51 @@ function refreshMoveUI() {
   moveInputs.dist.label.textContent = moveCfg.mode === 'c' ? 'Radius' : 'Distance';
   try { localStorage.setItem('platformer-maker-move', JSON.stringify(moveCfg)); } catch {}
 }
-function updateMovePanel() { movePanel.hidden = tool !== 'm' || mode !== 'edit'; }
+function updateMovePanel() {
+  movePanel.hidden = tool !== 'm' || mode !== 'edit';
+  springPanel.hidden = tool !== 'j' || mode !== 'edit';
+}
+
+// Spring panel
+const springPanel = document.getElementById('springPanel'), springInputs = {};
+SPRING_ROTS.forEach((arrow, i) => {
+  const b = document.createElement('button'); b.dataset.rot = i; b.textContent = arrow; b.title = `${i * 45}°`;
+  b.onclick = () => { springCfg.rot = i; refreshSpringUI(); b.blur(); };
+  document.getElementById('springRot').appendChild(b);
+});
+[['arc', '⌒ Arc'], ['line', '➝ Straight']].forEach(([k, label]) => {
+  const b = document.createElement('button'); b.dataset.path = k; b.textContent = label;
+  b.onclick = () => { springCfg.path = k; refreshSpringUI(); b.blur(); };
+  document.getElementById('springPath').appendChild(b);
+});
+function rotateSpring(d) { springCfg.rot = (springCfg.rot + d + 8) % 8; refreshSpringUI(); status(`Spring direction ${SPRING_ROTS[springCfg.rot]} (${springCfg.rot * 45}°)`); }
+SPRING_FIELDS.forEach(f => {
+  const row = document.createElement('div'); row.className = 'row'; row.title = f.tip;
+  row.innerHTML = `<label>${f.name} <span style="opacity:.6">(${f.unit})</span></label>
+    <input type="range" min="${f.min}" max="${f.max}" step="${f.step}"><input type="number" min="${f.min}" max="${f.max}" step="${f.step}">`;
+  const [range, num] = row.querySelectorAll('input');
+  const set = v => { v = +v; if (Number.isFinite(v)) springCfg[f.k] = Math.max(f.min, Math.min(f.max, v)); refreshSpringUI(); };
+  range.oninput = e => set(e.target.value);
+  num.onchange = e => set(e.target.value);
+  springInputs[f.k] = { range, num, row };
+  document.getElementById('springRows').appendChild(row);
+});
+function refreshSpringUI() {
+  document.querySelectorAll('#springRot button').forEach(b => b.classList.toggle('on', +b.dataset.rot === springCfg.rot));
+  document.querySelectorAll('#springPath button').forEach(b => b.classList.toggle('on', b.dataset.path === springCfg.path));
+  for (const f of SPRING_FIELDS) {
+    const { range, num, row } = springInputs[f.k];
+    row.hidden = f.path !== springCfg.path;
+    range.value = springCfg[f.k];
+    if (document.activeElement !== num) num.value = springCfg[f.k];
+  }
+  document.getElementById('springInfo').textContent = springCfg.path === 'line'
+    ? `Straight launch for ${(springCfg.dist / springCfg.speed).toFixed(2)} s, no gravity and no control, then normal falling. Stops early on hitting a wall.`
+    : springCfg.rot === 0
+      ? `${springPhys(springCfg).tAir.toFixed(2)} s in the air (jump-key release doesn't cut a bounce short)`
+      : 'Rotated: launched along the arrow at the same speed as an upward bounce of this height, with this arc\'s gravity.';
+  try { localStorage.setItem('platformer-maker-spring', JSON.stringify(springCfg)); } catch {}
+}
 
 function saveCharCfg() { try { localStorage.setItem('platformer-maker-char', JSON.stringify(charCfg)); } catch {} }
 // Character, Power-ups and Enemies panels share the right side: showing one hides the others.
@@ -969,7 +1196,7 @@ function addPowerRow(parent, f) {
   parent.appendChild(row);
 }
 POWER_FIELDS.forEach(f => { if (f.section) subHead(pwRows, f.section); addPowerRow(pwRows, f); });
-subHead(pwRows, 'Abilities');
+const pwAbilRows = document.getElementById('pwAbilRows');
 POWER_ABILITIES.forEach(a => {
   const box = document.createElement('div'); box.className = 'ability'; box.title = a.tip;
   box.innerHTML = `<label class="chk"><input type="checkbox"> ${a.name}</label>`;
@@ -977,7 +1204,7 @@ POWER_ABILITIES.forEach(a => {
   chk.onchange = () => { editPower({ [a.k]: chk.checked }); chk.blur(); };
   pwInputs[a.k] = { chk, box };
   a.fields.forEach(f => addPowerRow(box, f));
-  pwRows.appendChild(box);
+  pwAbilRows.appendChild(box);
 });
 const pwName = document.getElementById('pwName'), pwColor = document.getElementById('pwColor');
 pwName.oninput = () => editPower({ name: pwName.value });
@@ -1016,6 +1243,8 @@ function refreshPowerUI() {
     if (document.activeElement !== num) num.value = d[f.k];
   }
   for (const a of POWER_ABILITIES) { pwInputs[a.k].chk.checked = d[a.k]; pwInputs[a.k].box.classList.toggle('off', !d[a.k]); }
+  const abil = POWER_ABILITIES.filter(a => d[a.k]).map(a => a.name.replace(/^\S+\s/, '').toLowerCase());
+  document.getElementById('pwAbilSummary').textContent = abil.length ? abil.join(' · ') : 'none active';
   document.getElementById('pwInfo').innerHTML = describePower(d);
 }
 function newPower(base = {}) {
@@ -1030,8 +1259,14 @@ function newPower(base = {}) {
 function deletePower() {
   const d = powerById(pwSel); if (!d) return;
   let n = 0; for (const row of grid) for (const c of row) if (c === d.id) n++;
+  const inBricks = Object.keys(meta).filter(k => meta[k]?.item === d.id);   // hidden inside Breakable bricks
+  n += inBricks.length;
   if (!confirm(n ? `Delete "${d.name}" and the ${n} placed in the level?` : `Delete "${d.name}"?`)) return;
-  if (n) { pushUndo(); for (const row of grid) for (let x = 0; x < row.length; x++) if (row[x] === d.id) row[x] = '.'; }
+  if (n) {
+    pushUndo();
+    for (const row of grid) for (let x = 0; x < row.length; x++) if (row[x] === d.id) row[x] = '.';
+    for (const k of inBricks) delete meta[k];   // the bricks stay, now empty
+  }
   const i = powerDefs.indexOf(d); powerDefs.splice(i, 1);
   pwSel = powerDefs[Math.min(i, powerDefs.length - 1)]?.id ?? null;
   powerDefsChanged(); status(`Deleted ${d.name}`);
@@ -1066,6 +1301,14 @@ function addEnemyRow(parent, f) {
 }
 ENEMY_FIELDS.forEach(f => addEnemyRow(document.getElementById('enRows'), f));
 ENEMY_MOVE_FIELDS.forEach(f => addEnemyRow(document.getElementById('enMoveRows'), f));
+ENEMY_SHOT_FIELDS.forEach(f => addEnemyRow(document.getElementById('enShotRows'), f));
+for (const [k, label] of ENEMY_SHOT_DIRS) {
+  const b = document.createElement('button'); b.dataset.dir = k; b.textContent = label;
+  b.onclick = () => { editEnemy({ shotDir: k }); b.blur(); };
+  document.getElementById('enShotDir').appendChild(b);
+}
+const enShoot = document.getElementById('enShoot');
+enShoot.onchange = () => { editEnemy({ shoot: enShoot.checked }); enShoot.blur(); };
 for (const [k, m] of Object.entries(ENEMY_MODES)) {
   const b = document.createElement('button'); b.dataset.mode = k; b.textContent = m.name;
   b.onclick = () => { editEnemy({ mode: k }); b.blur(); };
@@ -1102,7 +1345,12 @@ function refreshEnemyUI() {
   if (!d) return;
   if (document.activeElement !== enName) enName.value = d.name;
   enColor.value = d.color; enStomp.checked = d.stompable;
-  for (const f of [...ENEMY_FIELDS, ...ENEMY_MOVE_FIELDS]) {
+  enShoot.checked = d.shoot;
+  document.getElementById('enShootBox').classList.toggle('off', !d.shoot);
+  document.getElementById('enShootSummary').textContent = d.shoot ? `every ${d.fireRate} s` : 'off';
+  document.getElementById('enShotDir').hidden = !d.shoot;
+  document.querySelectorAll('#enShotDir button').forEach(b => b.classList.toggle('on', b.dataset.dir === d.shotDir));
+  for (const f of [...ENEMY_FIELDS, ...ENEMY_MOVE_FIELDS, ...ENEMY_SHOT_FIELDS]) {
     const { range, num, row } = enInputs[f.k];
     range.value = d[f.k];
     if (document.activeElement !== num) num.value = d[f.k];
@@ -1322,9 +1570,19 @@ function paint() {
   const { tx, ty } = tileAtMouse();
   if (tx < 0 || ty < 0 || tx >= W || ty >= H) return;
   const id = mouse.down === 2 ? '.' : tool;
+  // Painting an item / power-up onto a Breakable brick hides it inside (repainting the brick keeps it)
+  if (grid[ty][tx] === 'k' && (id === 'k' || hideable(id))) {
+    if (id !== 'k' && meta[tx + ',' + ty]?.item !== id) {
+      meta[tx + ',' + ty] = { item: id };
+      status(`${powerById(id)?.name || TOOLS.find(t => t.id === id).name} hidden in the brick — break it from below to release it`);
+    }
+    return;
+  }
   if (id === 'P') for (const row of grid) for (let x = 0; x < W; x++) if (row[x] === 'P') row[x] = '.';
   grid[ty][tx] = id;
-  if (id === 'm') meta[tx + ',' + ty] = { ...moveCfg }; else delete meta[tx + ',' + ty];
+  if (id === 'm') meta[tx + ',' + ty] = { ...moveCfg };
+  else if (id === 'j') meta[tx + ',' + ty] = { ...springCfg };
+  else delete meta[tx + ',' + ty];
 }
 cv.addEventListener('contextmenu', e => e.preventDefault());
 cv.addEventListener('mousedown', e => {
@@ -1335,6 +1593,7 @@ cv.addEventListener('mousedown', e => {
     if (c === undefined) return;
     setTool(c);
     if (c === 'm') { moveCfg = { ...MOVE_DEFAULTS, ...meta[tx + ',' + ty] }; refreshMoveUI(); }
+    if (c === 'j') { springCfg = springOf(tx, ty); refreshSpringUI(); }
     return;
   }
   mouse.down = e.button === 2 ? 2 : (e.button === 0 ? 1 : 0);
@@ -1366,7 +1625,6 @@ const TILE_DOCS = {
   v: 'One-way platform that shakes for 0.5 s after you land on it, then falls.',
   m: 'One-way platform that moves along a path (see <i>Moving platforms</i>).',
   s: 'Touching them costs 1 HP.',
-  e: 'Walks left and right, turning at walls and ledges. Touching it costs 1 HP. Stomp it or shoot it to defeat it.',
   c: 'Gives points; enough coins give an extra life (see <i>Game system</i>).',
   j: 'Bounces the player very high (about 2.7× a normal jump).',
   P: 'Where the player appears. Only one per level: placing a new one removes the old one. Required to play.',
@@ -1385,13 +1643,18 @@ function buildGuide() {
       tileRows.push([cat.name, '', 'Every power-up made in the Power-ups panel appears here' + (powerDefs.length ? ` (currently: ${powerDefs.map(d => esc(d.name)).join(', ')})` : '') + '. <b>✎ Create / edit…</b> (<kbd>U</kbd>) opens the editor.']);
       continue;
     }
+    if (cat.id === 'enemy') {
+      tileRows.push([cat.name, '<kbd>5</kbd>', 'Every enemy type made in the Enemies panel appears here' + (enemyDefs.length ? ` (currently: ${enemyDefs.map(d => esc(d.name)).join(', ')})` : '') + '. <b>✎ Create / edit…</b> (<kbd>E</kbd>) opens the editor; <kbd>5</kbd> selects the last enemy used.']);
+      continue;
+    }
     for (const t of TOOLS.filter(t => t.cat === cat.id))
       tileRows.push([`<span class="tile"><canvas width="48" height="48" data-icon="${t.id}"></canvas>${t.name}</span>`, `<kbd>${t.key.toUpperCase()}</kbd>`, `<small style="opacity:.6">${cat.name}</small> · ${TILE_DOCS[t.id] || ''}`]);
   }
   gen('tiles').innerHTML = guideTable(['Tile', 'Key', 'Behaviour'], tileRows);
   gen('tiles').querySelectorAll('canvas[data-icon]').forEach(c => drawIcon(c, c.dataset.icon));
-  gen('char').innerHTML = guideTable(['Setting', 'Range', 'Default', 'Description'],
-    CHAR_FIELDS.map(f => [f.name, fmtRange(f), CHAR_DEFAULTS[f.k], f.tip]));
+  const charRow = f => f.type === 'bool' ? [f.name, 'on / off', CHAR_DEFAULTS[f.k] ? 'on' : 'off', f.tip] : [f.name, fmtRange(f), CHAR_DEFAULTS[f.k], f.tip];
+  gen('char').innerHTML = guideTable(['Setting', 'Range', 'Default', 'Description'], CHAR_FIELDS.filter(f => !f.perk).map(charRow));
+  gen('charPerks').innerHTML = guideTable(['Setting', 'Range', 'Default', 'Description'], CHAR_FIELDS.filter(f => f.perk).map(charRow));
   gen('power').innerHTML = guideTable(['Setting', 'Range', 'Description'], POWER_FIELDS.map(f => [f.name, fmtRange(f), {
     duration: 'How long it lasts. <b>0 = until you lose a life.</b>',
     size: 'Player size. Growing waits until there is enough room.',
@@ -1399,6 +1662,8 @@ function buildGuide() {
   }[f.k] || '']));
   gen('abilities').innerHTML = guideTable(['Ability', 'Settings', 'Description'],
     POWER_ABILITIES.map(a => [a.name, a.fields.map(f => `${f.name}: ${fmtRange(f)}`).join('<br>'), a.tip]));
+  gen('enemy').innerHTML = guideTable(['Setting', 'Range', 'Default', 'Description'],
+    [...ENEMY_FIELDS, ...ENEMY_MOVE_FIELDS, ...ENEMY_SHOT_FIELDS].map(f => [f.name, fmtRange(f), ENEMY_DEFAULTS[f.k], f.tip]));
   gen('sys').innerHTML = guideTable(['Setting', 'Range', 'Default', 'Description'],
     SYS_FIELDS.map(f => [f.name, `${f.min} – ${f.max}`, SYS_DEFAULTS[f.k], f.tip]));
 }
@@ -1445,18 +1710,39 @@ window.addEventListener('keydown', e => {
   if (mode === 'edit') {
     if ((e.ctrlKey || e.metaKey) && e.code === 'KeyZ') { undo(); e.preventDefault(); return; }
     if (e.code === 'KeyC' && !e.ctrlKey && !e.metaKey) { toggleCharPanel(); return; }
+    if (e.code === 'KeyR' && tool === 'j' && !e.ctrlKey && !e.metaKey) { rotateSpring(e.shiftKey ? -1 : 1); return; }
     if (e.code === 'KeyU' && !e.ctrlKey && !e.metaKey) { togglePowerPanel(); return; }
     if (e.code === 'KeyE' && !e.ctrlKey && !e.metaKey) { toggleEnemyPanel(); return; }
     if (e.key === '5') { const id = catLast.enemy || enemyDefs[0]?.id; if (id) setTool(id); else toggleEnemyPanel(true); return; }
     const t = TOOLS.find(t => t.key === e.key); if (t) setTool(t.id);
   } else {
-    if (['Space','ArrowUp','KeyW','KeyZ'].includes(e.code)) { game.jumpBuffer = 0.12; e.preventDefault(); }
-    if ((e.code === 'KeyX' || e.code === 'KeyJ') && !e.repeat) shoot();
-    if (e.code === 'KeyR') newRun();
     if (e.code.startsWith('Arrow') || e.code === 'Space') e.preventDefault();
+    if (e.code === 'KeyP' && !e.repeat) { togglePause(); return; }
+    if (e.code === 'KeyR') { newRun(); return; }
+    if (game.paused) return;   // no jumping or shooting while paused
+    if (['Space','ArrowUp','KeyW','KeyZ'].includes(e.code)) game.jumpBuffer = 0.12;
+    if ((e.code === 'KeyX' || e.code === 'KeyJ') && !e.repeat) shoot();
   }
 });
 window.addEventListener('keyup', e => { keys[e.code] = false; });
+// Auto-pause when the window loses focus
+window.addEventListener('blur', () => {
+  for (const k in keys) keys[k] = false;
+  if (mode === 'play' && !game.paused) togglePause();
+});
+
+// Pause: freezes the game (no updates) until P / the Resume button. Not available once the run has ended.
+function togglePause() {
+  if (mode !== 'play' || game.won || game.over) return;
+  game.paused = !game.paused;
+  game.jumpBuffer = 0;
+  updatePauseButton();
+}
+function updatePauseButton() {
+  const b = document.getElementById('pause');
+  b.hidden = mode !== 'play';
+  b.textContent = game && game.paused ? '▶ Resume' : '❚❚ Pause';
+}
 
 // ---------- Play mode ----------
 function toggleMode() {
@@ -1471,14 +1757,16 @@ function toggleMode() {
   const b = document.getElementById('play');
   b.textContent = mode === 'edit' ? '▶ Play' : '■ Stop';
   b.classList.toggle('stop', mode === 'play');
+  updatePauseButton();
   updateHelp(); updateMovePanel();
 }
 
 // A run lasts from pressing Play until game over: score and lives carry over between lives,
 // while each life restarts the level from the Start tile with full health.
 function newRun() {
-  game = { deaths: 0, score: 0, lives: charCfg.lives, coinBank: 0, over: false };
+  game = { deaths: 0, score: 0, lives: charCfg.lives, coinBank: 0, over: false, paused: false };
   startGame();
+  updatePauseButton();
 }
 function startGame() {
   const g = cloneGrid(grid), enemies = [], movers = [];
@@ -1486,8 +1774,9 @@ function startGame() {
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
     const c = g[y][x];
     if (c === 'P') { sx = x; sy = y; g[y][x] = '.'; }
-    else if (c === 'e') { enemies.push({ x:x*T+4, y:y*T+8, w:24, h:24, vx:-60, vy:0, dead:0 }); g[y][x] = '.'; }
-    else if (c === 'c') coins++;
+    else if (enemyById(c)) { enemies.push(spawnEnemy(enemyById(c), x, y)); g[y][x] = '.'; }
+    else if (c === 'c' || (c === 'k' && hiddenItem(x, y) === 'c')) coins++;
+    else if (c === 'j' && springOf(x, y).rot) g[y][x] = 'J';   // rotated springs launch on touch instead of on landing
     else if (c === 'm') {
       const cfg = { ...MOVE_DEFAULTS, ...meta[x + ',' + y] };
       movers.push({ sx: x*T, sy: y*T, x: x*T, y: y*T, px: x*T, py: y*T, cfg });
@@ -1499,11 +1788,11 @@ function startGame() {
     p: { x: sx*T+5, y: sy*T+4, w:22, h:28, vx:0, vy:0, onGround:false, coyote:0, face:1, grav:0, ride:null, safe:{ x: sx*T+5, y: sy*T+4 }, hp: charCfg.hp, hurt: 0 },
     pops: [],
     phys: charPhys(),
-    jumpBuffer: 0, jumpHeld: false, debris: [], shaking: new Map(), falling: [], shots: [],
+    jumpBuffer: 0, jumpHeld: false, debris: [], shaking: new Map(), falling: [], shots: [], enemyShots: [],
   });
   // Power-up state: lost on each new life (the pick-ups respawn with the level)
   Object.assign(game, { power: null, fx: [] });
-  Object.assign(game.p, { scale: 1, targetScale: 1, airJumps: 0, gliding: false });
+  Object.assign(game.p, { scale: 1, targetScale: 1, airJumps: 0, gliding: false, sliding: false, wallLock: 0, wallCoyote: 0 });
   cam.x = game.p.x - viewW() / 2; cam.y = game.p.y - viewH() / 2; clampCam();
   playStatus();
 }
@@ -1524,7 +1813,7 @@ function overlaps(a, bx, by, bw, bh) { return a.x < bx+bw && a.x+a.w > bx && a.y
 
 // Move a body with axis-separated tile collision. Returns flags.
 function moveBody(b, g, dt, useOneWay) {
-  const res = { hitWall:false, landed:false, landedOn:null, hitCeil:false, ceilTiles:[] };
+  const res = { hitWall:false, landed:false, landedOn:null, landedAt:null, hitCeil:false, ceilTiles:[] };
   // X
   b.x += b.vx * dt;
   let y0 = Math.floor(b.y / T), y1 = Math.floor((b.y + b.h - 0.01) / T);
@@ -1544,7 +1833,7 @@ function moveBody(b, g, dt, useOneWay) {
     for (let tx = x0; tx <= x1; tx++) {
       const c = tileAt(g, tx, ty);
       if (SOLID.has(c) || (useOneWay && ONEWAY.has(c) && prevBottom <= ty*T + 0.5)) {
-        b.y = ty*T - b.h; b.vy = 0; res.landed = true; res.landedOn = c;
+        b.y = ty*T - b.h; b.vy = 0; res.landed = true; res.landedOn = c; res.landedAt = [tx, ty];
         if (c === 'j') break;  // spring takes priority
       }
     }
@@ -1566,9 +1855,16 @@ function doJump(p, P, v0) {
   p.vy = -v0; p.grav = P.grav / f;
 }
 
-// Smash a breakable tile into 4 falling chunks.
+// Smash a breakable tile into 4 falling chunks, releasing whatever was hidden inside:
+// a coin is collected straight away, a power-up appears where the brick was.
 function breakTile(G, tx, ty) {
   G.g[ty][tx] = '.';
+  const it = hiddenItem(tx, ty);   // the editor grid is unchanged during play, so bricks refill on restart
+  if (it === 'c') { collectCoin(G, tx*T + 16, ty*T); G.fx.push({ x: tx*T + 16, y: ty*T + 16, t: 0, coin: true }); }
+  else if (it && hideable(it)) {   // power-ups (and any other item) appear in the brick's place
+    G.g[ty][tx] = it;
+    G.fx.push({ x: tx*T + 16, y: ty*T + 16, t: 0, color: powerById(it)?.color || '#fff', big: true });
+  }
   for (let i = 0; i < 4; i++) {
     const sx = i % 2, sy = i >> 1;
     G.debris.push({ x: tx*T + 4 + sx*16, y: ty*T + 4 + sy*16, vx: (sx ? 1 : -1) * (90 + Math.random()*60), vy: -380 + sy*140 - Math.random()*80, r: 0, vr: (sx ? 1 : -1) * 10 });
@@ -1580,6 +1876,26 @@ function updateDebris(G, dt) {
 }
 
 // Shaking platforms drop after FALL_DELAY; they come back when the level restarts.
+// Spring launch from the tile at (tx, ty), using that spring's settings.
+function launchSpring(G, tx, ty) {
+  const p = G.p, c = springOf(tx, ty), [sx, sy] = springDir(c.rot);
+  if (p.springCD > 0) return;
+  p.springCD = 0.15;   // touching the same spring for a few frames launches only once
+  p.onGround = false; p.coyote = 0; p.ride = null; G.jumpHeld = false;
+  if (Math.abs(sx) > 0.1) p.face = Math.sign(sx);
+  if (c.path === 'line') {
+    const v = c.speed * T;
+    p.vx = sx * v; p.vy = sy * v; p.grav = 0;
+    p.dash = { vx: p.vx, vy: p.vy, left: c.dist / c.speed };
+    p.launched = Math.abs(p.vx) > 0.1;
+  } else {
+    const S = springPhys(c);
+    p.dash = null; p.grav = S.grav;
+    if (c.rot === 0) p.vy = -S.v0;   // straight up keeps the player's own run speed
+    else { p.vx = sx * S.v0; p.vy = sy * S.v0; p.launched = Math.abs(sx) > 0.1; }
+  }
+}
+
 function updateFalling(G, dt) {
   for (const [k, t] of G.shaking) {
     if (t + dt < FALL_DELAY) { G.shaking.set(k, t + dt); continue; }
@@ -1630,7 +1946,7 @@ function updateShots(G, dt) {
       }
       const tx = Math.floor((s.x + SHOT / 2) / T), ty = Math.floor((s.y + SHOT / 2) / T);
       if (SOLID.has(tileAt(G.g, tx, ty))) return false;
-      for (const e of G.enemies) if (!e.dead && overlaps(e, s.x, s.y, SHOT, SHOT)) { killEnemy(G, e); return false; }
+      for (const e of G.enemies) if (!e.dead && overlaps(e, s.x, s.y, SHOT, SHOT)) { damageEnemy(G, e); return false; }
     }
     return s.x > vx0 && s.x < vx1 && s.y > vy0 && s.y < vy1;
   });
@@ -1651,7 +1967,13 @@ function collectCoin(G, x, y) {
 function killEnemy(G, e) {
   if (e.dead) return;
   e.dead = 0.001;
-  addScore(G, sysCfg.enemyPoints, e.x + e.w / 2, e.y);
+  addScore(G, e.cfg.points, e.x + e.w / 2, e.y);
+}
+// A stomp or a shot removes 1 HP; the enemy flashes while it survives.
+function damageEnemy(G, e) {
+  if (e.dead) return;
+  if (--e.hp <= 0) return killEnemy(G, e);
+  e.hit = 0.3;
 }
 // Take one hit from something centred at fromX. Returns true if the hit cost a life
 // (the level was restarted or the game is over), so the caller must stop updating.
@@ -1662,18 +1984,88 @@ function hurt(G, fromX) {
   p.hurt = HURT_TIME;
   const away = Math.sign(p.x + p.w / 2 - fromX) || -p.face;   // knock back away from the source
   p.vx = away * G.phys.run * 0.6; p.vy = -G.phys.jump * 0.55; p.grav = 0;
-  p.onGround = false; p.ride = null; G.jumpHeld = false;
+  p.onGround = false; p.ride = null; p.dash = null; p.launched = false; G.jumpHeld = false;
   return false;
 }
 function loseLife() {
   const G = game;
   G.deaths++; G.lives--;
   if (G.lives > 0) return startGame();
-  G.lives = 0; G.p.hp = 0; G.over = true; G.shots = [];
+  G.lives = 0; G.p.hp = 0; G.over = true; G.shots = []; G.enemyShots = [];
   playStatus();
 }
 // Invincibility: falling out of the level returns the player to the last solid ground they stood on.
-function rescue(p) { Object.assign(p, { x: p.safe.x, y: p.safe.y, vx: 0, vy: 0, grav: 0, coyote: 0 }); }
+function rescue(p) { Object.assign(p, { x: p.safe.x, y: p.safe.y, vx: 0, vy: 0, grav: 0, coyote: 0, dash: null, launched: false }); }
+
+// ---------- Enemies in play ----------
+// Each enemy keeps a copy of its type's settings, taken when the level (re)starts.
+// It is bottom-aligned on its tile and centred horizontally, whatever its size.
+function spawnEnemy(d, tx, ty) {
+  const s = d.size * T, x = tx*T + T/2 - s/2, y = (ty+1)*T - s;
+  return { cfg: { ...d }, x, y, sx: x, sy: y, w: s, h: s, vy: 0, dead: 0,
+    vx: d.mode === 'walk' ? enemyFace(d) * d.speed * T : 0, face: enemyFace(d),
+    hp: d.hp, hit: 0, grace: 0, t: 0, active: false, reload: d.fireRate / 2 };
+}
+function enemyOnScreen(e, margin = 0) {
+  return overlaps(e, cam.x - margin, cam.y - margin, viewW() + 2 * margin, viewH() + 2 * margin);
+}
+function updateEnemy(G, e, dt) {
+  const c = e.cfg, v = c.speed * T;
+  if (cheats.noAI) {   // no AI: stays put (walkers still fall) and doesn't shoot
+    if (c.mode === 'walk') { e.vy = Math.min(e.vy + PHYS.grav * dt, PHYS.maxFall); const vx = e.vx; e.vx = 0; moveBody(e, G.g, dt, true); e.vx = vx; }
+    return;
+  }
+  e.t += dt;
+  if (c.mode === 'walk') {   // walk, turning at walls and ledges
+    e.vy = Math.min(e.vy + PHYS.grav * dt, PHYS.maxFall);
+    const dir = Math.sign(e.vx) || e.face, r = moveBody(e, G.g, dt, true);
+    if (r.hitWall) e.vx = -dir * v;
+    else if (r.landed) {
+      const fx = e.vx > 0 ? e.x + e.w + 1 : e.x - 1;
+      const below = tileAt(G.g, Math.floor(fx / T), Math.floor((e.y + e.h + 1) / T));
+      if (!SOLID.has(below) && !ONEWAY.has(below)) e.vx = -e.vx;
+    }
+    if (e.vx) e.face = Math.sign(e.vx);
+  } else if (c.mode === 'path') {   // back and forth from A to B, through walls (same timing as moving platforms)
+    const [ox, oy] = moverOffset(c, e.t), nx = e.sx + ox;
+    if (Math.abs(nx - e.x) > 1e-6) e.face = Math.sign(nx - e.x);
+    e.x = nx; e.y = e.sy + oy;
+  } else if (c.mode === 'line') {   // endless: starts once on screen, flies off and is gone
+    if (!e.active && !(e.active = enemyOnScreen(e, T))) return;
+    const [dx, dy] = DIR_VEC[c.dir], n = Math.hypot(dx, dy);
+    e.x += dx / n * v * dt; e.y += dy / n * v * dt;
+    if (!overlaps(e, -2*T, -2*T, W*T + 4*T, H*T + 4*T)) { e.dead = 99; return; }
+  }
+  if (e.y > H * T + 64) { e.dead = 99; return; }
+  if (c.shoot && enemyOnScreen(e) && (e.reload -= dt) <= 0) { e.reload = c.fireRate; enemyFire(G, e); }
+}
+const ESHOT = 10;   // enemy projectile size (px)
+const SHOT_DIRS = face => ({ face: [[face, 0]], lr: [[-1, 0], [1, 0]], up: [[0, -1]], down: [[0, 1]], ud: [[0, -1], [0, 1]] });
+function enemyFire(G, e) {
+  const c = e.cfg, v = c.shotSpeed * T, cx = e.x + e.w / 2 - ESHOT / 2, cy = e.y + e.h / 2 - ESHOT / 2;
+  for (const [dx, dy] of SHOT_DIRS(e.face)[c.shotDir])
+    G.enemyShots.push({ x: cx + dx * (e.w / 2), y: cy + dy * (e.h / 2), vx: dx * v, vy: dy * v, color: c.color });
+}
+// Enemy projectiles fly straight, stop at solid tiles, vanish off screen and cost the player 1 HP.
+// Returns true if a hit cost a life (the caller must stop updating).
+function updateEnemyShots(G, dt) {
+  const p = G.p;
+  let lost = false;
+  G.enemyShots = G.enemyShots.filter(s => {
+    if (lost) return false;
+    const steps = Math.max(1, Math.ceil(Math.max(Math.abs(s.vx), Math.abs(s.vy)) * dt / (T / 2)));
+    for (let i = 0; i < steps; i++) {
+      s.x += s.vx * dt / steps; s.y += s.vy * dt / steps;
+      if (SOLID.has(tileAt(G.g, Math.floor((s.x + ESHOT / 2) / T), Math.floor((s.y + ESHOT / 2) / T)))) return false;
+      if (overlaps(p, s.x, s.y, ESHOT, ESHOT)) {
+        if (hurt(G, s.x + ESHOT / 2)) lost = true;   // hurt() ignores hits while invincible or blinking
+        return false;
+      }
+    }
+    return s.x > cam.x - 64 && s.x < cam.x + viewW() + 64 && s.y > cam.y - 64 && s.y < cam.y + viewH() + 64;
+  });
+  return lost;
+}
 
 // ---------- Power-ups in play ----------
 const BASE_W = 22, BASE_H = 28;   // player hitbox at 100% size
@@ -1725,6 +2117,13 @@ function updateFx(G, dt) {
   G.fx = G.fx.filter(f => f.t < 0.5);
 }
 
+// Side (1 = right, -1 = left, 0 = none) of a solid wall the body is pressed against.
+function wallSide(g, p) {
+  const y0 = Math.floor((p.y + 2) / T), y1 = Math.floor((p.y + p.h - 2) / T);
+  const solidCol = tx => { for (let ty = y0; ty <= y1; ty++) if (SOLID.has(tileAt(g, tx, ty))) return true; return false; };
+  return solidCol(Math.floor((p.x + p.w + 1) / T)) ? 1 : solidCol(Math.floor((p.x - 1) / T)) ? -1 : 0;
+}
+
 function update(dt) {
   const G = game, p = G.p, C = G.phys;
   G.t += dt;
@@ -1732,6 +2131,7 @@ function update(dt) {
   G.pops = G.pops.filter(q => q.t < 0.9);
   if (G.won || G.over) return;
   if (p.hurt > 0) p.hurt -= dt;
+  if (p.springCD > 0) p.springCD -= dt;
   tickPower(G, dt); resizePlayer(G, dt); updateFx(G, dt);
   const pw = activePower(G);
 
@@ -1747,12 +2147,19 @@ function update(dt) {
     p.vx = vx; p.vy = vy;
   }
 
+  // Wall contact (wall jump from the character settings or the current power-up)
+  const wallJumpOn = charCfg.wallJump || !!pw?.wallJump;
+  const side = wallJumpOn && !p.onGround ? wallSide(G.g, p) : 0;
+  if (side) { p.wallSide = side; p.wallCoyote = 0.1; } else p.wallCoyote = (p.wallCoyote || 0) - dt;
+  p.wallLock = Math.max(0, (p.wallLock || 0) - dt);
+
   // Horizontal input
   const dir = (keys.ArrowRight || keys.KeyD ? 1 : 0) - (keys.ArrowLeft || keys.KeyA || keys.KeyQ ? 1 : 0);
-  if (dir && !(p.hurt > HURT_TIME - 0.25)) {   // no control for a moment while knocked back
+  if (dir && !(p.hurt > HURT_TIME - 0.25) && !(p.wallLock > 0)) {   // no control for a moment while knocked back / after a wall kick
     p.face = dir;
+    const lim = p.launched ? Math.max(C.run, Math.abs(p.vx)) : C.run;   // a sideways spring launch may exceed run speed
     p.vx += dir * (p.onGround ? C.accel : C.airAccel) * dt;
-    p.vx = Math.max(-C.run, Math.min(C.run, p.vx));
+    p.vx = Math.max(-lim, Math.min(lim, p.vx));
   } else if (p.onGround) {
     const f = C.friction * dt;
     p.vx = Math.abs(p.vx) <= f ? 0 : p.vx - Math.sign(p.vx) * f;
@@ -1763,6 +2170,11 @@ function update(dt) {
   G.jumpBuffer -= dt; p.coyote -= dt;
   if (G.jumpBuffer > 0 && p.coyote > 0) {
     doJump(p, C, C.jump); G.jumpBuffer = 0; p.coyote = 0; G.jumpHeld = true;
+  } else if (wallJumpOn && p.wallCoyote > 0 && G.jumpBuffer > 0) {
+    // Wall jump: kick away from the wall at full run speed (so it is a full-size jump)
+    p.vx = -p.wallSide * C.run; p.face = -p.wallSide;
+    doJump(p, C, C.jump); G.jumpBuffer = 0; p.wallCoyote = 0; p.wallLock = 0.18; G.jumpHeld = true;
+    G.fx.push({ x: p.wallSide > 0 ? p.x + p.w : p.x, y: p.y + p.h / 2, t: 0, color: '#ffffff' });
   } else if (pw?.doubleJump && p.airJumps > 0 && G.jumpBuffer > 0.12 - 2 * dt) {
     // Air jump: only on a fresh press, so a press just before landing stays a buffered ground jump
     doJump(p, C, C.jump); G.jumpBuffer = 0; p.airJumps--; G.jumpHeld = true;
@@ -1773,11 +2185,23 @@ function update(dt) {
 
   p.vy = Math.min(p.vy + (p.grav || C.grav) * dt, C.maxFall);
   // Glide: holding jump while falling caps the fall speed
-  p.gliding = !!(pw?.glide && held && !p.onGround && p.vy > pw.glideFall * T);
-  if (p.gliding) p.vy = pw.glideFall * T;
+  // (from the character settings or the current power-up; the power-up's fall speed wins while active)
+  const glideV = (pw?.glide ? pw.glideFall : charCfg.glideFall) * T;
+  p.gliding = !!((pw?.glide || charCfg.glide) && held && !p.onGround && p.vy > glideV);
+  if (p.gliding) p.vy = glideV;
+  // Wall slide: holding toward the wall while falling caps the fall speed
+  const slideV = (pw?.wallJump ? pw.wallSlide : charCfg.wallSlide) * T;
+  p.sliding = !!(side && dir === side && p.vy > slideV);
+  if (p.sliding) p.vy = slideV;
+  if (p.dash) { p.vx = p.dash.vx; p.vy = p.dash.vy; p.dash.left -= dt; p.gliding = p.sliding = false; }   // straight launch: fixed velocity
   const prevBottom = p.y + p.h;
   const r = moveBody(p, G.g, dt, true);
   p.onGround = r.landed;
+  if (p.dash && (p.dash.left <= 0 || r.hitWall || r.hitCeil || r.landed)) {   // straight launch over: gravity takes over
+    if (p.vy < 0) p.vy = 0;
+    p.dash = null;
+  }
+  if (r.landed || r.hitWall) p.launched = false;
   // Land on moving platforms (one-way, like Platform tiles)
   p.ride = null;
   if (p.vy >= 0) for (const m of G.movers) {
@@ -1797,7 +2221,7 @@ function update(dt) {
   if (r.landed) {
     p.grav = 0;
     if (r.landedOn !== 'v') p.safe = { x: p.x, y: p.y };   // falling platforms aren't a safe spot to return to
-    if (r.landedOn === 'j') { p.vy = -C.spring; p.onGround = false; G.jumpHeld = false; }
+    if (r.landedOn === 'j') { p.springCD = 0; launchSpring(G, ...r.landedAt); }   // bounce sized by this spring's settings
     else p.coyote = 0.1;
   }
   if (p.onGround || r.landedOn === 'j') p.airJumps = pw?.doubleJump ? pw.airJumps : 0;   // air jumps refill on landing
@@ -1811,6 +2235,8 @@ function update(dt) {
       G.g[ty][tx] = '.'; collectCoin(G, tx*T + 16, ty*T + 8);
     } else if (powerById(c) && overlaps(p, tx*T+5, ty*T+5, 22, 22)) {
       G.g[ty][tx] = '.'; givePower(G, c, tx*T + 16, ty*T + 16);
+    } else if (c === 'J' && overlaps(p, tx*T+4, ty*T+4, 24, 24)) {
+      launchSpring(G, tx, ty);
     } else if (c === 's' && overlaps(p, tx*T+4, ty*T+14, 24, 18)) {
       if (hurt(G, tx*T + 16)) return;
     } else if (c === 'f' && overlaps(p, tx*T+10, ty*T, 12, T)) {
@@ -1822,28 +2248,21 @@ function update(dt) {
   // Enemies
   for (const e of G.enemies) {
     if (e.dead) { e.dead += dt; continue; }
-    e.vy = Math.min(e.vy + PHYS.grav * dt, PHYS.maxFall);
-    if (cheats.noAI) {   // no AI: enemy keeps its walking direction but stays put (gravity still applies)
-      const vx = e.vx; e.vx = 0; moveBody(e, G.g, dt, true); e.vx = vx;
-    } else {
-      const er = moveBody(e, G.g, dt, true);
-      if (er.hitWall) e.vx = -Math.sign(e.vx || -1) * 60;
-      else if (er.landed) {
-        // turn around at ledges
-        const fx = e.vx > 0 ? e.x + e.w + 1 : e.x - 1;
-        const below = tileAt(G.g, Math.floor(fx / T), Math.floor((e.y + e.h + 1) / T));
-        if (!SOLID.has(below) && !ONEWAY.has(below)) e.vx = -e.vx;
-      }
-    }
-    if (e.y > H * T + 64) e.dead = 99;
+    if (e.hit > 0) e.hit -= dt;
+    if (e.grace > 0) e.grace -= dt;
+    updateEnemy(G, e, dt);
+    if (e.dead) continue;
     if (overlaps(p, e.x, e.y, e.w, e.h)) {
-      if (p.vy > 0 && p.y + p.h - e.y < 16) {
-        killEnemy(G, e); if (held) doJump(p, C, C.jump); else { p.vy = -C.stomp; p.grav = 0; } G.jumpHeld = held;
+      const fromAbove = p.vy > 0 && p.y + p.h - e.y < 16;
+      if (fromAbove && e.cfg.stompable) {   // stomp: -1 HP for the enemy, bounce for the player
+        if (!(e.grace > 0)) { e.grace = 0.25; damageEnemy(G, e); }
+        if (held) doJump(p, C, C.jump); else { p.vy = -C.stomp; p.grav = 0; } G.jumpHeld = held;
       } else if (cheats.invincible) killEnemy(G, e);   // invincible: plough straight through enemies
-      else if (hurt(G, e.x + e.w / 2)) return;
+      else if (!(e.grace > 0) && hurt(G, e.x + e.w / 2)) return;   // grace: no hit right after a stomp
     }
   }
   updateShots(G, dt);
+  if (updateEnemyShots(G, dt)) return;
   G.enemies = G.enemies.filter(e => !e.dead || e.dead < 0.4);
 
   // Camera
@@ -1907,22 +2326,28 @@ function drawTile(c, x, y, t) {
       ctx.fillStyle = '#e0a020'; ctx.fillRect(x+15, y+10, 2, 12);
       break;
     }
-    case 'j':
-      ctx.fillStyle = '#888'; ctx.fillRect(x+6, y+18, 20, 14);
-      ctx.fillStyle = '#4fd18b'; ctx.fillRect(x+2, y+12, 28, 6);
-      ctx.strokeStyle = '#333'; ctx.lineWidth = 2; ctx.beginPath();
-      for (let i = 0; i < 3; i++) { ctx.moveTo(x+8, y+21+i*4); ctx.lineTo(x+24, y+23+i*4); }
-      ctx.stroke();
-      break;
-    case 'e': drawEnemy(x+4, y+8, 24, 24, 0); break;
+    case 'j': case 'J': drawSpring(x, y, 0, false); break;
     case 'P': drawPlayer(x+5, y+4, 22, 28, 1); break;
     case 'f':
       ctx.fillStyle = '#ddd'; ctx.fillRect(x+14, y, 3, T);
       ctx.fillStyle = '#e94560';
       ctx.beginPath(); ctx.moveTo(x+17, y+2); ctx.lineTo(x+30, y+8); ctx.lineTo(x+17, y+14); ctx.fill();
       break;
-    default: { const d = powerById(c); if (d) drawPowerItem(d, x, y, t); }
+    default: {
+      const en = enemyById(c);
+      if (en) { const s = en.size * T; drawEnemy(en, x + T/2 - s/2, y + T - s, s, { face: enemyFace(en), t }); break; }
+      const d = powerById(c); if (d) drawPowerItem(d, x, y, t);
+    }
   }
+}
+// Editor only: a small badge on a Breakable brick showing what is hidden inside.
+function drawHidden(tx, ty, item, t) {
+  const cx = tx*T + T/2, cy = ty*T + T/2;
+  ctx.save();
+  ctx.fillStyle = 'rgba(30,20,10,.55)'; ctx.beginPath(); ctx.arc(cx, cy, 11, 0, Math.PI * 2); ctx.fill();
+  ctx.translate(cx, cy); ctx.scale(0.6, 0.6);
+  drawTile(item, -T/2, -T/2, t);
+  ctx.restore();
 }
 // Power-up pick-up: a bobbing orb in the power-up's colour with its initial.
 function drawPowerItem(d, x, y, t) {
@@ -1940,9 +2365,9 @@ function drawPowerItem(d, x, y, t) {
 // colour (blinking during the last 2 s of a timed power-up) and wings while gliding.
 function drawHero(G, t) {
   const p = G.p, pw = activePower(G), k = p.w / BASE_W;
-  if (pw && p.gliding) {
+  if (p.gliding) {   // wings: power-up colour when the power-up grants glide, white for the character's own glide
     const flap = Math.sin(t * 18) * 3 * k, sy = p.y + p.h * 0.35;
-    ctx.fillStyle = pw.color; ctx.globalAlpha = 0.85; ctx.beginPath();
+    ctx.fillStyle = pw?.glide ? pw.color : '#f0f0f0'; ctx.globalAlpha = 0.85; ctx.beginPath();
     ctx.moveTo(p.x + 2, sy); ctx.lineTo(p.x - 14 * k, sy - 8 * k + flap); ctx.lineTo(p.x + 2, sy + 10 * k);
     ctx.moveTo(p.x + p.w - 2, sy); ctx.lineTo(p.x + p.w + 14 * k, sy - 8 * k + flap); ctx.lineTo(p.x + p.w - 2, sy + 10 * k);
     ctx.fill(); ctx.globalAlpha = 1;
@@ -1962,12 +2387,61 @@ function drawPlayer(x, y, w, h, face) {
   ctx.fillRect(ex, y+7, 6, 7);
   ctx.fillStyle = '#111'; ctx.fillRect(ex + (face > 0 ? 3 : 0), y+9, 3, 4);
 }
-function drawEnemy(x, y, w, h, squash) {
-  ctx.fillStyle = '#c94f6d';
-  if (squash) { ctx.fillRect(x, y+h-8, w, 8); return; }
-  ctx.beginPath(); ctx.roundRect(x, y, w, h, [10, 10, 2, 2]); ctx.fill();
-  ctx.fillStyle = '#fff'; ctx.fillRect(x+5, y+7, 5, 6); ctx.fillRect(x+14, y+7, 5, 6);
-  ctx.fillStyle = '#111'; ctx.fillRect(x+6, y+9, 3, 3); ctx.fillRect(x+15, y+9, 3, 3);
+// Enemy of type d in an s × s box at (x, y), drawn on a 24 × 24 grid. o: { face, dead, flash, t }.
+// Flyers (A ↔ B, Endless) have wings, still ones are square, shooters carry cannons, and
+// enemies that can't be stomped have spikes on top.
+function drawEnemy(d, x, y, s, o = {}) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s / 24, s / 24);
+  const body = o.flash ? '#ffffff' : d.color;
+  if (o.dead) { ctx.fillStyle = body; ctx.fillRect(0, 16, 24, 8); ctx.restore(); return; }
+  if (d.mode === 'path' || d.mode === 'line') {
+    const flap = Math.sin((o.t || 0) * 16) * 3;
+    ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.beginPath();
+    ctx.moveTo(3, 10); ctx.lineTo(-7, 3 + flap); ctx.lineTo(1, 16);
+    ctx.moveTo(21, 10); ctx.lineTo(31, 3 + flap); ctx.lineTo(23, 16);
+    ctx.fill();
+  }
+  if (!d.stompable) {
+    ctx.fillStyle = '#d8dde6'; ctx.beginPath();
+    for (let i = 0; i < 4; i++) { ctx.moveTo(1 + i * 5.5, 4); ctx.lineTo(3.75 + i * 5.5, -4); ctx.lineTo(6.5 + i * 5.5, 4); }
+    ctx.fill();
+  }
+  if (d.shoot) {   // cannon(s) pointing where it fires
+    ctx.fillStyle = '#333';
+    for (const [dx, dy] of SHOT_DIRS(o.face > 0 ? 1 : -1)[d.shotDir])
+      ctx.fillRect(dx ? (dx > 0 ? 20 : -4) : 9, dy ? (dy > 0 ? 20 : -4) : 14, dx ? 8 : 6, dx ? 6 : 8);
+  }
+  ctx.fillStyle = body; ctx.beginPath(); ctx.roundRect(0, 0, 24, 24, d.mode === 'still' ? 4 : [10, 10, 2, 2]); ctx.fill();
+  const f = o.face > 0 ? 2 : 0;
+  ctx.fillStyle = '#fff'; ctx.fillRect(5, 7, 5, 6); ctx.fillRect(14, 7, 5, 6);
+  ctx.fillStyle = '#111'; ctx.fillRect(5 + f, 9, 3, 3); ctx.fillRect(14 + f, 9, 3, 3);
+  ctx.restore();
+}
+// Enemy in play, with a health bar once it has been hit.
+function drawEnemyInst(e, t) {
+  drawEnemy(e.cfg, e.x, e.y, e.w, { face: e.face, dead: e.dead, flash: e.hit > 0 && Math.floor(t * 20) % 2, t });
+  if (e.dead || e.hp >= e.cfg.hp) return;
+  const w = Math.max(e.w, 20), x = e.x + e.w / 2 - w / 2, y = e.y - 8;
+  ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fillRect(x, y, w, 4);
+  ctx.fillStyle = '#ff4d6d'; ctx.fillRect(x, y, w * e.hp / e.cfg.hp, 4);
+}
+// Editor preview of an enemy's movement: dashed line + ghost at B, or an arrow for endless movers.
+function drawEnemyPath(tx, ty, d) {
+  if (d.mode !== 'path' && d.mode !== 'line') return;
+  const s = d.size * T, cx = tx*T + T/2, cy = (ty+1)*T - s/2, [dx, dy] = DIR_VEC[d.dir];
+  ctx.strokeStyle = d.color; ctx.fillStyle = d.color; ctx.lineWidth = 2 / scale; ctx.setLineDash([6 / scale, 4 / scale]);
+  ctx.beginPath();
+  if (d.mode === 'path') {
+    const ox = dx * d.dist * T, oy = dy * d.dist * T;
+    ctx.moveTo(cx, cy); ctx.lineTo(cx + ox, cy + oy); ctx.stroke(); ctx.setLineDash([]);
+    ctx.globalAlpha = 0.35; drawEnemy(d, cx + ox - s/2, cy + oy - s/2, s, { face: Math.sign(dx) || -1 }); ctx.globalAlpha = 1;
+  } else {
+    const n = Math.hypot(dx, dy), len = s / 2 + 1.5 * T, ex = cx + dx / n * len, ey = cy + dy / n * len, a = Math.atan2(dy, dx);
+    ctx.moveTo(cx, cy); ctx.lineTo(ex, ey); ctx.stroke(); ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(ex + 4 * Math.cos(a), ey + 4 * Math.sin(a));
+    ctx.lineTo(ex - 8 * Math.cos(a - 0.6), ey - 8 * Math.sin(a - 0.6)); ctx.lineTo(ex - 8 * Math.cos(a + 0.6), ey - 8 * Math.sin(a + 0.6));
+    ctx.fill();
+  }
 }
 
 // Editor preview of a moving platform's path, with a ghost at B (or a quarter turn along the circle).
@@ -1983,6 +2457,52 @@ function drawMoverPath(tx, ty, c) {
 }
 
 // Preview the jump trajectory (player feet) from the Start tile, both directions.
+// Spring drawn rotated by rot × 45° around the tile centre; straight-launch springs get an arrow on the pad.
+function drawSpring(x, y, rot, line) {
+  ctx.save(); ctx.translate(x + 16, y + 16); ctx.rotate(rot * Math.PI / 4); ctx.translate(-16, -16);
+  ctx.fillStyle = '#888'; ctx.fillRect(6, 18, 20, 14);
+  ctx.fillStyle = '#4fd18b'; ctx.fillRect(2, 12, 28, 6);
+  ctx.strokeStyle = '#333'; ctx.lineWidth = 2; ctx.beginPath();
+  for (let i = 0; i < 3; i++) { ctx.moveTo(8, 21+i*4); ctx.lineTo(24, 23+i*4); }
+  ctx.stroke();
+  if (line) { ctx.fillStyle = '#1d6b44'; ctx.beginPath(); ctx.moveTo(16, 2); ctx.lineTo(22, 10); ctx.lineTo(10, 10); ctx.fill(); }
+  ctx.restore();
+}
+// Editor preview of a spring's launch (player feet for upward arcs, tile centre otherwise).
+function drawSpringArc(tx, ty, c) {
+  const [sx, sy] = springDir(c.rot);
+  ctx.strokeStyle = '#2f9e65'; ctx.lineWidth = 2 / scale; ctx.setLineDash([6 / scale, 4 / scale]);
+  if (c.path === 'line') {
+    const cx = tx*T + 16, cy = ty*T + 16, L = c.dist * T, ex = cx + sx * L, ey = cy + sy * L;
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(ex, ey); ctx.stroke(); ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(ex + sx * 8, ey + sy * 8); ctx.lineTo(ex - sy * 6, ey + sx * 6); ctx.lineTo(ex + sy * 6, ey - sx * 6); ctx.closePath();
+    ctx.fillStyle = '#2f9e65'; ctx.fill();
+    return;
+  }
+  const S = springPhys(c);
+  if (c.rot === 0) {
+    const cx = tx*T + 16, by = ty*T;
+    for (const dir of [1, -1]) {
+      ctx.beginPath();
+      for (let i = 0; i <= 40; i++) {
+        const t = S.tAir * i / 40, x = cx + dir * S.run * t, y = by - (S.v0 * t - S.grav * t * t / 2);
+        i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+      }
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(cx - 10, by - c.h * T); ctx.lineTo(cx + 10, by - c.h * T); ctx.stroke();   // peak marker
+    return;
+  }
+  const cx = tx*T + 16, cy = ty*T + 16, vx = sx * S.v0, vy = sy * S.v0;
+  ctx.beginPath();
+  for (let i = 0; i <= 40; i++) {
+    const t = S.tAir * i / 40, x = cx + vx * t, y = cy + vy * t + S.grav * t * t / 2;
+    i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+  }
+  ctx.stroke(); ctx.setLineDash([]);
+}
+
 function drawJumpArcs() {
   let sx = -1, sy = -1;
   for (let y = 0; y < H && sx < 0; y++) { const x = grid[y].indexOf('P'); if (x >= 0) { sx = x; sy = y; } }
@@ -2028,6 +2548,7 @@ function render(t) {
   for (let y = ty0; y <= ty1; y++) for (let x = tx0; x <= tx1; x++) {
     const c = g[y][x];
     if (c === '.') continue;
+    if (c === 'j' || c === 'J') { const sc = springOf(x, y); drawSpring(x*T, y*T, sc.rot, sc.path === 'line'); continue; }
     const sh = mode === 'play' && c === 'v' && game.shaking.has(x + ',' + y);
     drawTile(c, x*T + (sh ? Math.sin(t * 60) * 2 : 0), y*T, t);
   }
@@ -2044,12 +2565,25 @@ function render(t) {
     for (const k in meta) {
       const [x, y] = k.split(',').map(Number);
       if (grid[y]?.[x] === 'm') drawMoverPath(x, y, meta[k]);
+      else if (grid[y]?.[x] === 'j') { if (tool === 'j') drawSpringArc(x, y, springOf(x, y)); }
+      else { const it = hiddenItem(x, y); if (it) drawHidden(x, y, it, t); }
     }
+    // enemy paths (also for enemies placed a little off screen, so paths entering the view show)
+    for (let y = Math.max(0, ty0 - 30); y <= Math.min(H - 1, ty1 + 30); y++)
+      for (let x = Math.max(0, tx0 - 30); x <= Math.min(W - 1, tx1 + 30); x++) {
+        const en = enemyById(grid[y][x]); if (en) drawEnemyPath(x, y, en);
+      }
     if (mouse.inside) {
       const { tx, ty } = tileAtMouse();
       if (tx >= 0 && ty >= 0 && tx < W && ty < H) {
-        ctx.globalAlpha = 0.5; if (tool !== '.') drawTile(tool, tx*T, ty*T, t); ctx.globalAlpha = 1;
+        ctx.globalAlpha = 0.5;
+        if (grid[ty][tx] === 'k' && hideable(tool)) { ctx.globalAlpha = 0.8; drawHidden(tx, ty, tool, t); }   // goes inside the brick
+        else if (tool === 'j') drawSpring(tx*T, ty*T, springCfg.rot, springCfg.path === 'line');
+        else if (tool !== '.') drawTile(tool, tx*T, ty*T, t);
+        ctx.globalAlpha = 1;
         if (tool === 'm') drawMoverPath(tx, ty, moveCfg);
+        if (tool === 'j') drawSpringArc(tx, ty, springCfg);
+        if (enemyById(tool)) drawEnemyPath(tx, ty, enemyById(tool));
         ctx.strokeStyle = tool === '.' ? '#e33' : '#fff'; ctx.strokeRect(tx*T + 1, ty*T + 1, T - 2, T - 2);
       }
     }
@@ -2062,7 +2596,12 @@ function render(t) {
       ctx.fillStyle = '#9a5a26'; ctx.fillRect(-6, 3, 12, 3);
       ctx.restore();
     }
-    for (const e of game.enemies) drawEnemy(e.x, e.y, e.w, e.h, e.dead);
+    for (const e of game.enemies) drawEnemyInst(e, t);
+    for (const s of game.enemyShots) {   // enemy projectiles: dark core ringed with the enemy's colour
+      const cx = s.x + ESHOT / 2, cy = s.y + ESHOT / 2;
+      ctx.fillStyle = s.color; ctx.beginPath(); ctx.arc(cx, cy, ESHOT / 2 + 1.5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#222'; ctx.beginPath(); ctx.arc(cx, cy, ESHOT / 2 - 1.5, 0, Math.PI * 2); ctx.fill();
+    }
     for (const s of game.shots) {
       const cx = s.x + SHOT / 2, cy = s.y + SHOT / 2;
       ctx.fillStyle = s.color || '#ff8c28'; ctx.globalAlpha = 0.35;
@@ -2071,8 +2610,10 @@ function render(t) {
       ctx.fillStyle = s.color || '#ffb347'; ctx.beginPath(); ctx.arc(cx, cy, SHOT / 2, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#fff6c8'; ctx.beginPath(); ctx.arc(cx, cy, SHOT / 4 + Math.sin(s.t * 40), 0, Math.PI * 2); ctx.fill();
     }
-    for (const f of game.fx) {   // pick-up burst / air-jump puff
-      ctx.globalAlpha = 1 - f.t / 0.5; ctx.strokeStyle = f.color; ctx.lineWidth = 3;
+    for (const f of game.fx) {   // pick-up burst / air-jump puff / coin popping out of a brick
+      ctx.globalAlpha = 1 - f.t / 0.5;
+      if (f.coin) { drawTile('c', f.x - 16, f.y - 16 - f.t * 120, t * 3); continue; }
+      ctx.strokeStyle = f.color; ctx.lineWidth = 3;
       ctx.beginPath();
       if (f.big) ctx.arc(f.x, f.y, 10 + f.t * 90, 0, Math.PI * 2);
       else ctx.ellipse(f.x, f.y, 6 + f.t * 50, 3 + f.t * 12, 0, 0, Math.PI * 2);
@@ -2093,6 +2634,14 @@ function render(t) {
       ctx.strokeRect(game.p.x - 3, game.p.y - 3, game.p.w + 6, game.p.h + 6);
     }
     drawHUD();
+    if (game.paused) {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(0, 0, cv.width, cv.height);
+      ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+      ctx.font = 'bold 48px system-ui'; ctx.fillText('Paused', cv.width/2, cv.height/2 - 10);
+      ctx.font = '20px system-ui';
+      ctx.fillText('P: resume · R: restart run · Enter: back to editor', cv.width/2, cv.height/2 + 30);
+    }
     if (game.won || game.over) {
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(0, 0, cv.width, cv.height);
@@ -2144,6 +2693,8 @@ function frame(now) {
     if (pan || panY) { cam.x += pan * 700 * dt; cam.y += panY * 700 * dt; clampCam(); }
   } else if (guideOpen()) {
     acc = 0;   // paused while the guide is open
+  } else if (game.paused) {
+    acc = 0;
   } else {
     acc += dt;
     while (acc >= STEP && mode === 'play') { update(STEP); acc -= STEP; }
@@ -2159,9 +2710,13 @@ try { const c = localStorage.getItem('platformer-maker-sys'); if (c) setSysCfg(J
 refreshSysUI();
 try { const m = JSON.parse(localStorage.getItem('platformer-maker-move')); if (m && MOVE_MODES[m.mode]) moveCfg = { ...MOVE_DEFAULTS, ...m }; } catch {}
 refreshMoveUI();
+try { const m = JSON.parse(localStorage.getItem('platformer-maker-spring')); if (m) springCfg = { ...SPRING_DEFAULTS, ...m }; } catch {}
+if (!(springCfg.rot >= 0 && springCfg.rot < 8)) springCfg.rot = 0;
+refreshSpringUI();
 // Power-ups: last edited set (a level that carries its own set replaces it); starter presets on first run
+try { const s = localStorage.getItem('platformer-maker-enemies'); setEnemyDefs(s ? JSON.parse(s) : ENEMY_PRESETS); } catch { setEnemyDefs(ENEMY_PRESETS); }
 try { const s = localStorage.getItem('platformer-maker-powerups'); setPowerDefs(s ? JSON.parse(s) : POWER_PRESETS); } catch { setPowerDefs(POWER_PRESETS); }
-powerDefsChanged();
+powerDefsChanged(); enemyDefsChanged();
 try { const s = localStorage.getItem('platformer-maker-level'); if (s) ({ g: grid, m: meta } = deserialize(s)); else grid = defaultLevel(); }
 catch { grid = defaultLevel(); }
 syncSize(); setTool('g'); updateHelp(); resize(); cam.y = H * T; clampCam(); status('Editing');
