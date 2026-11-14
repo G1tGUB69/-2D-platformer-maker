@@ -73,7 +73,7 @@
   .panel .seg button:hover { background:var(--btnh); }
   .panel .seg button.on { border-color:var(--acc); }
   .panel .sub { font-size:12px; opacity:.85; margin-bottom:4px; }
-  #powerPanel { right:10px; width:320px; overflow-y:auto; }
+  #powerPanel { right:10px; width:320px; max-height:calc(100vh - 120px); overflow-y:auto; }
   #powerPanel h4.sub { margin:14px 0 8px; padding-top:10px; border-top:1px solid #444a66; font-size:11px; text-transform:uppercase; letter-spacing:.06em; opacity:.7; }
   .plist { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px; }
   .plist button { display:flex; align-items:center; gap:5px; background:var(--btn); color:var(--txt); border:2px solid transparent; border-radius:6px; padding:3px 7px 3px 4px; cursor:pointer; font:inherit; font-size:12px; }
@@ -90,6 +90,34 @@
   .panel .ability .row { margin-bottom:6px; }
   .panel .ability.off .row { display:none; }
   #help { position:absolute; left:10px; bottom:10px; background:#0009; padding:8px 10px; border-radius:6px; font-size:12px; line-height:1.5; pointer-events:none; }
+  /* In-game guide (same content as README.md) */
+  #guide { position:fixed; inset:0; z-index:20; background:#000a; display:flex; align-items:center; justify-content:center; padding:16px; }
+  #guide[hidden] { display:none; }
+  #guide .box { width:min(980px, 100%); height:min(86vh, 900px); display:flex; flex-direction:column; background:var(--panel); border:1px solid #444a66; border-radius:10px; box-shadow:0 12px 40px #000a; overflow:hidden; }
+  #guide header { display:flex; align-items:center; gap:10px; padding:10px 14px; border-bottom:1px solid #444a66; }
+  #guide header h2 { margin:0; font-size:16px; flex:1; }
+  #guide header small { opacity:.55; }
+  #guide header button { background:none; border:0; color:var(--txt); font-size:18px; cursor:pointer; opacity:.7; }
+  #guide header button:hover { opacity:1; }
+  #guide .body { flex:1; display:flex; min-height:0; }
+  #guide nav { width:190px; flex:none; overflow-y:auto; padding:8px; border-right:1px solid #444a66; }
+  #guide nav button { display:block; width:100%; text-align:left; background:none; border:0; border-radius:6px; color:var(--txt); padding:6px 8px; font:inherit; font-size:13px; cursor:pointer; opacity:.8; }
+  #guide nav button:hover { background:var(--btnh); opacity:1; }
+  #guide nav button.on { background:var(--btn); opacity:1; box-shadow:inset 3px 0 0 var(--acc); }
+  #guide article { flex:1; overflow-y:auto; padding:6px 22px 24px; line-height:1.55; }
+  #guide article h3 { margin:22px 0 8px; font-size:17px; color:var(--acc); }
+  #guide article h4 { margin:16px 0 6px; font-size:13px; text-transform:uppercase; letter-spacing:.05em; opacity:.75; }
+  #guide article p, #guide article ul { margin:6px 0; }
+  #guide article ul { padding-left:20px; }
+  #guide table { border-collapse:collapse; width:100%; margin:8px 0 12px; font-size:13px; }
+  #guide th, #guide td { text-align:left; padding:5px 8px; border-bottom:1px solid #3a3f58; vertical-align:top; }
+  #guide th { font-size:11px; text-transform:uppercase; letter-spacing:.05em; opacity:.6; font-weight:600; }
+  #guide td:first-child { white-space:nowrap; font-weight:600; }
+  #guide kbd { font:12px ui-monospace, monospace; background:#1f2232; border:1px solid #444a66; border-bottom-width:2px; border-radius:4px; padding:0 5px; white-space:nowrap; }
+  #guide code { font:12px ui-monospace, monospace; background:#1f2232; border-radius:4px; padding:1px 4px; }
+  #guide .tile { display:flex; align-items:center; gap:8px; }
+  #guide .tile canvas { width:24px; height:24px; flex:none; }
+  @media (max-width:640px) { #guide nav { display:none; } #guide article { padding:6px 14px 20px; } }
 </style>
 </head>
 <body>
@@ -146,9 +174,15 @@
     <div class="menu" id="cheatMenu" role="menu">
       <h4>Cheats</h4>
       <label class="chk"><input type="checkbox" data-cheat="invincible"> 🛡 Invincibility <small>I</small></label>
-      <div class="note">Spikes and enemies can't hurt you; falling into a pit puts you back on the last solid ground.</div>
+      <label class="chk"><input type="checkbox" data-cheat="endlessTime"> ⏳ Endless time <small>T</small></label>
+      <label class="chk"><input type="checkbox" data-cheat="noAI"> 🧊 No enemy AI <small>N</small></label>
+      <div class="note">Invincibility: spikes and enemies can't hurt you; falling into a pit puts you back on the last solid ground.<br>
+        Endless time: timed power-ups never run out.<br>
+        No enemy AI: enemies stand still (you can still stomp them, and touching them still hurts).</div>
     </div>
   </div>
+  <span class="sep"></span>
+  <button id="guideBtn" title="How to use the editor (H / F1)">❓ Help</button>
   <span id="status"></span>
 </div>
 <div id="wrap">
@@ -183,6 +217,196 @@
     <div class="foot"><button id="pwDup">Duplicate</button><button id="pwDel">🗑 Delete</button></div>
   </div>
   <div class="info" id="pwEmpty">No power-ups yet. Click ＋ New to create one.</div>
+</div>
+
+<!-- In-game guide: keep in sync with README.md. Setting tables marked data-gen are filled from the config arrays. -->
+<div id="guide" hidden role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+  <div class="box">
+    <header><h2 id="guideTitle">📖 Platformer Maker guide</h2><small>H / F1 / Esc to close · the game is paused</small><button id="guideClose" title="Close (Esc)">✕</button></header>
+    <div class="body">
+      <nav id="guideNav"></nav>
+      <article id="guideBody">
+        <section data-title="Getting started">
+          <h3>Getting started</h3>
+          <ul>
+            <li>Pick a tile from the palette at the bottom, paint with the <b>left mouse button</b>, erase with the <b>right mouse button</b>.</li>
+            <li>Make sure the level has a <b>Start</b> tile (and ideally a <b>Goal</b>), then press <b>▶ Play</b> or <kbd>Enter</kbd>.</li>
+            <li>Press <kbd>Enter</kbd> or <kbd>Esc</kbd> to go back to the editor.</li>
+            <li>Click <b>Save</b> (browser) or <b>Export</b> (file) to keep your level.</li>
+          </ul>
+          <h4>Screen layout</h4>
+          <table>
+            <tr><th>Area</th><th>What it does</th></tr>
+            <tr><td>Toolbar (top)</td><td>Play/Stop, file actions, settings panels and menus. The status text on the right shows messages, and score/HP/lives while playing.</td></tr>
+            <tr><td>Canvas (middle)</td><td>The level. A grid is shown in edit mode.</td></tr>
+            <tr><td>Palette (bottom)</td><td>Tile categories. Click a category to select its last-used tile; categories with a <b>▲</b> open a list of all their tiles.</td></tr>
+            <tr><td>Hint bar</td><td>Short reminder of the keys for the current mode (bottom-left of the canvas).</td></tr>
+            <tr><td>Side panels</td><td>Character, Power-ups and Moving-platform settings.</td></tr>
+          </table>
+        </section>
+
+        <section data-title="Toolbar">
+          <h3>Toolbar</h3>
+          <table>
+            <tr><th>Button</th><th>Key</th><th>Description</th></tr>
+            <tr><td>▶ Play / ■ Stop</td><td><kbd>Enter</kbd></td><td>Switch between editing and playing. Play needs a Start tile.</td></tr>
+            <tr><td>↶ Undo</td><td><kbd>Ctrl+Z</kbd></td><td>Undo the last paint stroke, clear, resize, load or import (up to 100 steps).</td></tr>
+            <tr><td>Clear</td><td></td><td>Empty the whole level (asks first; can be undone).</td></tr>
+            <tr><td>Save / Load</td><td></td><td>Save the level to the browser / load it back.</td></tr>
+            <tr><td>Export / Import</td><td></td><td>Download the level as <code>level.json</code> / open a <code>.json</code> level file.</td></tr>
+            <tr><td>🏃 Character</td><td><kbd>C</kbd></td><td>Jump, speed, shots and health settings.</td></tr>
+            <tr><td>⭐ Power-ups</td><td><kbd>U</kbd></td><td>Create and edit power-ups.</td></tr>
+            <tr><td>⚙ Game system</td><td></td><td>Points per coin/enemy and coins needed for an extra life.</td></tr>
+            <tr><td>🖥 Screen</td><td></td><td>Screen resolution and level size.</td></tr>
+            <tr><td>🎮 Cheats</td><td><kbd>I</kbd></td><td>Toggle invincibility.</td></tr>
+            <tr><td>❓ Help</td><td><kbd>H</kbd> <kbd>F1</kbd></td><td>This guide.</td></tr>
+          </table>
+          <p>Only one dropdown menu is open at a time; click outside or press <kbd>Esc</kbd> to close it.</p>
+        </section>
+
+        <section data-title="Tiles">
+          <h3>Tile palette</h3>
+          <p>Select a tile with its key or from the palette. <b>Middle-click</b> a tile in the level to pick it up as the current tool.</p>
+          <table data-gen="tiles"></table>
+          <p><b>One-way</b> tiles (Platform, Falling, Moving, Spring) can be jumped through from below and landed on from above. The left and right edges of the level act as walls.</p>
+        </section>
+
+        <section data-title="Moving platforms">
+          <h3>Moving platforms</h3>
+          <p>When the <b>Moving</b> tool (<kbd>M</kbd>) is selected, the <b>Moving platform</b> panel opens on the left. Its settings apply to the next tiles you paint.</p>
+          <table>
+            <tr><th>Setting</th><th>Description</th></tr>
+            <tr><td>Path</td><td>↔ Horizontal · ↕ Vertical · ⤢ Diagonal · ⟳ Circle</td></tr>
+            <tr><td>Direction</td><td>Which way it starts moving (→ ←, ↑ ↓, ↗ ↘ ↙ ↖, ↻ ↺).</td></tr>
+            <tr><td>Distance / Radius</td><td>1 – 20 tiles: length of the trip, or the circle's radius.</td></tr>
+            <tr><td>Speed</td><td>0.5 – 15 tiles/s.</td></tr>
+          </table>
+          <ul>
+            <li>The tile you place is the <b>start point (A)</b>. Straight paths go back and forth between A and B. Circles start at the top, with the centre <i>Radius</i> tiles below.</li>
+            <li>A dashed line and a faded copy show the path in the editor.</li>
+            <li><b>Paint over</b> an existing moving platform to give it the current settings; <b>middle-click</b> one to copy its settings.</li>
+            <li>Neighbouring tiles with the same settings move together, so you can build wider platforms.</li>
+          </ul>
+        </section>
+
+        <section data-title="Character">
+          <h3>Character settings</h3>
+          <p>Open with <b>🏃 Character</b> or <kbd>C</kbd>. Changes apply immediately, even while playing. While the panel is open, dashed <b>jump arcs</b> are drawn from the Start tile so you can check what the player can reach (orange = standing jump, shown when <i>Speed impact</i> is above 0).</p>
+          <table data-gen="char"></table>
+          <p><b>Reset defaults</b> restores the default values.</p>
+        </section>
+
+        <section data-title="Power-ups">
+          <h3>Power-ups</h3>
+          <p>Open with <b>⭐ Power-ups</b> or <kbd>U</kbd>. Power-ups are made by you and saved with the level. Five examples are created the first time: <b>Giant</b>, <b>Tiny</b>, <b>Wings</b> (double jump), <b>Feather</b> (glide) and <b>Fire</b> (bouncing projectiles).</p>
+          <h4>Managing power-ups</h4>
+          <ul>
+            <li>Click a power-up in the list to edit it <b>and</b> select it for painting.</li>
+            <li><b>＋ New</b> creates one (up to 25). <b>Duplicate</b> copies the selected one. <b>🗑 Delete</b> removes it and every copy placed in the level.</li>
+            <li><b>Name</b> (16 characters max): its first letter is drawn on the pick-up orb. <b>Colour</b>: used for the orb, the player's headband and effects.</li>
+          </ul>
+          <h4>Settings</h4>
+          <table data-gen="power"></table>
+          <h4>Abilities (tick to enable)</h4>
+          <table data-gen="abilities"></table>
+          <h4>Rules</h4>
+          <ul>
+            <li>Picking up a power-up <b>replaces</b> the current one.</li>
+            <li>Power-ups are <b>lost when you lose a life</b>; pick-ups come back with the level.</li>
+            <li>A timed power-up's headband blinks during its last 2 seconds.</li>
+            <li>Editing a power-up while playing updates it live.</li>
+          </ul>
+        </section>
+
+        <section data-title="Game system">
+          <h3>Game system (score &amp; lives)</h3>
+          <p>Open the <b>⚙ Game system</b> menu. Health points and starting lives are in the Character panel.</p>
+          <table data-gen="sys"></table>
+        </section>
+
+        <section data-title="Screen & level size">
+          <h3>Screen &amp; level size</h3>
+          <p>Open the <b>🖥 Screen</b> menu.</p>
+          <h4>Screen size</h4>
+          <ul>
+            <li><b>Fit window</b> (default) fills the available space.</li>
+            <li>Fixed resolutions (16:9, 4:3, 1:1, 21:9) are letterboxed and scaled down if the window is too small.</li>
+            <li>At most 18 rows are visible at once; taller levels scroll vertically.</li>
+          </ul>
+          <h4>Level size (tiles)</h4>
+          <table>
+            <tr><th>Setting</th><th>Range</th><th>Description</th></tr>
+            <tr><td>Width</td><td>20 – 1000</td><td>Adds/removes columns <b>on the right</b> (± buttons step by 10).</td></tr>
+            <tr><td>Height</td><td>8 – 200</td><td>Adds/removes rows <b>at the top</b>, so the ground stays in place (± 1).</td></tr>
+          </table>
+          <p>You can also type a value. Resizing only works in edit mode and can be undone.</p>
+        </section>
+
+        <section data-title="Cheats">
+          <h3>Cheats</h3>
+          <p>Open the <b>🎮 Cheats</b> menu or press <kbd>I</kbd> (works in both modes).</p>
+          <ul>
+            <li><b>🛡 Invincibility</b>: spikes and enemies can't hurt you (touching an enemy defeats it), and falling into a pit puts you back on the last solid ground. A golden outline shows it is on.</li>
+          </ul>
+        </section>
+
+        <section data-title="Controls">
+          <h3>Controls</h3>
+          <h4>Editor</h4>
+          <table>
+            <tr><th>Action</th><th>Input</th></tr>
+            <tr><td>Paint / Erase</td><td>Left click / Right click (drag to paint several)</td></tr>
+            <tr><td>Pick tile</td><td>Middle click (also copies moving-platform settings)</td></tr>
+            <tr><td>Select tile</td><td><kbd>1</kbd>–<kbd>9</kbd> <kbd>0</kbd> <kbd>B</kbd> <kbd>F</kbd> <kbd>M</kbd></td></tr>
+            <tr><td>Scroll</td><td>Arrows / <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> (<kbd>Z</kbd><kbd>Q</kbd> on AZERTY) · wheel · <kbd>Shift</kbd>+wheel: vertical</td></tr>
+            <tr><td>Undo</td><td><kbd>Ctrl+Z</kbd></td></tr>
+            <tr><td>Panels</td><td><kbd>C</kbd> Character · <kbd>U</kbd> Power-ups</td></tr>
+            <tr><td>Invincibility</td><td><kbd>I</kbd></td></tr>
+            <tr><td>Help</td><td><kbd>H</kbd> / <kbd>F1</kbd></td></tr>
+            <tr><td>Play</td><td><kbd>Enter</kbd></td></tr>
+            <tr><td>Close menu / list / help</td><td><kbd>Esc</kbd></td></tr>
+          </table>
+          <h4>Play</h4>
+          <table>
+            <tr><th>Action</th><th>Input</th></tr>
+            <tr><td>Move</td><td><kbd>←</kbd> <kbd>→</kbd> / <kbd>A</kbd> <kbd>D</kbd> (<kbd>Q</kbd> on AZERTY)</td></tr>
+            <tr><td>Jump (hold for higher)</td><td><kbd>Space</kbd> / <kbd>W</kbd> / <kbd>↑</kbd> / <kbd>Z</kbd></td></tr>
+            <tr><td>Shoot / throw</td><td><kbd>X</kbd> / <kbd>J</kbd></td></tr>
+            <tr><td>Restart the run</td><td><kbd>R</kbd></td></tr>
+            <tr><td>Invincibility</td><td><kbd>I</kbd></td></tr>
+            <tr><td>Help (pauses)</td><td><kbd>H</kbd> / <kbd>F1</kbd></td></tr>
+            <tr><td>Back to editor</td><td><kbd>Enter</kbd> / <kbd>Esc</kbd></td></tr>
+          </table>
+        </section>
+
+        <section data-title="Gameplay rules">
+          <h3>Gameplay rules</h3>
+          <ul>
+            <li><b>A run</b> lasts from pressing Play until game over. Score and lives carry over between lives; each life restarts the level from the Start tile with full HP.</li>
+            <li><b>Getting hit</b> (spikes, enemies) costs 1 HP, knocks you back and makes you invulnerable (blinking) for 1.2 s. At 0 HP you lose a life.</li>
+            <li><b>Pits</b>: falling out of the level always costs a whole life, whatever your HP.</li>
+            <li><b>Stomping</b> an enemy defeats it and bounces you up; hold jump for a full-height bounce.</li>
+            <li><b>Shots</b> fly straight, stop at solid tiles, defeat enemies and disappear off screen.</li>
+            <li><b>Jump feel</b>: releasing jump early cuts the jump short. A short grace period lets you jump just after leaving a ledge or just before landing.</li>
+            <li><b>Breakable</b> blocks and <b>Falling</b> platforms come back on each new life.</li>
+            <li><b>Goal</b>: touching the flag completes the level. <kbd>R</kbd> plays again, <kbd>Enter</kbd> goes back to editing.</li>
+            <li><b>HUD</b> (top-left): hearts for HP, then score, coins collected / total, and lives.</li>
+          </ul>
+        </section>
+
+        <section data-title="Saving & files">
+          <h3>Saving, loading &amp; files</h3>
+          <ul>
+            <li>The browser remembers automatically: character, game-system, power-up and moving-platform settings, screen size and cheats.</li>
+            <li>The <b>level itself</b> is only stored when you click <b>Save</b> (browser) or <b>Export</b> (file). The level saved in the browser loads on start-up.</li>
+            <li>Saved and exported levels include tiles, character, game system, moving platforms and power-ups, so a level file is self-contained. Loading or importing a level replaces your current settings with the level's.</li>
+            <li><b>Export</b> often: browser storage can be cleared.</li>
+          </ul>
+          <p>The full file format is described in <code>README.md</code>.</p>
+        </section>
+      </article>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -540,8 +764,8 @@ function markTool() {
 function status(msg) { document.getElementById('status').textContent = msg; }
 function updateHelp() {
   document.getElementById('help').innerHTML = mode === 'edit'
-    ? 'Left click: paint · Right click: erase · Middle click: pick · 1–0, B, F, M: tools · C: character · U: power-ups · I: invincibility<br>Arrows/WASD or wheel (Shift+wheel: vertical): scroll · Enter: play'
-    : '←/→ or A/D: move · Space/W/↑: jump · X/J: shoot · R: restart run · I: invincibility · Enter/Esc: back to editor';
+    ? 'Left click: paint · Right click: erase · Middle click: pick · 1–0, B, F, M: tools · C: character · U: power-ups<br>Cheats — I: invincibility · T: endless time · N: no enemy AI · Arrows/WASD or wheel (Shift+wheel: vertical): scroll · Enter: play'
+    : '←/→ or A/D: move · Space/W/↑: jump · X/J: shoot · R: restart run · I / T / N: cheats · Enter/Esc: back to editor';
 }
 
 // Character panel
@@ -831,9 +1055,9 @@ function refreshSysUI() {
 }
 
 // ---------- Cheats ----------
-const cheats = { invincible: false };
+const cheats = { invincible: false, endlessTime: false, noAI: false };
 try { Object.assign(cheats, JSON.parse(localStorage.getItem('platformer-maker-cheats') || '{}')); } catch {}
-const CHEAT_NAMES = { invincible: 'Invincibility' };
+const CHEAT_NAMES = { invincible: 'Invincibility', endlessTime: 'Endless time', noAI: 'No enemy AI' };
 function anyCheat() { return Object.values(cheats).some(Boolean); }
 function setCheat(id, on) {
   cheats[id] = on;
@@ -931,7 +1155,8 @@ window.addEventListener('keydown', e => {
   if (e.code === 'Escape' && anyMenuOpen()) { setMenu(false); return; }
   if (e.code === 'Escape' && paletteEl.querySelector('.cat.open')) { closeCats(); return; }
   if (e.target.tagName === 'INPUT' && e.target.type !== 'checkbox') { if (e.code === 'Enter') e.target.blur(); return; }
-  if (e.code === 'KeyI' && !e.ctrlKey && !e.metaKey && !e.altKey) { setCheat('invincible', !cheats.invincible); return; }
+  const CHEAT_KEYS = { KeyI: 'invincible', KeyT: 'endlessTime', KeyN: 'noAI' };
+  if (CHEAT_KEYS[e.code] && !e.ctrlKey && !e.metaKey && !e.altKey) { const id = CHEAT_KEYS[e.code]; setCheat(id, !cheats[id]); return; }
   if (!e.ctrlKey && !e.metaKey) keys[e.code] = true;   // Ctrl+Z etc. must not pan
   if (e.code === 'Enter' || (e.code === 'Escape' && mode === 'play')) { toggleMode(); e.preventDefault(); return; }
   if (mode === 'edit') {
@@ -997,8 +1222,11 @@ function startGame() {
   cam.x = game.p.x - viewW() / 2; cam.y = game.p.y - viewH() / 2; clampCam();
   playStatus();
 }
+function cheatStatus() {
+  return (cheats.invincible ? ' · 🛡' : '') + (cheats.endlessTime ? ' · ⏳' : '') + (cheats.noAI ? ' · 🧊' : '');
+}
 function playStatus() {
-  const G = game, s = `Score ${G.score} · Coins ${G.coins}/${G.totalCoins} · HP ${G.p.hp}/${charCfg.hp} · Lives ${G.lives}` + powerStatus(G) + (cheats.invincible ? ' · 🛡 Invincible' : '');
+  const G = game, s = `Score ${G.score} · Coins ${G.coins}/${G.totalCoins} · HP ${G.p.hp}/${charCfg.hp} · Lives ${G.lives}` + powerStatus(G) + cheatStatus();
   status(G.won ? 'Level complete! ' + s : G.over ? 'Game over! ' + s : s);
 }
 
@@ -1175,6 +1403,7 @@ function applyPowerEffects(G) {
   G.phys = charPhys(pw || {});
   G.p.targetScale = pw ? pw.size / 100 : 1;
   if (!pw?.doubleJump) G.p.airJumps = 0;
+  if (pw?.duration && G.power.t <= 0) G.power.t = pw.duration;   // duration raised from 0 while active
 }
 function givePower(G, id, x, y) {
   const pw = powerById(id);
@@ -1188,7 +1417,7 @@ function givePower(G, id, x, y) {
 function tickPower(G, dt) {
   if (!G.power) return;
   const pw = activePower(G);
-  if (pw && (!pw.duration || (G.power.t -= dt) > 0)) return;
+  if (pw && (!pw.duration || cheats.endlessTime || (G.power.t -= dt) > 0)) return;   // endless time: countdown frozen
   G.power = null; applyPowerEffects(G);
 }
 function boxFree(g, x, y, w, h) {
@@ -1309,13 +1538,17 @@ function update(dt) {
   for (const e of G.enemies) {
     if (e.dead) { e.dead += dt; continue; }
     e.vy = Math.min(e.vy + PHYS.grav * dt, PHYS.maxFall);
-    const er = moveBody(e, G.g, dt, true);
-    if (er.hitWall) e.vx = -Math.sign(e.vx || -1) * 60;
-    else if (er.landed) {
-      // turn around at ledges
-      const fx = e.vx > 0 ? e.x + e.w + 1 : e.x - 1;
-      const below = tileAt(G.g, Math.floor(fx / T), Math.floor((e.y + e.h + 1) / T));
-      if (!SOLID.has(below) && !ONEWAY.has(below)) e.vx = -e.vx;
+    if (cheats.noAI) {   // no AI: enemy keeps its walking direction but stays put (gravity still applies)
+      const vx = e.vx; e.vx = 0; moveBody(e, G.g, dt, true); e.vx = vx;
+    } else {
+      const er = moveBody(e, G.g, dt, true);
+      if (er.hitWall) e.vx = -Math.sign(e.vx || -1) * 60;
+      else if (er.landed) {
+        // turn around at ledges
+        const fx = e.vx > 0 ? e.x + e.w + 1 : e.x - 1;
+        const below = tileAt(G.g, Math.floor(fx / T), Math.floor((e.y + e.h + 1) / T));
+        if (!SOLID.has(below) && !ONEWAY.has(below)) e.vx = -e.vx;
+      }
     }
     if (e.y > H * T + 64) e.dead = 99;
     if (overlaps(p, e.x, e.y, e.w, e.h)) {
@@ -1403,7 +1636,38 @@ function drawTile(c, x, y, t) {
       ctx.fillStyle = '#e94560';
       ctx.beginPath(); ctx.moveTo(x+17, y+2); ctx.lineTo(x+30, y+8); ctx.lineTo(x+17, y+14); ctx.fill();
       break;
+    default: { const d = powerById(c); if (d) drawPowerItem(d, x, y, t); }
   }
+}
+// Power-up pick-up: a bobbing orb in the power-up's colour with its initial.
+function drawPowerItem(d, x, y, t) {
+  const cx = x + 16, cy = y + 16 + Math.sin(t * 3 + x * 0.05) * 2;
+  ctx.save();
+  ctx.fillStyle = d.color; ctx.beginPath(); ctx.arc(cx, cy, 12, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.fillStyle = 'rgba(255,255,255,.6)'; ctx.beginPath(); ctx.arc(cx - 5, cy - 5, 3.5, 0, Math.PI * 2); ctx.fill();
+  ctx.font = 'bold 13px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.6)'; ctx.strokeText(powerLetter(d), cx, cy + 1);
+  ctx.fillStyle = '#fff'; ctx.fillText(powerLetter(d), cx, cy + 1);
+  ctx.restore();
+}
+// The player in play mode: scaled to its current size, with a headband in the power-up's
+// colour (blinking during the last 2 s of a timed power-up) and wings while gliding.
+function drawHero(G, t) {
+  const p = G.p, pw = activePower(G), k = p.w / BASE_W;
+  if (pw && p.gliding) {
+    const flap = Math.sin(t * 18) * 3 * k, sy = p.y + p.h * 0.35;
+    ctx.fillStyle = pw.color; ctx.globalAlpha = 0.85; ctx.beginPath();
+    ctx.moveTo(p.x + 2, sy); ctx.lineTo(p.x - 14 * k, sy - 8 * k + flap); ctx.lineTo(p.x + 2, sy + 10 * k);
+    ctx.moveTo(p.x + p.w - 2, sy); ctx.lineTo(p.x + p.w + 14 * k, sy - 8 * k + flap); ctx.lineTo(p.x + p.w - 2, sy + 10 * k);
+    ctx.fill(); ctx.globalAlpha = 1;
+  }
+  ctx.save(); ctx.translate(p.x, p.y); ctx.scale(k, p.h / BASE_H);
+  drawPlayer(0, 0, BASE_W, BASE_H, p.face);
+  if (pw && !(pw.duration && G.power.t < 2 && Math.floor(t * 10) % 2)) {
+    ctx.fillStyle = pw.color; ctx.fillRect(0, 2, BASE_W, 3);
+  }
+  ctx.restore();
 }
 function drawPlayer(x, y, w, h, face) {
   ctx.fillStyle = '#4da3ff'; ctx.fillRect(x, y, w, h);
@@ -1516,13 +1780,22 @@ function render(t) {
     for (const e of game.enemies) drawEnemy(e.x, e.y, e.w, e.h, e.dead);
     for (const s of game.shots) {
       const cx = s.x + SHOT / 2, cy = s.y + SHOT / 2;
-      ctx.fillStyle = 'rgba(255,140,40,.35)';
+      ctx.fillStyle = s.color || '#ff8c28'; ctx.globalAlpha = 0.35;
       ctx.beginPath(); ctx.ellipse(cx - Math.sign(s.vx) * 5, cy, 10, 6, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#ffb347'; ctx.beginPath(); ctx.arc(cx, cy, SHOT / 2, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = s.color || '#ffb347'; ctx.beginPath(); ctx.arc(cx, cy, SHOT / 2, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#fff6c8'; ctx.beginPath(); ctx.arc(cx, cy, SHOT / 4 + Math.sin(s.t * 40), 0, Math.PI * 2); ctx.fill();
     }
+    for (const f of game.fx) {   // pick-up burst / air-jump puff
+      ctx.globalAlpha = 1 - f.t / 0.5; ctx.strokeStyle = f.color; ctx.lineWidth = 3;
+      ctx.beginPath();
+      if (f.big) ctx.arc(f.x, f.y, 10 + f.t * 90, 0, Math.PI * 2);
+      else ctx.ellipse(f.x, f.y, 6 + f.t * 50, 3 + f.t * 12, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
     if (!(game.p.hurt > 0 && Math.floor(t * 16) % 2) && !game.over)   // blink while invulnerable after a hit
-      drawPlayer(game.p.x, game.p.y, game.p.w, game.p.h, game.p.face);
+      drawHero(game, t);
     ctx.font = 'bold 14px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
     for (const q of game.pops) {
       ctx.globalAlpha = Math.max(0, 1 - q.t / 0.9);
@@ -1599,6 +1872,9 @@ try { const c = localStorage.getItem('platformer-maker-sys'); if (c) setSysCfg(J
 refreshSysUI();
 try { const m = JSON.parse(localStorage.getItem('platformer-maker-move')); if (m && MOVE_MODES[m.mode]) moveCfg = { ...MOVE_DEFAULTS, ...m }; } catch {}
 refreshMoveUI();
+// Power-ups: last edited set (a level that carries its own set replaces it); starter presets on first run
+try { const s = localStorage.getItem('platformer-maker-powerups'); setPowerDefs(s ? JSON.parse(s) : POWER_PRESETS); } catch { setPowerDefs(POWER_PRESETS); }
+powerDefsChanged();
 try { const s = localStorage.getItem('platformer-maker-level'); if (s) ({ g: grid, m: meta } = deserialize(s)); else grid = defaultLevel(); }
 catch { grid = defaultLevel(); }
 syncSize(); setTool('g'); updateHelp(); resize(); cam.y = H * T; clampCam(); status('Editing');
