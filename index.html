@@ -128,7 +128,12 @@
   .panel details.cat > .body { padding:2px 10px 6px; }
   .panel details.cat .body > h4.sub:first-child, .panel details.cat .body > .sub:first-child { margin-top:4px; padding-top:0; border-top:0; }
   #charPanel h4.sub { margin:14px 0 8px; padding-top:10px; border-top:1px solid var(--line); font-size:11px; text-transform:uppercase; letter-spacing:.06em; opacity:.7; }
-  #movePanel, #springPanel, #flamePanel, #bubblePanel, #goalPanel { left:calc(var(--dockL, 0px) + 10px); width:280px; }
+  #movePanel, #springPanel, #flamePanel, #bubblePanel, #goalPanel, #signPanel, #npcPanel, #shopPanel { left:calc(var(--dockL, 0px) + 10px); width:280px; }
+  #shopPanel, #npcPanel { max-height:calc(100vh - var(--dockT, 0px) - var(--dockB, 0px) - 12px); overflow-y:auto; }
+  .panel textarea { display:block; width:100%; resize:vertical; background:var(--btn); color:var(--txt); border:2px solid transparent; border-radius:6px; padding:5px 6px; font:inherit; margin-bottom:8px; }
+  .panel textarea:focus { outline:none; border-color:var(--acc); }
+  .panel input.full { display:block; width:100%; margin-bottom:6px; }
+  .panel label.chk small { margin-left:auto; opacity:.6; font-size:11px; }
   .panel .seg { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px; }
   .panel .seg button { flex:1; background:var(--btn); color:var(--txt); border:2px solid transparent; border-radius:6px; padding:5px 6px; cursor:pointer; font:inherit; font-size:12px; white-space:nowrap; }
   .panel .seg button:hover { background:var(--btnh); }
@@ -290,6 +295,10 @@
           <summary>❤️ Lives <small id="sysSumLives"></small></summary>
           <div class="body"><div id="sysLives"></div><div class="note" id="sysNoteLives"></div></div>
         </details>
+        <details class="mcat" id="sysCatTime">
+          <summary>⏱ Time <small id="sysSumTime"></small></summary>
+          <div class="body"><div id="sysTime"></div><div class="note" id="sysNoteTime"></div></div>
+        </details>
         <details class="mcat" id="sysCatHazards">
           <summary>⚠️ Hazards <small id="sysSumHazards"></small></summary>
           <div class="body"><div id="sysHazards"></div><div class="note" id="sysNoteHazards"></div></div>
@@ -329,7 +338,7 @@
         <label class="chk"><input type="checkbox" data-cheat="endlessTime"> ⏳ Endless time <small>T</small></label>
         <label class="chk"><input type="checkbox" data-cheat="noAI"> 🧊 No enemy AI <small>N</small></label>
         <div class="note">Invincibility: spikes, flames, poison, enemies and their shots can't hurt you; falling into a pit or lava puts you back on the last solid ground.<br>
-          Endless time: timed power-ups never run out.<br>
+          Endless time: timed power-ups never run out and the level timer stops.<br>
           No enemy AI: enemies stand still and don't shoot (you can still stomp them, and touching them still hurts).</div>
       </div>
     </div>
@@ -369,7 +378,7 @@
 <div id="charPanel" class="panel" hidden>
   <h3>Character <button id="charClose" title="Close">✕</button></h3>
   <details class="cat" id="charMetrics" open>
-    <summary>📏 Metrics <small>jump · speed · shots · health</small></summary>
+    <summary>📏 Metrics <small>jump · speed · shots · health · prices</small></summary>
     <div class="body"><div id="charRows"></div><div class="info" id="charInfo"></div></div>
   </details>
   <details class="cat" id="charPerks" open>
@@ -418,6 +427,37 @@
   <div class="info">Touching a bubble pops it and bounces the character (hold jump for a full jump). Paint over a placed spawner to apply these settings, middle-click one to copy its settings.</div>
 </div>
 
+<div id="signPanel" class="panel" hidden>
+  <h3>Text box</h3>
+  <div class="sub">Text <span style="opacity:.6">(up to 200 characters)</span></div>
+  <textarea id="signText" maxlength="200" rows="4" placeholder="Text shown in play"></textarea>
+  <div class="info">Solid block. In play, its text pops up in a bubble while the character touches it, and for 3 s after hitting it from below. Paint over a placed box to give it this text, middle-click one to copy its text.</div>
+</div>
+
+<div id="npcPanel" class="panel" hidden>
+  <h3>NPC</h3>
+  <div class="line"><input type="text" id="npcName" maxlength="16" placeholder="Name"><input type="color" id="npcColor" title="Colour"></div>
+  <div class="sub">Dialogue <span style="opacity:.6">(1 to 5 sentences)</span></div>
+  <div id="npcLines"></div>
+  <div class="info" id="npcInfo"></div>
+  <div class="info">In play, stand next to the NPC and press ↓ / S to talk; each press shows the next sentence. Paint over a placed NPC to apply these settings, middle-click one to copy its settings.</div>
+</div>
+
+<div id="shopPanel" class="panel" hidden>
+  <h3>Merchant</h3>
+  <div class="line"><input type="text" id="shopName" maxlength="16" placeholder="Name"><input type="color" id="shopColor" title="Colour"></div>
+  <div class="sub">Greeting</div>
+  <input type="text" id="shopGreet" class="full" maxlength="80" placeholder="Welcome!">
+  <div class="sub" style="margin-top:6px">For sale <span style="opacity:.6">(paid with coins)</span></div>
+  <div class="ability"><label class="chk" title="Sell every power-up, including ones created later"><input type="checkbox" id="shopAllPw"> ⭐ All power-ups</label><div id="shopPwList"></div></div>
+  <div class="ability" id="shopTimeBox"><label class="chk" title="Extra seconds on the level timer (only offered when the level has a time limit)"><input type="checkbox" id="shopTime"> ⏱ Time</label>
+    <div class="row" title="Seconds added by one purchase"><label>Seconds per purchase <span style="opacity:.6">(s)</span></label><input type="range" id="shopTimeRange" min="5" max="300" step="5"><input type="number" id="shopTimeNum" min="5" max="300" step="5"></div></div>
+  <div class="ability"><label class="chk" title="+1 life"><input type="checkbox" id="shopLife"> ❤️ Extra life</label></div>
+  <div class="ability"><label class="chk" title="Restores 1 health point (not above the maximum)"><input type="checkbox" id="shopHp"> 💗 Health point</label></div>
+  <div class="info" id="shopInfo"></div>
+  <div class="info">In play, stand next to the merchant and press ↓ / S to open the shop. Paint over a placed merchant to apply these settings, middle-click one to copy its settings.</div>
+</div>
+
 <div id="flamePanel" class="panel" hidden>
   <h3>Flame jet</h3>
   <div id="flameRows"></div>
@@ -431,7 +471,7 @@
   <div id="powerEdit">
     <div class="line"><input type="text" id="pwName" maxlength="16" placeholder="Name"><input type="color" id="pwColor" title="Colour"></div>
     <details class="cat" id="pwCatStats" open>
-      <summary>📏 Stats <small>duration · size · movement</small></summary>
+      <summary>📏 Stats <small>duration · size · movement · price</small></summary>
       <div class="body" id="pwRows"></div>
     </details>
     <details class="cat" id="pwCatAbil" open>
@@ -517,7 +557,7 @@
             <tr><td>Bars <small>(top &amp; bottom)</small></td><td>Five toolbars: Play, Edit &amp; files, Game design, Level elements, Layout &amp; Help. Each can be docked on any edge (see <i>Editor layout</i>). The status text shows messages, and score/HP/lives while playing.</td></tr>
             <tr><td>Canvas (middle)</td><td>The level. A grid is shown in edit mode.</td></tr>
             <tr><td>Hint bar</td><td>Short reminder of the keys for the current mode (bottom-left of the canvas).</td></tr>
-            <tr><td>Side panels</td><td>Character, Power-ups and Enemies editors (right); settings for the selected tool (left): Moving platform, Spring, Flame jet, Bubbles or Goal. Sections inside panels and menus can be collapsed.</td></tr>
+            <tr><td>Side panels</td><td>Character, Power-ups and Enemies editors (right); settings for the selected tool (left): Moving platform, Spring, Flame jet, Bubbles, Goal, Text box, NPC or Merchant. Sections inside panels and menus can be collapsed.</td></tr>
           </table>
         </section>
 
@@ -564,7 +604,7 @@
 
         <section data-title="Tiles">
           <h3>Tile palette</h3>
-          <p>Select a tile with its key or from the <b>Level elements</b> bar: click a category to select its last-used tile; categories with a <b>▲</b> open a list of all their tiles. <b>Middle-click</b> a tile in the level to pick it up as the current tool (this also copies a moving platform's, spring's, flame jet's, bubble spawner's or goal's settings).</p>
+          <p>Select a tile with its key or from the <b>Level elements</b> bar: click a category to select its last-used tile; categories with a <b>▲</b> open a list of all their tiles. <b>Middle-click</b> a tile in the level to pick it up as the current tool (this also copies a moving platform's, spring's, flame jet's, bubble spawner's, goal's, text box's, NPC's or merchant's settings).</p>
           <table data-gen="tiles"></table>
           <p><b>One-way</b> tiles (Platform, Falling, Moving, upward Spring) can be jumped through from below and landed on from above. The left and right edges of the level act as walls.</p>
           <p><b>Bricks</b>: Power, Coin, Spin and Breakable bricks come back on each new life. If there is no room above a Power brick, its power-up is given to you straight away.</p>
@@ -621,6 +661,36 @@
             <li>Touching the pole anywhere completes the level.</li>
             <li>The score depends on how high the character's feet are, from <b>Flag bottom points</b> to <b>Flag top points</b> (<b>⚙ Game system › 🏆 Score</b>). <b>Flag score steps</b> above 1 split the pole into score bands. Both values are shown next to the pole.</li>
             <li><b>Paint over</b> a goal to apply the current height; <b>middle-click</b> one to copy it.</li>
+          </ul>
+        </section>
+
+        <section data-title="NPCs & text boxes">
+          <h3>NPCs &amp; text boxes</h3>
+          <p>The <b>Text box</b> is in the <b>Terrain</b> category; <b>NPC</b> and <b>Merchant</b> are in the <b>NPCs</b> category. Each one has its own settings, edited in a panel on the left when its tool is selected. As with springs, the panel's settings apply to the next ones you paint: <b>paint over</b> a placed one to apply them, <b>middle-click</b> one to copy its settings. While the tool is selected, every placed one shows its text in a bubble in the editor.</p>
+          <h4>📜 Text box</h4>
+          <ul>
+            <li>A solid block holding a text of up to 200 characters (line breaks are kept).</li>
+            <li>In play, the text pops up in a bubble above the block while the character touches it (standing on it, pushing against it), and for 3 s after hitting it from below.</li>
+          </ul>
+          <h4>🧑 NPC</h4>
+          <ul>
+            <li>Settings: <b>name</b>, <b>colour</b> and <b>1 to 5 sentences</b> (empty ones are skipped).</li>
+            <li>In play, stand next to the NPC (a <i>↓ Talk</i> bubble appears) and press <kbd>↓</kbd> / <kbd>S</kbd>. The game pauses; each press of <kbd>Space</kbd> / <kbd>↓</kbd> shows the next sentence, <kbd>Esc</kbd> stops talking.</li>
+            <li>NPCs can't be hurt and don't block the way.</li>
+          </ul>
+          <h4>🛒 Merchant</h4>
+          <p>Each Merchant has its own <b>name</b>, <b>colour</b>, <b>greeting</b> and <b>inventory</b>: tick what it sells.</p>
+          <table>
+            <tr><th>Item</th><th>Effect</th><th>Price set in</th></tr>
+            <tr><td>⭐ Power-ups</td><td>All of them (including ones created later) or only the ticked ones. Bought power-ups are given at once and replace the current one.</td><td>⭐ Power-ups › 🛒 Shop price (per power-up)</td></tr>
+            <tr><td>⏱ Time</td><td>Adds <i>Seconds per purchase</i> (5 – 300, per Merchant) to the level timer. Only offered when the level has a time limit.</td><td>⚙ Game system › ⏱ Time › Price per second</td></tr>
+            <tr><td>❤️ Extra life</td><td>+1 life.</td><td>🏃 Character › Price of a life</td></tr>
+            <tr><td>💗 Health point</td><td>Restores 1 HP (not above the maximum).</td><td>🏃 Character › Price per health point</td></tr>
+          </table>
+          <ul>
+            <li>In play, stand next to the Merchant (a <i>↓ Shop</i> bubble appears) and press <kbd>↓</kbd> / <kbd>S</kbd>. The game pauses while the shop is open.</li>
+            <li><kbd>↑</kbd> / <kbd>↓</kbd> choose, <kbd>Space</kbd> buys, <kbd>Esc</kbd> or <b>Leave</b> closes the shop. Items you can't afford show their price in red.</li>
+            <li>You pay with the coins collected during the current life (Big and Mega coins count for their value). Spent coins are gone; a price of 0 makes the item free.</li>
           </ul>
         </section>
 
@@ -728,7 +798,8 @@
 
         <section data-title="Game system">
           <h3>Game system (score &amp; lives)</h3>
-          <p>Open the <b>⚙ Game system</b> menu. It has four collapsible sections: 🏆 Score (coin points and goal-pole points), 🪙 Coins (value and size of each coin kind), ❤️ Lives and ⚠️ Hazards. Points per enemy are set per enemy type; health points and starting lives are in the Character panel.</p>
+          <p>Open the <b>⚙ Game system</b> menu. It has five collapsible sections: 🏆 Score (coin points and goal-pole points), 🪙 Coins (value and size of each coin kind), ❤️ Lives, ⏱ Time (time limit and the Merchants' price per second) and ⚠️ Hazards. Points per enemy are set per enemy type; health points, starting lives and the Merchants' life / HP prices are in the Character panel.</p>
+          <p><b>Time limit</b>: 0 (default) = no timer. Otherwise each life starts with that many seconds, shown in the HUD (red in the last 10 s); running out costs a life. The timer stops while you talk to an NPC or shop, and with the ⏳ Endless time cheat.</p>
           <table data-gen="sys"></table>
         </section>
 
@@ -756,7 +827,7 @@
           <table>
             <tr><th>Cheat</th><th>Key</th><th>Effect</th></tr>
             <tr><td>🛡 Invincibility</td><td><kbd>I</kbd></td><td>Spikes, flames, poison, enemies and their shots can't hurt you (touching an enemy defeats it), and falling into a pit or lava puts you back on the last solid ground. A golden outline shows it is on. The ⭐ Invincibility power-up ability does the same, except for pits and lava.</td></tr>
-            <tr><td>⏳ Endless time</td><td><kbd>T</kbd></td><td>Timed power-ups never run out.</td></tr>
+            <tr><td>⏳ Endless time</td><td><kbd>T</kbd></td><td>Timed power-ups never run out and the level timer stops.</td></tr>
             <tr><td>🧊 No enemy AI</td><td><kbd>N</kbd></td><td>Enemies stand still and don't shoot. You can still stomp them, and touching them still hurts.</td></tr>
           </table>
         </section>
@@ -789,6 +860,8 @@
             <tr><td>Rotating jump <small>(perk / ability)</small></td><td>Any jump spins you</td></tr>
             <tr><td>Swim <small>(in water)</small></td><td>Press jump to swim up; jump at the surface to leap out</td></tr>
             <tr><td>Shoot / throw</td><td><kbd>X</kbd> / <kbd>J</kbd></td></tr>
+            <tr><td>Talk / open shop</td><td><kbd>↓</kbd> / <kbd>S</kbd> next to an NPC or Merchant</td></tr>
+            <tr><td>Next sentence · shop</td><td><kbd>Space</kbd> / <kbd>↓</kbd> · <kbd>↑</kbd> <kbd>↓</kbd> choose, <kbd>Space</kbd> buy, <kbd>Esc</kbd> close</td></tr>
             <tr><td>Pause / resume</td><td><kbd>P</kbd></td></tr>
             <tr><td>Restart the run</td><td><kbd>R</kbd></td></tr>
             <tr><td>Cheats</td><td><kbd>I</kbd> / <kbd>T</kbd> / <kbd>N</kbd></td></tr>
@@ -812,16 +885,18 @@
             <li><b>Wall jump</b> kicks you away from the wall in a full-size jump; you briefly can't steer back toward it.</li>
             <li>Bricks, coins, power-ups and <b>Falling</b> platforms come back on each new life.</li>
             <li><b>Goal</b>: touching the pole completes the level and gives flag points by height (shown on the end screen). <kbd>R</kbd> plays again, <kbd>Enter</kbd> goes back to editing.</li>
-            <li><b>HUD</b> (top-left): hearts for HP, then score, coins collected / total, and lives.</li>
+            <li><b>Time limit</b> (if set in ⚙ Game system): running out of time costs a life; each life starts with the full time.</li>
+            <li><b>Coins</b> collected during a life can be spent at Merchants; the counter restarts at 0 on each new life.</li>
+            <li><b>HUD</b> (top-left): hearts for HP, then score, coins collected / total, lives and the timer (when there is a time limit).</li>
           </ul>
         </section>
 
         <section data-title="Saving & files">
           <h3>Saving, loading &amp; files</h3>
           <ul>
-            <li>The browser remembers automatically: character, game-system, power-up, enemy, moving-platform, spring, flame-jet, bubble and goal settings, screen size, editor layout, cheats and which panel sections are open.</li>
+            <li>The browser remembers automatically: character, game-system, power-up, enemy, moving-platform, spring, flame-jet, bubble, goal, text-box, NPC and merchant settings, screen size, editor layout, cheats and which panel sections are open.</li>
             <li>The <b>level itself</b> is only stored when you click <b>Save</b> (browser) or <b>Export</b> (file). The level saved in the browser loads on start-up.</li>
-            <li>Saved and exported levels include tiles, character, game system, moving platforms, springs, flame jets, bubble spawners, goals, hidden items, power-ups and enemies, so a level file is self-contained. Loading or importing a level replaces your current settings with the level's. Older levels without enemy types still load: their enemies become a Walker.</li>
+            <li>Saved and exported levels include tiles, character, game system, moving platforms, springs, flame jets, bubble spawners, goals, text boxes, NPCs, merchants, hidden items, power-ups and enemies, so a level file is self-contained. Loading or importing a level replaces your current settings with the level's. Older levels without enemy types still load: their enemies become a Walker.</li>
             <li><b>Export</b> often: browser storage can be cleared.</li>
           </ul>
           <p>The full file format is described in <code>README.md</code>.</p>
@@ -845,6 +920,7 @@ const CATEGORIES = [
   { id:'item',    name:'Items' },
   { id:'power',   name:'Power-ups' },   // items come from powerDefs (user-made)
   { id:'gadget',  name:'Gadgets' },
+  { id:'npc',     name:'NPCs' },
   { id:'level',   name:'Level' },
   { id:'edit',    name:'Edit' },
 ];
@@ -858,6 +934,7 @@ const TOOLS = [
   { id:'p', name:'Platform', cat:'terrain', color:'#8fa3b8', key:'3' },
   { id:'v', name:'Falling',  cat:'terrain', color:'#c98f4a', key:'f' },
   { id:'m', name:'Moving',   cat:'terrain', color:'#9b7bd6', key:'m' },
+  { id:'#', name:'Text box', cat:'terrain', color:'#f2e3c0' },
   { id:'s', name:'Spikes',   cat:'hazard',  color:'#d8dde6', key:'4' },
   { id:'^', name:'Flame jet', cat:'hazard', color:'#ff7a1a' },
   { id:'@', name:'Lava',     cat:'hazard',  color:'#ff5a1f', sub:'Zones' },
@@ -868,6 +945,8 @@ const TOOLS = [
   { id:'*', name:'Mega coin', cat:'item',   color:'#ffe066', sub:'Coins' },
   { id:'j', name:'Spring',   cat:'gadget',  color:'#4fd18b', key:'7' },
   { id:'+', name:'Bubbles',  cat:'gadget',  color:'#9fdcff', key:'g' },
+  { id:'[', name:'NPC',      cat:'npc',     color:'#d9a441' },
+  { id:']', name:'Merchant', cat:'npc',     color:'#2f8f5b' },
   { id:'P', name:'Start',    cat:'level',   color:'#4da3ff', key:'8' },
   { id:'f', name:'Goal',     cat:'level',   color:'#ffffff', key:'9' },
   { id:'.', name:'Eraser',   cat:'edit',    color:'transparent', key:'0' },
@@ -885,6 +964,8 @@ const CHAR_FIELDS = [
   { k:'projMax',   name:'Projectiles on screen', unit:'max', min:0, max:10, step:1, tip:'How many shots can be on screen at the same time (0 = shooting disabled)' },
   { k:'hp',    name:'Health points', unit:'HP',    min:1, max:10, step:1, section:'❤️ Health', tip:'Hits from spikes or enemies the character can take before losing a life' },
   { k:'lives', name:'Lives',         unit:'start', min:1, max:99, step:1, tip:'Lives at the start of a run; when the last one is lost it is game over' },
+  { k:'lifePrice', name:'🛒 Price of a life', unit:'coins', min:0, max:999, step:1, tip:'Coins a Merchant asks for an extra life (0 = free)' },
+  { k:'hpPrice',   name:'🛒 Price per health point', unit:'coins', min:0, max:999, step:1, tip:'Coins a Merchant asks to restore 1 HP (0 = free)' },
   { k:'wallJump',  type:'bool', perk:true, name:'🧗 Wall jump', tip:'Jump off walls while in the air; hold toward a wall to slide down it slowly' },
   { k:'wallSlide', perk:'wallJump', name:'Wall slide speed', unit:'tiles/s', min:0.5, max:20, step:0.5, tip:'Fall speed while holding toward a wall (when wall jump is on)' },
   { k:'glide',     type:'bool', perk:true, name:'🪂 Glide', tip:'Hold jump while falling to float down slowly' },
@@ -892,7 +973,7 @@ const CHAR_FIELDS = [
   { k:'spinJump',  type:'bool', perk:true, name:'🌀 Rotating jump', tip:'Jumps spin the character until it lands; while spinning, touching an enemy from any side hits it (−1 HP) and bounces you off' },
   { k:'spinSpeed', perk:'spinJump', name:'Spin speed', unit:'turns/s', min:0.5, max:6, step:0.5, tip:'How fast the character rotates during a rotating jump (when rotating jump is on)' },
 ];
-const CHAR_DEFAULTS = { jumpH:3.4, jumpW:4.8, speed:7.2, impact:0, projSpeed:14, projMax:3, hp:3, lives:3, wallJump:false, wallSlide:3, glide:false, glideFall:2, spinJump:false, spinSpeed:2 };
+const CHAR_DEFAULTS = { jumpH:3.4, jumpW:4.8, speed:7.2, impact:0, projSpeed:14, projMax:3, hp:3, lives:3, lifePrice:50, hpPrice:10, wallJump:false, wallSlide:3, glide:false, glideFall:2, spinJump:false, spinSpeed:2 };
 let charCfg = { ...CHAR_DEFAULTS };
 function setCharCfg(c) {
   for (const f of CHAR_FIELDS) {
@@ -916,10 +997,13 @@ const SYS_FIELDS = [
   // Coin sizes (% of their normal size): scales both the drawing and the pickup area
   { k:'bigSize',  name:'🟡 Big coin size %',  box:'sysCoinSize', min:50, max:250, step:10, tip:'Size of Big coins, in % of their normal size (also scales how easy they are to grab)' },
   { k:'megaSize', name:'🌟 Mega coin size %', box:'sysCoinSize', min:50, max:250, step:10, tip:'Size of Mega coins, in % of their normal size (also scales how easy they are to grab)' },
+  // Time
+  { k:'timeLimit', name:'⏱ Time limit (s)', box:'sysTime', min:0, max:999, step:10, tip:'Seconds to reach the goal on each life (0 = no time limit). Running out of time costs a life.' },
+  { k:'timePrice', name:'🛒 Price per second', box:'sysTime', min:0, max:100, step:0.1, tip:'Coins a Merchant asks for each second of extra time (each merchant sells time in packs of seconds)' },
   // Hazards
   { k:'poisonRate', name:'☠️ Poison: seconds per HP', box:'sysHazards', min:0.2, max:10, step:0.1, tip:'Time spent in a Poison zone for each HP lost (lower = deadlier). The first hit comes after half this time.' },
 ];
-const SYS_DEFAULTS = { flagTop:5000, flagBottom:100, flagSteps:0, coinPoints:100, coinsPerLife:100, coinVal:1, bigVal:5, megaVal:10, bigSize:100, megaSize:100, poisonRate:1 };
+const SYS_DEFAULTS = { flagTop:5000, flagBottom:100, flagSteps:0, coinPoints:100, coinsPerLife:100, coinVal:1, bigVal:5, megaVal:10, bigSize:100, megaSize:100, poisonRate:1, timeLimit:0, timePrice:1 };
 // Coin tiles -> the sysCfg field holding their value (in coins)
 const COIN_VALUE_KEY = { c:'coinVal', '$':'bigVal', '*':'megaVal' };
 function isCoin(id) { return typeof id === 'string' && id in COIN_VALUE_KEY; }
@@ -1027,6 +1111,42 @@ function springPhys(c) {
   const grav = 2 * h / (tUp * tUp);
   return { v0: 2 * h / tUp + grav / 240, grav, tAir: 2 * tUp, run };
 }
+// ---------- Text boxes & NPCs ----------
+// Text box ('#'): solid block whose text (meta) pops up in a bubble when touched or hit from below.
+// NPC ('['): talks with 1 to 5 sentences. Merchant (']'): sells power-ups, time, lives and HP for coins.
+// Prices are global: per power-up (Power-ups panel), per second (Game system › Time), per life / HP (Character).
+const SIGN_MAX = 200, NPC_LINES = 5, NPC_LINE_MAX = 120;
+const SIGN_DEFAULTS = { text:'Hello! Touch me to read me.' };
+const NPC_DEFAULTS = { name:'Villager', color:'#d9a441', lines:['Hello, traveller!', 'The goal is somewhere to the right.', '', '', ''] };
+const SHOP_DEFAULTS = { name:'Merchant', color:'#2f8f5b', greet:'Welcome! Take a look at my wares.', allPowers:true, powers:[], time:true, timeAmt:30, life:true, hp:true };
+const isHex = c => /^#[0-9a-f]{6}$/i.test(c);
+const asObj = m => m && typeof m === 'object' ? m : {};
+function normSign(m) { m = asObj(m); return { text: String(m.text ?? SIGN_DEFAULTS.text).slice(0, SIGN_MAX) }; }
+function normNpc(m) {
+  m = asObj(m);
+  const lines = Array.isArray(m.lines) ? m.lines : NPC_DEFAULTS.lines;
+  return { name: String(m.name ?? NPC_DEFAULTS.name).slice(0, 16), color: isHex(m.color) ? m.color : NPC_DEFAULTS.color,
+    lines: Array.from({ length: NPC_LINES }, (_, i) => String(lines[i] ?? '').slice(0, NPC_LINE_MAX)) };
+}
+function normShop(m) {
+  m = asObj(m);
+  const o = { ...SHOP_DEFAULTS };
+  o.name = String(m.name ?? o.name).slice(0, 16);
+  if (isHex(m.color)) o.color = m.color;
+  o.greet = String(m.greet ?? o.greet).slice(0, 80);
+  for (const k of ['allPowers', 'time', 'life', 'hp']) o[k] = !!(m[k] ?? o[k]);
+  o.powers = Array.isArray(m.powers) ? m.powers.filter(id => typeof id === 'string' && id.length === 1) : [];
+  if (Number.isFinite(+m.timeAmt) && m.timeAmt !== '') o.timeAmt = Math.max(5, Math.min(300, Math.round(+m.timeAmt)));
+  return o;
+}
+let signCfg = normSign(), npcCfg = normNpc(), shopCfg = normShop();
+function signOf(x, y) { return normSign(meta[x + ',' + y]); }
+function npcOf(x, y) { return normNpc(meta[x + ',' + y]); }
+function shopOf(x, y) { return normShop(meta[x + ',' + y]); }
+function npcSentences(c) { const l = c.lines.map(s => s.trim()).filter(Boolean); return l.length ? l : ['…']; }
+// Power-ups a merchant sells: all of them, or the ticked ones that still exist.
+function shopPowers(c) { return c.allPowers ? powerDefs : c.powers.map(powerById).filter(Boolean); }
+
 // ---------- Hazards ----------
 // Flame jet ('^'): a solid burner that shoots a vertical flame on a cycle. Each one has its own
 // settings in `meta` ("x,y" -> cfg): h = flame height (tiles), on / off = burn / pause time, delay = phase offset.
@@ -1089,6 +1209,7 @@ const POWER_FIELDS = [
   { k:'jumpH', name:'Jump height', unit:'%', min:25, max:300, step:5 },
   { k:'jumpW', name:'Jump width',  unit:'%', min:25, max:300, step:5 },
   { k:'speed', name:'Speed',       unit:'%', min:25, max:300, step:5 },
+  { k:'price', name:'🛒 Shop price', unit:'coins · 0 = free', min:0, max:999, step:1, section:'Merchants' },
 ];
 // Abilities: an on/off switch, each with its own settings.
 const POWER_ABILITIES = [
@@ -1106,7 +1227,7 @@ const POWER_ABILITIES = [
     { k:'projBounce', name:'Bounce height', unit:'tiles · 0 = fly straight', min:0, max:4, step:0.25 } ] },
   { k:'invincible', name:'⭐ Invincibility', tip:'Spikes, flames, poison, enemies and their shots can\'t hurt you, and touching an enemy defeats it. Pits and lava still cost a life', fields:[] },
 ];
-const POWER_DEFAULTS = { name:'Power-up', color:'#ff6b9a', duration:0, size:100, jumpH:100, jumpW:100, speed:100,
+const POWER_DEFAULTS = { name:'Power-up', color:'#ff6b9a', duration:0, size:100, jumpH:100, jumpW:100, speed:100, price:10,
   doubleJump:false, airJumps:1, glide:false, glideFall:2, spinJump:false, spinSpeed:2, wallJump:false, wallSlide:3, projectile:false, projMax:2, projSpeed:12, projBounce:1, invincible:false };
 const POWER_PRESETS = [   // starter set, created the first time the editor runs
   { name:'Giant',   color:'#e94560', size:160, speed:90 },
@@ -1154,7 +1275,8 @@ function describePower(d) {
   if (d.wallJump) out.push('wall jump');
   if (d.projectile) out.push(d.projBounce ? 'bouncing projectiles' : 'projectiles');
   if (d.invincible) out.push('invincible');
-  return (out.length ? out.join(' · ') : 'No effect yet') + '<br>' + (d.duration ? `Lasts ${d.duration} s` : 'Lasts until you die') + ' · picking up another power-up replaces it';
+  return (out.length ? out.join(' · ') : 'No effect yet') + '<br>' + (d.duration ? `Lasts ${d.duration} s` : 'Lasts until you die') + ' · picking up another power-up replaces it' +
+    `<br>Merchants sell it for ${d.price ? `${d.price} coin${d.price > 1 ? 's' : ''}` : 'free'}`;
 }
 
 // ---------- Enemies ----------
@@ -1235,7 +1357,7 @@ function describeEnemy(d) {
     '<br><span style="opacity:.7">Edits apply the next time the level (re)starts.</span>';
 }
 
-const SOLID = new Set(['g','b','k','!','%','&','=','+']);   // '=' = a spent Power / Coin brick (play only)
+const SOLID = new Set(['g','b','k','!','%','&','=','+','#']);   // '=' = a spent Power / Coin brick (play only), '#' = text box
 SOLID.add('^');   // flame-jet burner: stand on it while it rests
 const BREAKABLE = new Set(['k']);   // solid tiles the player smashes by hitting them from below
 const ONEWAY = new Set(['p','j','v']);
@@ -1269,7 +1391,7 @@ function liveMeta() {   // only keep settings of tiles that still use them
   const m = {};
   for (const k in meta) {
     const [x, y] = k.split(',').map(Number), c = grid[y]?.[x];
-    if (c === 'm' || c === 'j' || c === '^' || c === '+' || c === 'f' || (c === 'k' && meta[k]?.item)) m[k] = meta[k];
+    if ('mj^+f#[]'.includes(c) || (c === 'k' && meta[k]?.item)) m[k] = meta[k];
   }
   return m;
 }
@@ -1437,7 +1559,7 @@ function status(msg) { document.getElementById('status').textContent = msg; }
 function updateHelp() {
   document.getElementById('help').innerHTML = mode === 'edit'
     ? 'Left click: paint · Right click: erase · Middle click: pick · 1–0, B, F, M, X, O, Y, G: tools · R: rotate spring / bubbles · C: character · U: power-ups · E: enemies<br>Cheats — I: invincibility · T: endless time · N: no enemy AI · Arrows/WASD or wheel (Shift+wheel: vertical): scroll · Enter: play · H: help · ²: key map'
-    : '←/→ or A/D: move · Space/W/↑: jump · X/J: shoot · P: pause · R: restart run · I / T / N: cheats · Enter/Esc: back to editor · H: help · ²: key map';
+    : '←/→ or A/D: move · Space/W/↑: jump · X/J: shoot · ↓/S: talk / shop · P: pause · R: restart run · I / T / N: cheats · Enter/Esc: back to editor · H: help · ²: key map';
 }
 document.getElementById('pause').onclick = e => { togglePause(); e.currentTarget.blur(); };
 
@@ -1506,7 +1628,8 @@ function refreshCharUI() {
     `Full-speed jump: ${charCfg.jumpH.toFixed(1)} high × ${charCfg.jumpW.toFixed(1)} long, ${air.toFixed(2)} s in the air<br>` +
     (charCfg.impact > 0 ? `Standing jump: ${(charCfg.jumpH * f0).toFixed(1)} tiles high, ${(air * f0).toFixed(2)} s in the air` : 'Jump height is the same at any speed') +
     `<br>${charCfg.projMax ? `Shoot with X or J · up to ${charCfg.projMax} shot${charCfg.projMax > 1 ? 's' : ''} at once` : 'Shooting disabled'}` +
-    `<br>${charCfg.hp} HP per life (${charCfg.hp > 1 ? `${charCfg.hp} hits` : 'one hit'} to lose a life; pits always cost a life) · starts with ${charCfg.lives} li${charCfg.lives > 1 ? 'ves' : 'fe'}`;
+    `<br>${charCfg.hp} HP per life (${charCfg.hp > 1 ? `${charCfg.hp} hits` : 'one hit'} to lose a life; pits always cost a life) · starts with ${charCfg.lives} li${charCfg.lives > 1 ? 'ves' : 'fe'}` +
+    `<br>Merchants: a life costs ${charCfg.lifePrice || 'nothing'}${charCfg.lifePrice ? ' coins' : ''}, 1 HP costs ${charCfg.hpPrice || 'nothing'}${charCfg.hpPrice ? ' coins' : ''}`;
   document.getElementById('perkInfo').innerHTML =
     `${charCfg.wallJump ? `Wall jump on · slides down walls at ${charCfg.wallSlide} tiles/s` : 'Wall jump off'}` +
     `<br>${charCfg.glide ? `Glide on · hold jump while falling to drop at ${charCfg.glideFall} tiles/s` : 'Glide off'}` +
@@ -1514,6 +1637,7 @@ function refreshCharUI() {
     `<br><span style="opacity:.8">Perks are always on; power-ups can still grant them temporarily.</span>`;
   const on = CHAR_FIELDS.filter(f => f.perk === true && charCfg[f.k]).map(f => f.name.replace(/^\S+\s/, '').toLowerCase());
   document.getElementById('perkSummary').textContent = on.length ? on.join(' · ') : 'none active';
+  refreshShopUI();   // its info line shows the life / HP prices
 }
 // Moving platform panel
 const movePanel = document.getElementById('movePanel'), moveInputs = {};
@@ -1559,6 +1683,9 @@ function updateMovePanel() {
   document.getElementById('flamePanel').hidden = tool !== '^' || mode !== 'edit';
   document.getElementById('bubblePanel').hidden = tool !== '+' || mode !== 'edit';
   document.getElementById('goalPanel').hidden = tool !== 'f' || mode !== 'edit';
+  document.getElementById('signPanel').hidden = tool !== '#' || mode !== 'edit';
+  document.getElementById('npcPanel').hidden = tool !== '[' || mode !== 'edit';
+  document.getElementById('shopPanel').hidden = tool !== ']' || mode !== 'edit';
 }
 
 // Goal panel
@@ -1674,6 +1801,80 @@ function refreshFlameUI() {
   try { localStorage.setItem('platformer-maker-flame', JSON.stringify(flameCfg)); } catch {}
 }
 
+// Text box panel
+const signText = document.getElementById('signText');
+signText.oninput = () => { signCfg = normSign({ text: signText.value }); refreshSignUI(); };
+function refreshSignUI() {
+  if (document.activeElement !== signText) signText.value = signCfg.text;
+  try { localStorage.setItem('platformer-maker-sign', JSON.stringify(signCfg)); } catch {}
+}
+
+// NPC panel: name, colour and up to 5 sentences (empty ones are skipped in play)
+const npcName = document.getElementById('npcName'), npcColor = document.getElementById('npcColor'), npcLineInputs = [];
+for (let i = 0; i < NPC_LINES; i++) {
+  const inp = document.createElement('input');
+  inp.type = 'text'; inp.className = 'full'; inp.maxLength = NPC_LINE_MAX;
+  inp.placeholder = i ? `Sentence ${i + 1} (optional)` : 'Sentence 1';
+  inp.oninput = () => { npcCfg.lines[i] = inp.value; refreshNpcUI(); };
+  document.getElementById('npcLines').appendChild(inp);
+  npcLineInputs.push(inp);
+}
+npcName.oninput = () => { npcCfg.name = npcName.value.slice(0, 16); refreshNpcUI(); };
+npcColor.oninput = () => { npcCfg.color = npcColor.value; refreshNpcUI(); };
+function refreshNpcUI() {
+  if (document.activeElement !== npcName) npcName.value = npcCfg.name;
+  npcColor.value = npcCfg.color;
+  npcLineInputs.forEach((inp, i) => { if (document.activeElement !== inp) inp.value = npcCfg.lines[i]; });
+  const n = npcCfg.lines.filter(s => s.trim()).length;
+  document.getElementById('npcInfo').textContent = n
+    ? `Says ${n} sentence${n > 1 ? 's' : ''}, one per key press.`
+    : 'No sentence yet: this NPC will only say "…".';
+  try { localStorage.setItem('platformer-maker-npc', JSON.stringify(npcCfg)); } catch {}
+}
+
+// Merchant panel: what it sells (prices are set globally, see the info line)
+const shopEl = id => document.getElementById(id);
+shopEl('shopName').oninput = e => { shopCfg.name = e.target.value.slice(0, 16); refreshShopUI(); };
+shopEl('shopColor').oninput = e => { shopCfg.color = e.target.value; refreshShopUI(); };
+shopEl('shopGreet').oninput = e => { shopCfg.greet = e.target.value.slice(0, 80); refreshShopUI(); };
+for (const [id, k] of [['shopAllPw', 'allPowers'], ['shopTime', 'time'], ['shopLife', 'life'], ['shopHp', 'hp']])
+  shopEl(id).onchange = e => { shopCfg[k] = e.target.checked; refreshShopUI(); e.target.blur(); };
+const setShopTime = v => { shopCfg = normShop({ ...shopCfg, timeAmt: v }); refreshShopUI(); };
+shopEl('shopTimeRange').oninput = e => setShopTime(e.target.value);
+shopEl('shopTimeNum').onchange = e => setShopTime(e.target.value);
+function refreshShopUI() {
+  const c = shopCfg, coins = n => n ? `${n} coin${n > 1 ? 's' : ''}` : 'free';
+  if (document.activeElement !== shopEl('shopName')) shopEl('shopName').value = c.name;
+  if (document.activeElement !== shopEl('shopGreet')) shopEl('shopGreet').value = c.greet;
+  shopEl('shopColor').value = c.color;
+  shopEl('shopAllPw').checked = c.allPowers; shopEl('shopTime').checked = c.time;
+  shopEl('shopLife').checked = c.life; shopEl('shopHp').checked = c.hp;
+  shopEl('shopTimeBox').classList.toggle('off', !c.time);
+  shopEl('shopTimeRange').value = c.timeAmt;
+  if (document.activeElement !== shopEl('shopTimeNum')) shopEl('shopTimeNum').value = c.timeAmt;
+  // One checkbox per power-up when "All power-ups" is off
+  const list = shopEl('shopPwList'); list.innerHTML = '';
+  if (!c.allPowers) {
+    if (!powerDefs.length) list.innerHTML = '<div class="info">No power-ups yet (⭐ Power-ups panel).</div>';
+    for (const d of powerDefs) {
+      const lab = document.createElement('label'); lab.className = 'chk';
+      lab.innerHTML = `<input type="checkbox"> <span style="color:${d.color}">●</span> ${esc(d.name)} <small>${coins(d.price)}</small>`;
+      const chk = lab.querySelector('input');
+      chk.checked = c.powers.includes(d.id);
+      chk.onchange = () => { c.powers = chk.checked ? [...c.powers, d.id] : c.powers.filter(id => id !== d.id); refreshShopUI(); };
+      list.appendChild(lab);
+    }
+  }
+  const pws = shopPowers(c), offers = [];
+  if (pws.length) offers.push(`${pws.length} power-up${pws.length > 1 ? 's' : ''} (price set in ⭐ Power-ups)`);
+  if (c.time) offers.push(`+${c.timeAmt} s for ${coins(Math.ceil(c.timeAmt * sysCfg.timePrice))} (${sysCfg.timePrice}/s, ⚙ Game system › Time)` +
+    (sysCfg.timeLimit ? '' : ' — only offered when the level has a time limit, currently off'));
+  if (c.life) offers.push(`+1 life for ${coins(charCfg.lifePrice)} (🏃 Character)`);
+  if (c.hp) offers.push(`+1 HP for ${coins(charCfg.hpPrice)} (🏃 Character)`);
+  shopEl('shopInfo').innerHTML = offers.length ? 'Sells:<br>· ' + offers.map(esc).join('<br>· ') : 'Sells nothing yet: tick something above.';
+  try { localStorage.setItem('platformer-maker-shop', JSON.stringify(c)); } catch {}
+}
+
 function saveCharCfg() { try { localStorage.setItem('platformer-maker-char', JSON.stringify(charCfg)); } catch {} }
 // Character, Power-ups and Enemies panels share the right side: showing one hides the others.
 const RIGHT_PANELS = [['charPanel', 'charBtn'], ['powerPanel', 'powerBtn'], ['enemyPanel', 'enemyBtn']];
@@ -1717,7 +1918,7 @@ pwColor.oninput = () => editPower({ color: pwColor.value });
 function editPower(patch) {
   const i = powerDefs.findIndex(d => d.id === pwSel); if (i < 0) return;
   powerDefs[i] = normPower({ ...powerDefs[i], ...patch }, pwSel);
-  savePowerDefs(); refreshPowerUI();
+  savePowerDefs(); refreshPowerUI(); refreshShopUI();
   if ('name' in patch || 'color' in patch) buildPalette();
   if (game?.p) applyPowerEffects(game);   // live while playing
 }
@@ -1779,7 +1980,7 @@ function deletePower() {
 function savePowerDefs() { try { localStorage.setItem('platformer-maker-powerups', JSON.stringify(powerDefs)); } catch {} }
 function powerDefsChanged() {
   if (!powerById(pwSel)) pwSel = powerDefs[0]?.id ?? null;
-  savePowerDefs(); buildPalette(); refreshPowerUI();
+  savePowerDefs(); buildPalette(); refreshPowerUI(); refreshShopUI();
   if (game?.p) applyPowerEffects(game);
 }
 function togglePowerPanel(show = powerPanel.hidden) {
@@ -2082,6 +2283,12 @@ function refreshSysUI() {
   txt('sysNoteLives', (n ? `Every ${n} coin${n > 1 ? 's' : ''} = +1 life.` : 'Coins never give lives.') +
     ' Health points and starting lives are in the Character panel.');
   txt('sysNoteHazards', `Standing in a Poison zone costs 1 HP every ${c.poisonRate} s (the first hit after ${+(c.poisonRate / 2).toFixed(2)} s).`);
+  txt('sysSumTime', c.timeLimit ? `${c.timeLimit} s · ${c.timePrice}/s` : 'no limit');
+  txt('sysNoteTime', (c.timeLimit
+    ? `Each life gives ${c.timeLimit} s to reach the goal; running out costs a life. `
+    : 'No time limit (0): the timer is hidden and Merchants don\'t sell time. ') +
+    `Merchants sell extra time at ${c.timePrice} coin${c.timePrice === 1 ? '' : 's'} per second, in packs set per Merchant.`);
+  refreshShopUI();   // its info line shows the time price
 }
 
 // ---------- Cheats ----------
@@ -2161,6 +2368,9 @@ function paint() {
   else if (id === '^') meta[tx + ',' + ty] = { ...flameCfg };
   else if (id === '+') meta[tx + ',' + ty] = { ...bubbleCfg };
   else if (id === 'f') meta[tx + ',' + ty] = { ...goalCfg };
+  else if (id === '#') meta[tx + ',' + ty] = normSign(signCfg);   // norm* return fresh copies
+  else if (id === '[') meta[tx + ',' + ty] = normNpc(npcCfg);
+  else if (id === ']') meta[tx + ',' + ty] = normShop(shopCfg);
   else delete meta[tx + ',' + ty];
 }
 cv.addEventListener('contextmenu', e => e.preventDefault());
@@ -2176,6 +2386,9 @@ cv.addEventListener('mousedown', e => {
     if (c === '^') { flameCfg = flameOf(tx, ty); refreshFlameUI(); }
     if (c === '+') { bubbleCfg = bubbleOf(tx, ty); refreshBubbleUI(); }
     if (c === 'f') { goalCfg = goalOf(tx, ty); refreshGoalUI(); }
+    if (c === '#') { signCfg = signOf(tx, ty); refreshSignUI(); }
+    if (c === '[') { npcCfg = npcOf(tx, ty); refreshNpcUI(); }
+    if (c === ']') { shopCfg = shopOf(tx, ty); refreshShopUI(); }
     return;
   }
   mouse.down = e.button === 2 ? 2 : (e.button === 0 ? 1 : 0);
@@ -2219,6 +2432,9 @@ const TILE_DOCS = {
   '%': 'Solid block: hit it <b>from below</b> to get a coin. Works once, then it is spent.',
   '&': 'Solid block that only shatters when the character touches it <b>while doing a rotating jump</b> (any side). You spin straight through it.',
   k: 'Solid block that shatters when the player hits it <b>from below</b>. Can hide a coin or power-up (see below).',
+  '#': 'Solid block holding a text (up to 200 characters, set in the <i>Text box</i> panel). In play the text pops up in a bubble while you touch the block, and for 3 s after hitting it from below.',
+  '[': 'Character you can talk to: stand next to it and press <kbd>↓</kbd> / <kbd>S</kbd>. Says 1 to 5 sentences, one per key press (see <i>NPCs &amp; text boxes</i>).',
+  ']': 'Sells power-ups, extra time, lives and health points for coins: stand next to it and press <kbd>↓</kbd> / <kbd>S</kbd> (see <i>NPCs &amp; text boxes</i>).',
   P: 'Where the player appears. Only one per level: placing a new one removes the old one. Required to play.',
   f: 'Goal pole: the tile is its base, the height is set per goal. Touching the pole completes the level; the higher you touch it, the more points (⚙ Game system ▸ Score).',
   '.': 'Removes tiles (same as right-click).',
@@ -2251,6 +2467,7 @@ function buildGuide() {
     duration: 'How long it lasts. <b>0 = until you lose a life.</b>',
     size: 'Player size. Growing waits until there is enough room.',
     jumpH: "Multiplies the character's jump height.", jumpW: "Multiplies the character's jump width.", speed: "Multiplies the character's speed.",
+    price: 'Coins a <b>Merchant</b> asks for it (default 10). 0 = free.',
   }[f.k] || '']));
   gen('abilities').innerHTML = guideTable(['Ability', 'Settings', 'Description'],
     POWER_ABILITIES.map(a => [a.name, a.fields.map(f => `${f.name}: ${fmtRange(f)}`).join('<br>') || '—', a.tip]));
@@ -2347,6 +2564,7 @@ function keymapActions(m) {
   } else {
     add(['ArrowLeft', 'KeyA', 'KeyQ'], 'Move left', 'move'); add(['ArrowRight', 'KeyD'], 'Move right', 'move');
     add(['Space', 'ArrowUp', 'KeyW', 'KeyZ'], 'Jump (hold = higher, swim up)', 'move');
+    add(['ArrowDown', 'KeyS'], 'Talk / open shop (next to an NPC)', 'act');
     add(['KeyX', 'KeyJ'], 'Shoot / throw', 'act'); add('KeyP', 'Pause / resume', 'act'); add('KeyR', 'Restart the run', 'act');
     add(['Enter', 'Escape'], 'Back to the editor', 'sys');
   }
@@ -2444,24 +2662,30 @@ window.addEventListener('keydown', e => {
 }, true);
 document.getElementById('titleStart').focus();
 
+// Keys typed into a text field must not trigger shortcuts.
+function isTyping(e) { const t = e.target; return t.tagName === 'TEXTAREA' || (t.tagName === 'INPUT' && t.type !== 'checkbox'); }
 window.addEventListener('keydown', e => {
   if (guideOpen()) {   // the guide is modal: only its own keys work while it is open
     if (e.code === 'Escape' || e.code === 'KeyH' || e.code === 'F1') { toggleGuide(false); e.preventDefault(); }
     return;
   }
   if (keymapOpen()) { keymapKey(e); return; }   // the keyboard map is modal too: keys are shown, not run
-  if (e.code === 'Backquote' && !e.ctrlKey && !e.metaKey && !e.altKey && !(e.target.tagName === 'INPUT' && e.target.type !== 'checkbox')) {
+  if (e.code === 'Backquote' && !e.ctrlKey && !e.metaKey && !e.altKey && !isTyping(e)) {
     toggleKeymap(true); e.preventDefault(); return;
   }
-  if ((e.code === 'F1' || (e.code === 'KeyH' && !e.ctrlKey && !e.metaKey && !e.altKey)) && !(e.target.tagName === 'INPUT' && e.target.type !== 'checkbox')) {
+  if ((e.code === 'F1' || (e.code === 'KeyH' && !e.ctrlKey && !e.metaKey && !e.altKey)) && !isTyping(e)) {
     toggleGuide(true); e.preventDefault(); return;
   }
   if (e.code === 'Escape' && anyMenuOpen()) { setMenu(false); return; }
   if (e.code === 'Escape' && paletteEl.querySelector('.cat.open')) { closeCats(); return; }
-  if (e.target.tagName === 'INPUT' && e.target.type !== 'checkbox') { if (e.code === 'Enter') e.target.blur(); return; }
+  if (isTyping(e)) {   // Enter validates a one-line field (a text area keeps it for new lines); Esc leaves the field
+    if ((e.code === 'Enter' && e.target.tagName === 'INPUT') || e.code === 'Escape') e.target.blur();
+    return;
+  }
   const CHEAT_KEYS = { KeyI: 'invincible', KeyT: 'endlessTime', KeyN: 'noAI' };
   if (CHEAT_KEYS[e.code] && !e.ctrlKey && !e.metaKey && !e.altKey) { const id = CHEAT_KEYS[e.code]; setCheat(id, !cheats[id]); return; }
   if (!e.ctrlKey && !e.metaKey) keys[e.code] = true;   // Ctrl+Z etc. must not pan
+  if (mode === 'play' && game?.ui && e.code !== 'Enter') { e.preventDefault(); uiKey(game, e); return; }   // dialogue / shop open
   if (e.code === 'Enter' || (e.code === 'Escape' && mode === 'play')) { toggleMode(); e.preventDefault(); return; }
   if (mode === 'edit') {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { undo(); e.preventDefault(); return; }   // by character, so it works on AZERTY too
@@ -2477,6 +2701,7 @@ window.addEventListener('keydown', e => {
     if (e.code === 'KeyP' && !e.repeat) { togglePause(); return; }
     if (e.code === 'KeyR') { newRun(); return; }
     if (game.paused) return;   // no jumping or shooting while paused
+    if ((e.code === 'ArrowDown' || e.code === 'KeyS') && !e.repeat && game.near && !game.won && !game.over) { openNPC(game, game.near); return; }
     if (['Space','ArrowUp','KeyW','KeyZ'].includes(e.code)) game.jumpBuffer = 0.12;
     if ((e.code === 'KeyX' || e.code === 'KeyJ') && !e.repeat) shoot();
   }
@@ -2547,6 +2772,8 @@ function startGame() {
   Object.assign(game, {
     g, enemies, movers, spawners, goals, flagPts: 0, bubbles: [], totalCoins: coins, coins: 0, won: false, t: 0,
     p: { x: sx*T+5, y: sy*T+4, w:22, h:28, vx:0, vy:0, onGround:false, coyote:0, face:1, grav:0, ride:null, safe:{ x: sx*T+5, y: sy*T+4 }, hp: charCfg.hp, hurt: 0 },
+    // Level timer (reset on each life), NPC next to the player, open dialogue / shop, text boxes showing their text
+    timed: sysCfg.timeLimit > 0, time: sysCfg.timeLimit, near: null, ui: null, signs: new Map(),
     pops: [],
     phys: charPhys(),
     jumpBuffer: 0, jumpHeld: false, debris: [], bumps: new Map(), shaking: new Map(), falling: [], shots: [], enemyShots: [],
@@ -2565,7 +2792,8 @@ function cheatStatus() {
   return (cheats.invincible ? ' · 🛡' : '') + (cheats.endlessTime ? ' · ⏳' : '') + (cheats.noAI ? ' · 🧊' : '');
 }
 function playStatus() {
-  const G = game, s = `Score ${G.score} · Coins ${G.coins}/${G.totalCoins} · HP ${G.p.hp}/${charCfg.hp} · Lives ${G.lives}` + powerStatus(G) + cheatStatus();
+  const G = game, s = `Score ${G.score} · Coins ${G.coins}/${G.totalCoins} · HP ${G.p.hp}/${charCfg.hp} · Lives ${G.lives}` +
+    (G.timed ? ` · Time ${Math.ceil(G.time)}` : '') + powerStatus(G) + cheatStatus();
   status(G.won ? 'Level complete! ' + s : G.over ? 'Game over! ' + s : s);
 }
 
@@ -2936,6 +3164,83 @@ function updateFx(G, dt) {
   G.fx = G.fx.filter(f => f.t < 0.5);
 }
 
+// ---------- Text boxes, NPCs & merchants in play ----------
+const SIGN_SHOW = 3;   // seconds a text box's bubble stays after being hit from below
+// Text boxes touched by the player show their text (and keep it a moment after); NPCs next to the player can be talked to.
+function updateTalk(G, dt) {
+  const p = G.p;
+  for (const [k, v] of G.signs) if (v - dt <= 0) G.signs.delete(k); else G.signs.set(k, v - dt);
+  for (let ty = Math.floor((p.y - 2) / T); ty <= Math.floor((p.y + p.h + 2) / T); ty++)
+    for (let tx = Math.floor((p.x - 2) / T); tx <= Math.floor((p.x + p.w + 2) / T); tx++)
+      if (tileAt(G.g, tx, ty) === '#') { const k = tx + ',' + ty; G.signs.set(k, Math.max(G.signs.get(k) || 0, 0.5)); }
+  G.near = null;
+  for (let ty = Math.floor(p.y / T) - 1; ty <= Math.floor((p.y + p.h) / T) + 1 && !G.near; ty++)
+    for (let tx = Math.floor(p.x / T) - 1; tx <= Math.floor((p.x + p.w) / T) + 1; tx++) {
+      const c = tileAt(G.g, tx, ty);
+      if ((c === '[' || c === ']') && overlaps(p, tx*T - 6, ty*T, T + 12, T)) { G.near = { tx, ty, shop: c === ']' }; break; }
+    }
+}
+// Talking pauses the game: an NPC says its sentences one by one, a merchant opens its shop.
+function openNPC(G, n) {
+  G.jumpBuffer = 0;
+  if (n.shop) {
+    const c = shopOf(n.tx, n.ty), items = [];
+    for (const d of shopPowers(c)) items.push({ kind: 'power', id: d.id });
+    if (c.time && G.timed) items.push({ kind: 'time', amt: c.timeAmt });
+    if (c.life) items.push({ kind: 'life' });
+    if (c.hp) items.push({ kind: 'hp' });
+    items.push({ kind: 'leave' });
+    G.ui = { kind: 'shop', cfg: c, items, sel: 0, msg: c.greet, bad: false };
+  } else {
+    const c = npcOf(n.tx, n.ty);
+    G.ui = { kind: 'talk', cfg: c, lines: npcSentences(c), i: 0 };
+  }
+}
+function closeUI(G) { G.ui = null; G.jumpBuffer = 0; playStatus(); }
+function itemPrice(it) {
+  return it.kind === 'power' ? powerById(it.id)?.price ?? 0 : it.kind === 'time' ? Math.ceil(it.amt * sysCfg.timePrice)
+    : it.kind === 'life' ? charCfg.lifePrice : it.kind === 'hp' ? charCfg.hpPrice : 0;
+}
+function itemName(it) {
+  return { power: () => powerById(it.id)?.name || 'Power-up', time: () => `+${it.amt} s of time`, life: () => '+1 life', hp: () => '+1 health point', leave: () => 'Leave' }[it.kind]();
+}
+// Why an item can't be bought right now (null = it can).
+function shopBlocked(G, it) {
+  if (it.kind === 'power' && !powerById(it.id)) return 'Sold out';
+  if (it.kind === 'hp' && G.p.hp >= charCfg.hp) return 'Health already full';
+  const price = itemPrice(it);
+  if (G.coins < price) return `Not enough coins (${price} needed)`;
+  return null;
+}
+function shopBuy(G) {
+  const ui = G.ui, it = ui.items[ui.sel], p = G.p;
+  if (it.kind === 'leave') return closeUI(G);
+  const why = shopBlocked(G, it);
+  if (why) { ui.msg = why; ui.bad = true; return; }
+  G.coins -= itemPrice(it);
+  if (it.kind === 'power') givePower(G, it.id, p.x + p.w / 2, p.y);
+  else if (it.kind === 'time') G.time += it.amt;
+  else if (it.kind === 'life') G.lives++;
+  else if (it.kind === 'hp') p.hp = Math.min(charCfg.hp, p.hp + 1);
+  ui.msg = `Thank you! ${itemName(it)} is yours.`; ui.bad = false;
+  playStatus();
+}
+function uiKey(G, e) {
+  const ui = G.ui, c = e.code;
+  if (c === 'KeyP' && !e.repeat) return togglePause();
+  if (G.paused) return;
+  if (c === 'Escape') return closeUI(G);
+  if (e.repeat && ui.kind === 'talk') return;
+  if (ui.kind === 'talk') {
+    if (['Space', 'ArrowDown', 'KeyS', 'KeyX', 'KeyJ', 'ArrowUp', 'KeyW', 'KeyZ'].includes(c) && ++ui.i >= ui.lines.length) closeUI(G);
+    return;
+  }
+  const n = ui.items.length;
+  if (c === 'ArrowUp' || c === 'KeyW' || c === 'KeyZ') ui.sel = (ui.sel + n - 1) % n;
+  else if (c === 'ArrowDown' || c === 'KeyS') ui.sel = (ui.sel + 1) % n;
+  else if ((c === 'Space' || c === 'KeyX' || c === 'KeyJ') && !e.repeat) shopBuy(G);
+}
+
 // Side (1 = right, -1 = left, 0 = none) of a solid wall the body is pressed against.
 function wallSide(g, p) {
   const y0 = Math.floor((p.y + 2) / T), y1 = Math.floor((p.y + p.h - 2) / T);
@@ -2949,6 +3254,7 @@ function update(dt) {
   for (const q of G.pops) { q.t += dt; q.y -= 40 * dt; }   // floating score text
   G.pops = G.pops.filter(q => q.t < 0.9);
   if (G.won || G.over) return;
+  if (G.timed && !cheats.endlessTime && (G.time -= dt) <= 0) { G.time = 0; return loseLife(); }   // out of time: a whole life
   if (p.hurt > 0) p.hurt -= dt;
   if (p.springCD > 0) p.springCD -= dt;
   tickPower(G, dt); resizePlayer(G, dt); updateFx(G, dt);
@@ -3058,6 +3364,7 @@ function update(dt) {
     const c = tileAt(G.g, tx, ty);
     if (BREAKABLE.has(c)) breakTile(G, tx, ty);
     else if (c === '!' || c === '%') hitPrizeBrick(G, tx, ty, c);
+    else if (c === '#') { G.bumps.set(tx + ',' + ty, BUMP_TIME); G.signs.set(tx + ',' + ty, SIGN_SHOW); }   // text box: show its text for a while
   }
   for (const [k, t] of G.bumps) if (t - dt <= 0) G.bumps.delete(k); else G.bumps.set(k, t - dt);
   if (r.landed) {   // standing on a falling platform starts its countdown
@@ -3104,6 +3411,7 @@ function update(dt) {
       if (hurt(G, tx*T + 16)) return;
     }
   }
+  updateTalk(G, dt);
   // Goal poles: win, scored by how high the feet are on the pole
   for (const gl of G.goals) {
     const top = (gl.ty - gl.h + 1) * T, bottom = (gl.ty + 1) * T;
@@ -3282,6 +3590,15 @@ function drawTile(c, x, y, t) {
       ctx.fillStyle = '#5c4d40'; ctx.fillRect(x, y+T-3, T, 3); ctx.fillRect(x+T-3, y, 3, T);
       ctx.fillStyle = '#4a3e33'; for (const [a, b] of [[5,5],[24,5],[5,24],[24,24]]) ctx.fillRect(x+a, y+b, 3, 3);
       break;
+    case '#':   // Text box: parchment block with lines of writing
+      ctx.fillStyle = '#f2e3c0'; ctx.fillRect(x, y, T, T);
+      ctx.fillStyle = '#8a6b3a'; ctx.fillRect(x, y, T, 3); ctx.fillRect(x, y+T-3, T, 3); ctx.fillRect(x, y, 3, T); ctx.fillRect(x+T-3, y, 3, T);
+      ctx.fillStyle = '#6b5232';
+      ctx.fillRect(x+7, y+9, 18, 2); ctx.fillRect(x+7, y+15, 14, 2); ctx.fillRect(x+7, y+21, 16, 2);
+      ctx.fillStyle = '#3f2a56'; ctx.beginPath(); ctx.moveTo(x+21, y+18); ctx.lineTo(x+27, y+18); ctx.lineTo(x+27, y+26); ctx.fill();   // bubble tail corner
+      break;
+    case '[': drawNPC(x, y, NPC_DEFAULTS, false, 1, t); break;
+    case ']': drawNPC(x, y, SHOP_DEFAULTS, true, 1, t); break;
     case 'j': case '>': drawSpring(x, y, 0, false); break;
     case '+': drawBubbler(x, y, 0); break;
     case 'P': drawPlayer(x+5, y+4, 22, 28, 1); break;
@@ -3349,6 +3666,80 @@ function drawPlayer(x, y, w, h, face) {
   ctx.fillRect(ex, y+7, 6, 7);
   ctx.fillStyle = '#111'; ctx.fillRect(ex + (face > 0 ? 3 : 0), y+9, 3, 4);
 }
+// NPC standing on the tile at (x, y): round head, body in its colour. Merchants wear a hat and carry a coin bag.
+function drawNPC(x, y, c, shop, face, t) {
+  const b = Math.sin(t * 2.5 + x * 0.07) * 0.8;   // idle breathing
+  ctx.save(); ctx.translate(x, y);
+  ctx.fillStyle = '#3b2f4a'; ctx.fillRect(10, 26, 5, 6); ctx.fillRect(17, 26, 5, 6);   // legs
+  ctx.fillStyle = c.color; ctx.beginPath(); ctx.roundRect(8, 14 + b, 16, 14 - b, [6, 6, 2, 2]); ctx.fill();   // body
+  ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.fillRect(8, 24, 16, 3);   // belt
+  if (shop) {   // coin bag on the back
+    const bx = face > 0 ? 5 : 27;
+    ctx.fillStyle = '#b8894a'; ctx.beginPath(); ctx.arc(bx, 22 + b, 5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ffcc4d'; ctx.beginPath(); ctx.arc(bx, 22 + b, 2.2, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.fillStyle = '#f1c79b'; ctx.beginPath(); ctx.arc(16, 9 + b, 7, 0, Math.PI * 2); ctx.fill();   // head
+  const ex = face > 0 ? 1.5 : -1.5;
+  ctx.fillStyle = '#222'; ctx.fillRect(12.5 + ex, 8 + b, 2, 3); ctx.fillRect(17.5 + ex, 8 + b, 2, 3);
+  if (shop) {   // wide-brimmed hat
+    ctx.fillStyle = '#6b4423'; ctx.fillRect(5, 3 + b, 22, 3); ctx.beginPath(); ctx.roundRect(10, -3 + b, 12, 7, [4, 4, 0, 0]); ctx.fill();
+    ctx.fillStyle = c.color; ctx.fillRect(10, 1 + b, 12, 2);
+  } else {   // hair
+    ctx.fillStyle = '#5a3d23'; ctx.beginPath(); ctx.arc(16, 7 + b, 7, Math.PI * 1.05, Math.PI * 1.95); ctx.fill();
+  }
+  ctx.restore();
+}
+// Break text into lines no wider than maxW (current ctx font); keeps the author's line breaks.
+function wrapText(text, maxW) {
+  const out = [];
+  for (const para of String(text).split('\n')) {
+    let line = '';
+    for (let word of para.split(/\s+/).filter(Boolean)) {
+      while (ctx.measureText(word).width > maxW && word.length > 1) {   // a word too long for a line is cut
+        let n = word.length - 1; while (n > 1 && ctx.measureText(word.slice(0, n)).width > maxW) n--;
+        if (line) { out.push(line); line = ''; }
+        out.push(word.slice(0, n)); word = word.slice(n);
+      }
+      const test = line ? line + ' ' + word : word;
+      if (line && ctx.measureText(test).width > maxW) { out.push(line); line = word; } else line = test;
+    }
+    out.push(line);
+  }
+  return out;
+}
+// Speech bubble (world space) whose tail points down at (cx, by). o: { alpha, title, titleColor, maxW }
+function drawSpeech(cx, by, text, o = {}) {
+  ctx.save();
+  ctx.globalAlpha = o.alpha ?? 1;
+  ctx.font = '11px system-ui'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+  const lines = wrapText(text, o.maxW || 200), lh = 14, pad = 6;
+  let tw = Math.max(...lines.map(l => ctx.measureText(l).width));
+  if (o.title) { ctx.font = 'bold 11px system-ui'; tw = Math.max(tw, ctx.measureText(o.title).width); }
+  const w = Math.ceil(tw) + pad * 2, h = (lines.length + (o.title ? 1 : 0)) * lh + pad * 2 - 2;
+  const x = Math.max(cam.x + 2, Math.min(cx - w / 2, cam.x + viewW() - w - 2)), y = by - 9 - h;
+  const tx = Math.max(x + 8, Math.min(cx, x + w - 8));
+  ctx.fillStyle = 'rgba(255,255,255,.96)'; ctx.strokeStyle = '#3f2a56'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.roundRect(x, y, w, h, 6); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(tx - 5, y + h - 1); ctx.lineTo(tx, y + h + 7); ctx.lineTo(tx + 5, y + h - 1); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(tx - 5, y + h); ctx.lineTo(tx, y + h + 7); ctx.lineTo(tx + 5, y + h); ctx.stroke();
+  let ly = y + pad;
+  if (o.title) { ctx.fillStyle = o.titleColor || '#3f2a56'; ctx.font = 'bold 11px system-ui'; ctx.fillText(o.title, x + pad, ly); ly += lh; }
+  ctx.fillStyle = '#222'; ctx.font = '11px system-ui';
+  for (const l of lines) { ctx.fillText(l, x + pad, ly); ly += lh; }
+  ctx.restore();
+}
+// Editor summary of what a merchant sells.
+function shopSummary(c) {
+  const s = [], n = shopPowers(c).length;
+  if (n) s.push(`${n} power-up${n > 1 ? 's' : ''}`);
+  if (c.time) s.push(`+${c.timeAmt} s`);
+  if (c.life) s.push('lives');
+  if (c.hp) s.push('HP');
+  return s.length ? 'Sells ' + s.join(' · ') : 'Sells nothing';
+}
+// Darker shade of a #rrggbb colour (titles readable on the white bubble).
+function shade(hex, k = 0.6) { return '#' + [1, 3, 5].map(i => Math.round(parseInt(hex.slice(i, i + 2), 16) * k).toString(16).padStart(2, '0')).join(''); }
+
 // Enemy of type d in an s × s box at (x, y), drawn on a 24 × 24 grid. o: { face, dead, flash, t }.
 // Flyers (A ↔ B, Endless) have wings, still ones are square, shooters carry cannons, and
 // enemies that can't be stomped have spikes on top.
@@ -3653,6 +4044,11 @@ function render(t) {
     if (c === 'j' || c === '>') { const sc = springOf(x, y); drawSpring(x*T, y*T, sc.rot, sc.path === 'line'); continue; }
     if (c === '+') { drawBubbler(x*T, y*T, bubbleOf(x, y).rot); continue; }
     if (c === 'f') continue;   // goal poles are drawn below, with their full height
+    if (c === '[' || c === ']') {   // NPCs turn to face the player
+      const face = mode === 'play' ? Math.sign(game.p.x + game.p.w / 2 - (x*T + 16)) || 1 : 1;
+      drawNPC(x*T, y*T, c === ']' ? shopOf(x, y) : npcOf(x, y), c === ']', face, t);
+      continue;
+    }
     if (c === '^') { drawBurner(x*T, y*T, t, flameState(flameOf(x, y), mode === 'play' ? game.t : t).warn); continue; }
     const sh = mode === 'play' && c === 'v' && game.shaking.has(x + ',' + y);
     const bump = mode === 'play' ? game.bumps.get(x + ',' + y) : 0;   // Power / Coin brick hop when hit
@@ -3678,6 +4074,7 @@ function render(t) {
       if (grid[y]?.[x] === 'm') drawMoverPath(x, y, meta[k]);
       else if (grid[y]?.[x] === 'j') { if (tool === 'j') drawSpringArc(x, y, springOf(x, y)); }
       else if (grid[y]?.[x] === '+') { if (tool === '+') drawBubblePath(x, y, bubbleOf(x, y)); }
+      else if ('#[]'.includes(grid[y]?.[x] || '.')) continue;   // text bubbles are drawn last, over everything
       else { const it = hiddenItem(x, y); if (it) drawHidden(x, y, it, t); }
     }
     // enemy paths (also for enemies placed a little off screen, so paths entering the view show)
@@ -3693,6 +4090,8 @@ function render(t) {
         else if (tool === 'j') drawSpring(tx*T, ty*T, springCfg.rot, springCfg.path === 'line');
         else if (tool === '+') drawBubbler(tx*T, ty*T, bubbleCfg.rot);
         else if (tool === 'f') drawGoal(tx, ty, goalCfg.h, false);
+        else if (tool === '[') drawNPC(tx*T, ty*T, npcCfg, false, 1, t);
+        else if (tool === ']') drawNPC(tx*T, ty*T, shopCfg, true, 1, t);
         else if (tool !== '.') drawTile(tool, tx*T, ty*T, t);
         ctx.globalAlpha = 1;
         if (tool === 'm') drawMoverPath(tx, ty, moveCfg);
@@ -3706,6 +4105,16 @@ function render(t) {
         if (enemyById(tool)) drawEnemyPath(tx, ty, enemyById(tool));
         ctx.strokeStyle = tool === '.' ? '#e33' : '#fff'; ctx.strokeRect(tx*T + 1, ty*T + 1, T - 2, T - 2);
       }
+    }
+    // Text box / NPC / merchant tool selected: show what each placed one says (and the one about to be painted)
+    if ('#[]'.includes(tool)) {
+      const say = (c, x, y, cfg, alpha) => c === '#' ? drawSpeech(x*T + 16, y*T, cfg.text || '(empty)', { alpha })
+        : c === '[' ? drawSpeech(x*T + 16, y*T - 2, npcSentences(cfg)[0] + (npcSentences(cfg).length > 1 ? ' …' : ''), { alpha, title: cfg.name, titleColor: shade(cfg.color) })
+        : drawSpeech(x*T + 16, y*T - 4, (cfg.greet ? cfg.greet + '\n' : '') + shopSummary(cfg), { alpha, title: cfg.name, titleColor: shade(cfg.color) });
+      for (let y = ty0; y <= ty1; y++) for (let x = tx0; x <= tx1; x++)
+        if (grid[y][x] === tool) say(tool, x, y, tool === '#' ? signOf(x, y) : tool === '[' ? npcOf(x, y) : shopOf(x, y), 0.9);
+      const { tx, ty } = tileAtMouse();
+      if (mouse.inside && tx >= 0 && ty >= 0 && tx < W && ty < H) say(tool, tx, ty, tool === '#' ? signCfg : tool === '[' ? npcCfg : shopCfg, 0.6);
     }
   } else {
     for (const f of game.falling) drawTile('v', f.x, f.y, t);
@@ -3758,6 +4167,14 @@ function render(t) {
       ctx.fillStyle = q.color; ctx.fillText(q.text, q.x, q.y);
     }
     ctx.globalAlpha = 1;
+    for (const [k, v] of game.signs) {   // text boxes being read
+      const [x, y] = k.split(',').map(Number);
+      drawSpeech(x*T + 16, y*T, signOf(x, y).text, { alpha: Math.min(1, v / 0.3) });
+    }
+    if (game.near && !game.ui && !game.won && !game.over) {   // talk prompt above the NPC next to the player
+      const n = game.near, c = n.shop ? shopOf(n.tx, n.ty) : npcOf(n.tx, n.ty);
+      drawSpeech(n.tx*T + 16, n.ty*T - 4 + Math.sin(t * 5) * 1.5, n.shop ? '↓ Shop' : '↓ Talk', { title: c.name, titleColor: shade(c.color) });
+    }
     if (activePower(game)?.invincible && !game.over) {   // invincibility power-up: cycling rainbow aura (blinks in the last 2 s of a timed one)
       const pw = activePower(game), ending = pw.duration && game.power.t < 2 && Math.floor(t * 10) % 2;
       if (!ending) {
@@ -3770,6 +4187,7 @@ function render(t) {
       ctx.strokeRect(game.p.x - 3, game.p.y - 3, game.p.w + 6, game.p.h + 6);
     }
     drawHUD();
+    if (game.ui) drawTalkUI(game, t);
     if (game.paused) {
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(0, 0, cv.width, cv.height);
@@ -3804,8 +4222,9 @@ function drawHUD() {
   const G = game, k = Math.max(0.75, Math.min(1.5, cv.height / 576));
   ctx.setTransform(k, 0, 0, k, 0, 0);
   ctx.font = 'bold 16px system-ui'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-  const score = 'SCORE ' + G.score, coins = `${G.coins}/${G.totalCoins}`, lives = '× ' + G.lives;
-  const textW = ctx.measureText(score).width + 18 + ctx.measureText(coins).width + 32 + ctx.measureText(lives).width + 16;
+  const score = 'SCORE ' + G.score, coins = `${G.coins}/${G.totalCoins}`, lives = '× ' + G.lives, time = G.timed ? String(Math.ceil(G.time)) : '';
+  const textW = ctx.measureText(score).width + 18 + ctx.measureText(coins).width + 32 + ctx.measureText(lives).width + 16 +
+    (time ? 34 + ctx.measureText(time).width : 0);
   const w = Math.max(charCfg.hp * 22, textW) + 20;
   ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.beginPath(); ctx.roundRect(10, 10, w, 60, 8); ctx.fill();
   for (let i = 0; i < charCfg.hp; i++) drawHeart(31 + i * 22, 18, 18, i < G.p.hp);
@@ -3815,7 +4234,95 @@ function drawHUD() {
   ctx.fillStyle = '#fff'; ctx.fillText(coins, x, y); x += ctx.measureText(coins).width + 18;
   ctx.fillStyle = '#4da3ff'; ctx.fillRect(x, y - 8, 11, 15); ctx.fillStyle = '#fff'; ctx.fillRect(x + 6, y - 5, 3, 4); x += 16;
   ctx.fillStyle = '#fff'; ctx.fillText(lives, x, y);
+  if (time) {   // level timer: red and blinking in the last 10 s
+    x += ctx.measureText(lives).width + 18;
+    const low = G.time <= 10, col = low ? '#ff4d6d' : '#fff';
+    drawClock(x + 7, y, 7, col); x += 18;
+    ctx.fillStyle = col; if (!(low && Math.floor(G.time * 4) % 2)) ctx.fillText(time, x, y);
+  }
   ctx.textBaseline = 'alphabetic';
+}
+function drawClock(cx, cy, r, color) {
+  ctx.strokeStyle = color; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx, cy - r * 0.6); ctx.lineTo(cx, cy); ctx.lineTo(cx + r * 0.5, cy); ctx.stroke();
+}
+// Dialogue box (NPC) or shop window (merchant), in screen space. The game is paused while one is open.
+function drawTalkUI(G, t) {
+  const ui = G.ui, c = ui.cfg, k = Math.max(0.75, Math.min(1.5, cv.height / 576)), sw = cv.width / k, sh = cv.height / k;
+  ctx.setTransform(k, 0, 0, k, 0, 0);
+  ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  const box = (x, y, w, h) => {
+    ctx.fillStyle = 'rgba(42,27,58,.95)'; ctx.strokeStyle = '#f0963c'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.roundRect(x, y, w, h, 10); ctx.fill(); ctx.stroke();
+  };
+  const nameTag = (x, y) => {   // NPC name on a tab in its colour
+    ctx.font = 'bold 14px system-ui';
+    const w = ctx.measureText(c.name).width + 20;
+    ctx.fillStyle = c.color; ctx.beginPath(); ctx.roundRect(x, y, w, 24, 6); ctx.fill();
+    ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.55)'; ctx.strokeText(c.name, x + 10, y + 17);
+    ctx.fillStyle = '#fff'; ctx.fillText(c.name, x + 10, y + 17);
+  };
+  if (ui.kind === 'talk') {
+    const w = Math.min(640, sw - 32), x = (sw - w) / 2;
+    ctx.font = '17px system-ui';
+    const lines = wrapText(ui.lines[ui.i], w - 36), h = 58 + lines.length * 23, y = sh - h - 18;
+    box(x, y, w, h);
+    ctx.fillStyle = '#fff'; ctx.font = '17px system-ui';
+    lines.forEach((l, i) => ctx.fillText(l, x + 18, y + 34 + i * 23));
+    ctx.font = '12px system-ui'; ctx.fillStyle = 'rgba(246,240,251,.65)'; ctx.textAlign = 'right';
+    const last = ui.i === ui.lines.length - 1;
+    ctx.fillText(`${ui.i + 1}/${ui.lines.length} · Space / ↓: ${last ? 'close' : 'next'} · Esc: close`, x + w - 30, y + h - 12);
+    if (Math.floor(t * 3) % 2) {   // blinking "more" arrow
+      ctx.fillStyle = '#f0963c'; ctx.beginPath();
+      ctx.moveTo(x + w - 22, y + h - 20); ctx.lineTo(x + w - 12, y + h - 20); ctx.lineTo(x + w - 17, y + h - 13); ctx.fill();
+    }
+    ctx.textAlign = 'left';
+    nameTag(x + 14, y - 14);
+    return;
+  }
+  // Shop
+  const rowH = 30, w = Math.min(440, sw - 32), x = (sw - w) / 2;
+  ctx.font = '14px system-ui';
+  const greet = ui.msg ? wrapText(ui.msg, w - 36) : [];
+  const h = 52 + greet.length * 19 + 12 + ui.items.length * rowH + 34;
+  const y = Math.max(12, (sh - h) / 2);
+  box(x, y, w, h);
+  nameTag(x + 14, y - 12);
+  ctx.font = 'bold 14px system-ui'; ctx.fillStyle = '#ffcc4d'; ctx.textAlign = 'right';   // wallet
+  ctx.fillText(`${G.coins} coin${G.coins === 1 ? '' : 's'}`, x + w - 18, y + 30);
+  ctx.beginPath(); ctx.ellipse(x + w - 26 - ctx.measureText(`${G.coins} coin${G.coins === 1 ? '' : 's'}`).width, y + 25, 5, 7, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.textAlign = 'left'; ctx.font = '14px system-ui';
+  ctx.fillStyle = ui.bad ? '#ff8fa3' : 'rgba(246,240,251,.9)';
+  greet.forEach((l, i) => ctx.fillText(l, x + 18, y + 54 + i * 19));
+  let ry = y + 52 + greet.length * 19 + 4;
+  ui.items.forEach((it, i) => {
+    const sel = i === ui.sel, blocked = it.kind !== 'leave' && shopBlocked(G, it), price = itemPrice(it);
+    if (sel) { ctx.fillStyle = 'rgba(240,150,60,.25)'; ctx.strokeStyle = '#f0963c'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.roundRect(x + 10, ry, w - 20, rowH - 4, 6); ctx.fill(); ctx.stroke(); }
+    ctx.globalAlpha = blocked ? 0.45 : 1;
+    const ix = x + 30, iy = ry + (rowH - 4) / 2;
+    if (it.kind === 'power') {
+      const d = powerById(it.id);
+      if (d) { ctx.save(); ctx.translate(ix - 10, iy - 10); ctx.scale(20 / 32, 20 / 32); drawPowerItem(d, 0, 0, 0); ctx.restore(); }
+    } else if (it.kind === 'time') drawClock(ix, iy, 8, '#fff');
+    else if (it.kind === 'life') drawHeart(ix, iy - 8, 16, true);
+    else if (it.kind === 'hp') { drawHeart(ix, iy - 7, 14, true); ctx.fillStyle = '#fff'; ctx.font = 'bold 11px system-ui'; ctx.textAlign = 'center'; ctx.fillText('+', ix, iy + 3); ctx.textAlign = 'left'; }
+    else { ctx.fillStyle = '#fff'; ctx.font = '15px system-ui'; ctx.textAlign = 'center'; ctx.fillText('↩', ix, iy + 5); ctx.textAlign = 'left'; }
+    ctx.font = (sel ? 'bold ' : '') + '15px system-ui'; ctx.fillStyle = '#fff';
+    ctx.fillText(itemName(it), x + 50, iy + 5);
+    if (it.kind !== 'leave') {
+      ctx.textAlign = 'right'; ctx.font = 'bold 14px system-ui';
+      ctx.fillStyle = G.coins < price ? '#ff8fa3' : '#ffcc4d';
+      ctx.fillText(price ? `${price}` : 'FREE', x + w - 22, iy + 5);
+      if (price) { ctx.beginPath(); ctx.ellipse(x + w - 30 - ctx.measureText(`${price}`).width, iy, 4, 6, 0, 0, Math.PI * 2); ctx.fill(); }
+      ctx.textAlign = 'left';
+    }
+    ctx.globalAlpha = 1;
+    ry += rowH;
+  });
+  ctx.font = '12px system-ui'; ctx.fillStyle = 'rgba(246,240,251,.65)'; ctx.textAlign = 'center';
+  ctx.fillText('↑ / ↓: choose · Space: buy · Esc: leave', x + w / 2, y + h - 12);
+  ctx.textAlign = 'left';
 }
 
 // ---------- Main loop ----------
@@ -3829,8 +4336,8 @@ function frame(now) {
     if (pan || panY) { cam.x += pan * 700 * dt; cam.y += panY * 700 * dt; clampCam(); }
   } else if (guideOpen()) {
     acc = 0;   // paused while the guide is open
-  } else if (game.paused) {
-    acc = 0;
+  } else if (game.paused || game.ui) {
+    acc = 0;   // paused, or talking to an NPC / shopping
   } else {
     acc += dt;
     while (acc >= STEP && mode === 'play') { update(STEP); acc -= STEP; }
@@ -3840,6 +4347,11 @@ function frame(now) {
 }
 
 // ---------- Boot ----------
+// Text box / NPC / merchant panels first: refreshing other panels refreshes (and saves) the merchant panel too
+try { signCfg = normSign(JSON.parse(localStorage.getItem('platformer-maker-sign')) ?? undefined); } catch {}
+try { npcCfg = normNpc(JSON.parse(localStorage.getItem('platformer-maker-npc'))); } catch {}
+try { shopCfg = normShop(JSON.parse(localStorage.getItem('platformer-maker-shop')) ?? undefined); } catch {}
+refreshSignUI(); refreshNpcUI();
 try { const c = localStorage.getItem('platformer-maker-char'); if (c) setCharCfg(JSON.parse(c)); } catch {}
 refreshCharUI();
 try { const c = localStorage.getItem('platformer-maker-sys'); if (c) setSysCfg(JSON.parse(c)); } catch {}

@@ -1,6 +1,6 @@
 # Platformer Maker
 
-A tile-based 2D platformer editor that runs in a single HTML file. Build a level, set up your character, enemies and power-ups, then press **Play** to try it instantly.
+A tile-based 2D platformer editor that runs in a single HTML file. Build a level, set up your character, enemies, power-ups, NPCs and merchants, then press **Play** to try it instantly.
 
 > The same guide is available inside the editor: click **❓ Help** in the toolbar or press **H** (or **F1**).
 
@@ -18,16 +18,17 @@ A tile-based 2D platformer editor that runs in a single HTML file. Build a level
 8. [Springs](#springs)
 9. [Bubble spawners](#bubble-spawners)
 10. [Goal pole](#goal-pole)
-11. [Character settings](#character-settings)
-12. [Power-ups](#power-ups)
-13. [Enemies](#enemies-1)
-14. [Game system (score & lives)](#game-system-score--lives)
-15. [Screen & level size](#screen--level-size)
-16. [Cheats](#cheats)
-17. [Controls](#controls)
-18. [Gameplay rules](#gameplay-rules)
-19. [Saving, loading & file format](#saving-loading--file-format)
-20. [Tips](#tips)
+11. [NPCs & text boxes](#npcs--text-boxes)
+12. [Character settings](#character-settings)
+13. [Power-ups](#power-ups)
+14. [Enemies](#enemies-1)
+15. [Game system (score & lives)](#game-system-score--lives)
+16. [Screen & level size](#screen--level-size)
+17. [Cheats](#cheats)
+18. [Controls](#controls)
+19. [Gameplay rules](#gameplay-rules)
+20. [Saving, loading & file format](#saving-loading--file-format)
+21. [Tips](#tips)
 
 ---
 
@@ -49,7 +50,7 @@ A tile-based 2D platformer editor that runs in a single HTML file. Build a level
 | **Bars** | Top and bottom | Five toolbars (Play, Edit & files, Game design, Level elements, Layout & Help). Each can be docked on any edge of the screen, see [Editor layout](#editor-layout). The status text shows messages, and score/HP/lives while playing. |
 | **Canvas** | Middle | The level. A grid is shown in edit mode. |
 | **Hint bar** | Bottom-left of the canvas | Short reminder of the keys for the current mode. |
-| **Side panels** | Left / right | Character, Power-ups and Enemies editors (right); settings for the selected tool (left): Moving platform, Spring, Flame jet, Bubbles or Goal. Sections inside panels and menus can be collapsed; the editor remembers which are open. |
+| **Side panels** | Left / right | Character, Power-ups and Enemies editors (right); settings for the selected tool (left): Moving platform, Spring, Flame jet, Bubbles, Goal, Text box, NPC or Merchant. Sections inside panels and menus can be collapsed; the editor remembers which are open. |
 
 ---
 
@@ -97,7 +98,7 @@ Open the **🧩 Layout** menu to arrange the screen. The tools are split into fi
 
 ## Tile palette
 
-Select a tile with its key or from the **Level elements** bar: click a category to select its last-used tile; categories with a **▲** open a list of all their tiles. **Middle-click** a tile in the level to pick it up as the current tool (this also copies a moving platform's, spring's, flame jet's, bubble spawner's or goal's settings).
+Select a tile with its key or from the **Level elements** bar: click a category to select its last-used tile; categories with a **▲** open a list of all their tiles. **Middle-click** a tile in the level to pick it up as the current tool (this also copies a moving platform's, spring's, flame jet's, bubble spawner's, goal's, text box's, NPC's or merchant's settings).
 
 ### Terrain
 
@@ -112,6 +113,7 @@ Select a tile with its key or from the **Level elements** bar: click a category 
 | **Power brick** | `X` | Solid block: hit it **from below** to release a random power-up (from your Power-ups list) on top of it. Gives a coin if there are no power-ups. Works once, then it is spent. |
 | **Coin brick** | `O` | Solid block: hit it **from below** to get a coin. Works once, then it is spent. |
 | **Spin brick** | `Y` | Solid block that only shatters when the character touches it **while doing a rotating jump** (any side). You spin straight through it. |
+| **Text box** | | Solid block holding a text (up to 200 characters). In play the text pops up in a bubble while you touch the block, and for 3 s after hitting it from below. See [NPCs & text boxes](#npcs--text-boxes). |
 
 Spent and broken bricks come back on each new life. If there is no room above a Power brick, its power-up is given to you straight away.
 
@@ -162,6 +164,15 @@ Every power-up you create in the Power-ups panel appears here. The last entry, *
 |---|---|---|
 | **Spring** | `7` | Launches the player. Each spring has its own direction, trajectory and strength. See [Springs](#springs). |
 | **Bubbles** | `G` | Solid block that keeps releasing soap bubbles. Touching a bubble pops it and bounces the character. See [Bubble spawners](#bubble-spawners). |
+
+### NPCs
+
+| Tile | Key | Behaviour |
+|---|---|---|
+| **NPC** | | Character you can talk to: stand next to it and press `↓` / `S`. Says 1 to 5 sentences, one per key press. |
+| **Merchant** | | Sells power-ups, extra time, lives and health points for coins: stand next to it and press `↓` / `S`. |
+
+See [NPCs & text boxes](#npcs--text-boxes).
 
 ### Level
 
@@ -259,6 +270,38 @@ When the **Goal** tool is selected, the **Goal** panel opens on the left.
 
 ---
 
+## NPCs & text boxes
+
+The **Text box** is in the **Terrain** category; **NPC** and **Merchant** are in the **NPCs** category. Each one has its own settings, edited in a panel on the left when its tool is selected. As with springs, the panel's settings apply to the next ones you paint: **paint over** a placed one to apply them, **middle-click** one to copy its settings. While the tool is selected, every placed one shows its text in a bubble in the editor.
+
+### 📜 Text box
+
+- A solid block holding a text of up to 200 characters (line breaks are kept).
+- In play, the text pops up in a bubble above the block while the character touches it (standing on it, pushing against it), and for 3 s after hitting it from below.
+
+### 🧑 NPC
+
+- Settings: **name**, **colour** and **1 to 5 sentences** (empty ones are skipped).
+- In play, stand next to the NPC (a *↓ Talk* bubble appears) and press `↓` / `S`. The game pauses; each press of `Space` / `↓` shows the next sentence, `Esc` stops talking.
+- NPCs can't be hurt and don't block the way.
+
+### 🛒 Merchant
+
+Each Merchant has its own **name**, **colour**, **greeting** and **inventory**: tick what it sells.
+
+| Item | Effect | Price set in |
+|---|---|---|
+| **⭐ Power-ups** | All of them (including ones created later) or only the ticked ones. A bought power-up is given at once and replaces the current one. | ⭐ Power-ups › **🛒 Shop price** (per power-up, default 10) |
+| **⏱ Time** | Adds *Seconds per purchase* (5 – 300, default 30, per Merchant) to the level timer. Only offered when the level has a time limit. | ⚙ Game system › ⏱ Time › **Price per second** (default 1) |
+| **❤️ Extra life** | +1 life. | 🏃 Character › **Price of a life** (default 50) |
+| **💗 Health point** | Restores 1 HP (not above the maximum). | 🏃 Character › **Price per health point** (default 10) |
+
+- In play, stand next to the Merchant (a *↓ Shop* bubble appears) and press `↓` / `S`. The game pauses while the shop is open.
+- `↑` / `↓` choose, `Space` buys, `Esc` or **Leave** closes the shop. Items you can't afford show their price in red.
+- You pay with the coins collected during the current life (Big and Mega coins count for their value). Spent coins are gone; a price of 0 makes the item free.
+
+---
+
 ## Character settings
 
 Open with **🏃 Character** or `C`. Changes apply immediately, even while playing. When the panel is open, dashed **jump arcs** are drawn from the Start tile so you can check what the player can reach. The panel has two collapsible sections.
@@ -275,6 +318,8 @@ Open with **🏃 Character** or `C`. Changes apply immediately, even while playi
 | **Projectiles on screen** | 0 – 10 | 3 | Max shots at once. **0 disables shooting.** |
 | **Health points** | 1 – 10 HP | 3 | Hits the player can take before losing a life. |
 | **Lives** | 1 – 99 | 3 | Lives at the start of a run. |
+| **🛒 Price of a life** | 0 – 999 coins | 50 | Coins a Merchant asks for an extra life (0 = free). |
+| **🛒 Price per health point** | 0 – 999 coins | 10 | Coins a Merchant asks to restore 1 HP (0 = free). |
 
 ### ✨ Perks
 
@@ -321,6 +366,7 @@ Open with **⭐ Power-ups** or `U`. Power-ups are made by you and saved with the
 | **Jump height** | 25 – 300 % | Multiplies the character's jump height. |
 | **Jump width** | 25 – 300 % | Multiplies the character's jump width. |
 | **Speed** | 25 – 300 % | Multiplies the character's speed. |
+| **🛒 Shop price** | 0 – 999 coins | Coins a Merchant asks for it (default 10). 0 = free. |
 
 ### ✨ Abilities (tick to enable)
 
@@ -411,7 +457,7 @@ Enemies only fire while on screen. Their projectiles fly straight, stop at solid
 
 ## Game system (score & lives)
 
-Open the **⚙ Game system** menu. Its four sections can be collapsed.
+Open the **⚙ Game system** menu. Its five sections can be collapsed.
 
 | Section | Setting | Range | Default | Description |
 |---|---|---|---|---|
@@ -422,9 +468,13 @@ Open the **⚙ Game system** menu. Its four sections can be collapsed.
 | 🪙 Coins › Values | **Coin / Big coin / Mega coin** | 1 – 100 | 1 / 5 / 10 | How many coins each kind is worth. |
 | 🪙 Coins › Sizes | **Big coin size % / Mega coin size %** | 50 – 250 | 100 / 100 | Size of the drawing and of the pickup area. |
 | ❤️ Lives | **Coins for a life** | 0 – 999 | 100 | Collecting this many coins gives +1 life ("1UP"). 0 = never. |
+| ⏱ Time | **⏱ Time limit (s)** | 0 – 999 | 0 | Seconds to reach the goal on each life. 0 = no time limit (no timer, and Merchants don't sell time). Running out of time costs a life. |
+| ⏱ Time | **🛒 Price per second** | 0 – 100 | 1 | Coins a Merchant asks for each second of extra time (each Merchant sells time in packs of seconds). |
 | ⚠️ Hazards | **☠️ Poison: seconds per HP** | 0.2 – 10 | 1 | Time spent in a Poison zone for each HP lost (lower = deadlier). The first hit comes after half this time. |
 
-Points per enemy are set for each enemy type in the [Enemies editor](#enemies-1). Health points and starting lives are set in the [Character panel](#character-settings).
+Points per enemy are set for each enemy type in the [Enemies editor](#enemies-1). Health points, starting lives and the Merchants' life / HP prices are set in the [Character panel](#character-settings).
+
+With a time limit, the timer is shown in the HUD (red and blinking in the last 10 s). It stops while you talk to an NPC or shop, and with the ⏳ Endless time cheat.
 
 ---
 
@@ -457,7 +507,7 @@ Open the **🎮 Cheats** menu or use the keys below (they work in both modes). T
 | Cheat | Key | Effect |
 |---|---|---|
 | **🛡 Invincibility** | `I` | Spikes, flames, poison, enemies and their shots can't hurt you (touching an enemy defeats it), and falling into a pit or lava puts you back on the last solid ground you stood on. A golden outline shows it is on. The ⭐ Invincibility power-up ability does the same, except for pits and lava. |
-| **⏳ Endless time** | `T` | Timed power-ups never run out. |
+| **⏳ Endless time** | `T` | Timed power-ups never run out and the level timer stops. |
 | **🧊 No enemy AI** | `N` | Enemies stand still and don't shoot. You can still stomp them, and touching them still hurts. |
 
 ---
@@ -493,6 +543,9 @@ Open the **🎮 Cheats** menu or use the keys below (they work in both modes). T
 | Rotating jump (with the perk/ability) | Any jump spins you |
 | Swim (in water) | Press jump to swim up; jump at the surface to leap out |
 | Shoot / throw | `X` / `J` |
+| Talk / open shop | `↓` / `S` next to an NPC or Merchant |
+| Next sentence (talking) | `Space` / `↓` · `Esc` stops |
+| Shop | `↑` `↓` choose · `Space` buy · `Esc` leave |
 | Pause / resume | `P` |
 | Restart the run | `R` |
 | Cheats | `I` / `T` / `N` |
@@ -516,17 +569,19 @@ Open the **🎮 Cheats** menu or use the keys below (they work in both modes). T
 - **Level edges** act as walls on the left and right.
 - **Goal**: touching the pole completes the level and gives flag points by height (shown on the end screen). Press `R` to play again or `Enter` to edit.
 - **Game over** when the last life is lost. Press `R` to try again.
-- **HUD** (top-left): hearts for HP, then score, coins collected / total, and lives.
+- **Time limit** (if set in ⚙ Game system): running out of time costs a life; each life starts with the full time.
+- **Coins** collected during a life can be spent at Merchants; the counter restarts at 0 on each new life.
+- **HUD** (top-left): hearts for HP, then score, coins collected / total, lives and the timer (when there is a time limit).
 
 ---
 
 ## Saving, loading & file format
 
-**What the browser remembers automatically**: character settings, game-system settings, power-ups, enemies, moving-platform, spring, flame-jet, bubble and goal settings, screen size, editor layout, cheats and which panel sections are open.
+**What the browser remembers automatically**: character settings, game-system settings, power-ups, enemies, moving-platform, spring, flame-jet, bubble, goal, text-box, NPC and merchant settings, screen size, editor layout, cheats and which panel sections are open.
 
 **The level itself** is only stored when you click **Save** (browser) or **Export** (file). On start-up, the level saved in the browser is loaded.
 
-Saved and exported levels include the tiles, character settings, game-system settings, moving-platform, spring, flame-jet, bubble-spawner and goal settings, hidden items, power-ups and enemies, so a level file is self-contained. Loading or importing a level replaces your current character, game-system, power-up and enemy settings with the level's. Older levels without enemy types still load: their `e` tiles become a Walker.
+Saved and exported levels include the tiles, character settings, game-system settings, moving-platform, spring, flame-jet, bubble-spawner and goal settings, text boxes, NPCs, merchants, hidden items, power-ups and enemies, so a level file is self-contained. Loading or importing a level replaces your current character, game-system, power-up and enemy settings with the level's. Older levels without enemy types still load: their `e` tiles become a Walker.
 
 ### `level.json`
 
@@ -535,16 +590,21 @@ Saved and exported levels include the tiles, character settings, game-system set
   "w": 120,
   "h": 18,
   "rows": ["....", "..."],
-  "char": { "jumpH": 3.4, "jumpW": 4.8, "speed": 7.2, "impact": 0, "projSpeed": 14, "projMax": 3, "hp": 3, "lives": 3,
+  "char": { "jumpH": 3.4, "jumpW": 4.8, "speed": 7.2, "impact": 0, "projSpeed": 14, "projMax": 3, "hp": 3, "lives": 3, "lifePrice": 50, "hpPrice": 10,
             "wallJump": false, "wallSlide": 3, "glide": false, "glideFall": 2, "spinJump": false, "spinSpeed": 2 },
   "sys": { "coinPoints": 100, "flagTop": 5000, "flagBottom": 100, "flagSteps": 0, "coinsPerLife": 100,
-           "coinVal": 1, "bigVal": 5, "megaVal": 10, "bigSize": 100, "megaSize": 100, "poisonRate": 1 },
+           "coinVal": 1, "bigVal": 5, "megaVal": 10, "bigSize": 100, "megaSize": 100, "poisonRate": 1,
+           "timeLimit": 0, "timePrice": 1 },
   "meta": {
     "12,9": { "mode": "h", "dir": "r", "dist": 4, "speed": 2 },
     "20,15": { "h": 9, "w": 8, "rot": 0, "path": "arc", "dist": 6, "speed": 20 },
-    "30,11": { "item": "c" }
+    "30,11": { "item": "c" },
+    "8,12": { "text": "Hello! Touch me to read me." },
+    "10,15": { "name": "Villager", "color": "#d9a441", "lines": ["Hello, traveller!", "The goal is to the right.", "", "", ""] },
+    "14,15": { "name": "Merchant", "color": "#2f8f5b", "greet": "Welcome!", "allPowers": false, "powers": ["A"],
+               "time": true, "timeAmt": 30, "life": true, "hp": true }
   },
-  "powerups": [ { "id": "A", "name": "Giant", "color": "#e94560", "size": 160, "speed": 90 } ],
+  "powerups": [ { "id": "A", "name": "Giant", "color": "#e94560", "size": 160, "speed": 90, "price": 10 } ],
   "enemies": [ { "id": "e", "name": "Walker", "color": "#c94f6d", "size": 0.75, "hp": 1, "points": 200, "stompable": true, "spinImmune": false,
                  "mode": "walk", "dir": "l", "speed": 2, "dist": 4, "shoot": false, "shotDir": "face", "fireRate": 2, "shotSpeed": 6 } ]
 }
@@ -566,6 +626,8 @@ Each string in `rows` is one row of the level, top to bottom, one character per 
 | `!` | Power brick | `$` | Big coin |
 | `%` | Coin brick | `*` | Mega coin |
 | `&` | Spin brick | `+` | Bubble spawner |
+| `#` | Text box | `[` | NPC |
+| `]` | Merchant | | |
 
 Enemy `id`s are taken from `eadhilnoqrtuwxyz0123456789`. Enemy `mode` is `still`, `walk`, `path` (A ↔ B) or `line` (endless); `shotDir` is `face`, `lr`, `up`, `down` or `ud`.
 
@@ -577,6 +639,9 @@ Enemy `id`s are taken from `eadhilnoqrtuwxyz0123456789`. Enemy `mode` is `still`
 - **Flame jet** (`^`): `h` (flame height, tiles), `on` / `off` (burn / pause time, s), `delay` (s).
 - **Bubble spawner** (`+`): `rot` is 0, 1, 7 (↑ ↗ ↖) or 3, 4, 5 (↘ ↓ ↙); `every` (s), `speed` (tiles/s), `dist` (tiles).
 - **Goal** (`f`): `h` is the pole height in tiles (1 if missing).
+- **Text box** (`#`): `text` (up to 200 characters).
+- **NPC** (`[`): `name`, `color`, `lines` (5 strings; empty ones are skipped).
+- **Merchant** (`]`): `name`, `color`, `greet`; `allPowers` (sell every power-up) or `powers` (list of power-up `id`s); `time` with `timeAmt` (seconds per purchase), `life`, `hp` (true = sold). Prices are global (power-ups, Game system, Character).
 
 ---
 
@@ -588,4 +653,6 @@ Enemy `id`s are taken from `eadhilnoqrtuwxyz0123456789`. Enemy `mode` is `still`
 - Sideways or **straight** springs make fast launch sections; select the Spring tool to see every trajectory.
 - Build tall shafts and give the player **Wall jump** (perk or Climber power-up) to climb them.
 - Use **Invincibility** and **No enemy AI** to test the layout of long levels quickly, then turn them off to test difficulty.
+- Put a **Merchant** before a hard section and price **HP** so players must collect coins to afford it.
+- Use **Text boxes** for hints and **NPCs** for story; select their tool to proofread every text in the editor.
 - **Export** often: browser storage can be cleared.
