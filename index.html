@@ -73,8 +73,8 @@
   .panel .seg button:hover { background:var(--btnh); }
   .panel .seg button.on { border-color:var(--acc); }
   .panel .sub { font-size:12px; opacity:.85; margin-bottom:4px; }
-  #powerPanel { right:10px; width:320px; max-height:calc(100vh - 120px); overflow-y:auto; }
-  #powerPanel h4.sub { margin:14px 0 8px; padding-top:10px; border-top:1px solid #444a66; font-size:11px; text-transform:uppercase; letter-spacing:.06em; opacity:.7; }
+  #powerPanel, #enemyPanel { right:10px; width:320px; max-height:calc(100vh - 120px); overflow-y:auto; }
+  #powerPanel h4.sub, #enemyPanel h4.sub { margin:14px 0 8px; padding-top:10px; border-top:1px solid #444a66; font-size:11px; text-transform:uppercase; letter-spacing:.06em; opacity:.7; }
   .plist { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px; }
   .plist button { display:flex; align-items:center; gap:5px; background:var(--btn); color:var(--txt); border:2px solid transparent; border-radius:6px; padding:3px 7px 3px 4px; cursor:pointer; font:inherit; font-size:12px; }
   .plist button:hover { background:var(--btnh); }
@@ -134,6 +134,7 @@
   <span class="sep"></span>
   <button id="charBtn" title="Character settings (C)">🏃 Character</button>
   <button id="powerBtn" title="Create and edit power-ups (U)">⭐ Power-ups</button>
+  <button id="enemyBtn" title="Create and edit enemies (E)">👾 Enemies</button>
   <div class="dd">
     <button id="sysBtn" aria-haspopup="true" aria-expanded="false">⚙ Game system <span class="caret">▼</span></button>
     <div class="menu" id="sysMenu" role="menu">
@@ -217,6 +218,24 @@
     <div class="foot"><button id="pwDup">Duplicate</button><button id="pwDel">🗑 Delete</button></div>
   </div>
   <div class="info" id="pwEmpty">No power-ups yet. Click ＋ New to create one.</div>
+</div>
+
+<div id="enemyPanel" class="panel" hidden>
+  <h3>Enemies <button id="enemyClose" title="Close">✕</button></h3>
+  <div class="plist" id="enemyList"></div>
+  <div id="enemyEdit">
+    <div class="line"><input type="text" id="enName" maxlength="16" placeholder="Name"><input type="color" id="enColor" title="Colour"></div>
+    <div id="enRows"></div>
+    <label class="chk" title="Off: landing on it hurts the player instead of damaging it"><input type="checkbox" id="enStomp"> 🥾 Can be stomped (each stomp = −1 HP)</label>
+    <h4 class="sub">Movement</h4>
+    <div class="seg" id="enMode"></div>
+    <div class="sub" id="enDirLbl">Direction</div>
+    <div class="seg" id="enDir"></div>
+    <div id="enMoveRows"></div>
+    <div class="info" id="enInfo"></div>
+    <div class="foot"><button id="enDup">Duplicate</button><button id="enDel">🗑 Delete</button></div>
+  </div>
+  <div class="info" id="enEmpty">No enemies yet. Click ＋ New to create one.</div>
 </div>
 
 <!-- In-game guide: keep in sync with README.md. Setting tables marked data-gen are filled from the config arrays. -->
@@ -422,7 +441,7 @@ const MIN_W = 20, MAX_W = 1000, MIN_H = 8, MAX_H = 200;
 const CATEGORIES = [
   { id:'terrain', name:'Terrain' },
   { id:'hazard',  name:'Hazards' },
-  { id:'enemy',   name:'Enemies' },
+  { id:'enemy',   name:'Enemies' },     // items come from enemyDefs (user-made)
   { id:'item',    name:'Items' },
   { id:'power',   name:'Power-ups' },   // items come from powerDefs (user-made)
   { id:'gadget',  name:'Gadgets' },
@@ -437,7 +456,6 @@ const TOOLS = [
   { id:'v', name:'Falling',  cat:'terrain', color:'#c98f4a', key:'f' },
   { id:'m', name:'Moving',   cat:'terrain', color:'#9b7bd6', key:'m' },
   { id:'s', name:'Spikes',   cat:'hazard',  color:'#d8dde6', key:'4' },
-  { id:'e', name:'Enemy',    cat:'enemy',   color:'#c94f6d', key:'5' },
   { id:'c', name:'Coin',     cat:'item',    color:'#ffcc4d', key:'6' },
   { id:'j', name:'Spring',   cat:'gadget',  color:'#4fd18b', key:'7' },
   { id:'P', name:'Start',    cat:'level',   color:'#4da3ff', key:'8' },
@@ -470,10 +488,9 @@ function setCharCfg(c) {
 // ---------- Game system config (score & lives rules) ----------
 const SYS_FIELDS = [
   { k:'coinPoints',   name:'Points per coin',  box:'sysScore', min:0, max:10000, step:10, tip:'Score gained for each coin collected' },
-  { k:'enemyPoints',  name:'Points per enemy', box:'sysScore', min:0, max:10000, step:10, tip:'Score gained for each enemy defeated (stomp, shot or invincible)' },
   { k:'coinsPerLife', name:'Coins for a life', box:'sysLives', min:0, max:999,   step:1,  tip:'Collecting this many coins gives an extra life (0 = never)' },
 ];
-const SYS_DEFAULTS = { coinPoints:100, enemyPoints:200, coinsPerLife:100 };
+const SYS_DEFAULTS = { coinPoints:100, coinsPerLife:100 };
 let sysCfg = { ...SYS_DEFAULTS };
 function setSysCfg(c) {
   for (const f of SYS_FIELDS) {
@@ -581,16 +598,18 @@ function normPower(d, id) {
   return o;
 }
 function freePowerId(used) { return [...POWER_IDS].find(c => !used.has(c)); }
-function setPowerDefs(list) {
+// Normalise a user-made list, keeping valid unique ids from `pool` and giving the others free ones.
+function withIds(list, pool, norm) {
   list = Array.isArray(list) ? list.filter(d => d && typeof d === 'object') : [];
-  const used = new Set();
-  const keep = list.map(d => typeof d.id === 'string' && d.id.length === 1 && POWER_IDS.includes(d.id) && !used.has(d.id) && !!used.add(d.id));
-  powerDefs = [];
+  const used = new Set(), out = [];
+  const keep = list.map(d => typeof d.id === 'string' && d.id.length === 1 && pool.includes(d.id) && !used.has(d.id) && !!used.add(d.id));
   list.forEach((d, i) => {
-    const id = keep[i] ? d.id : freePowerId(used);
-    if (id) { used.add(id); powerDefs.push(normPower(d, id)); }
+    const id = keep[i] ? d.id : [...pool].find(c => !used.has(c));
+    if (id) { used.add(id); out.push(norm(d, id)); }
   });
+  return out;
 }
+function setPowerDefs(list) { powerDefs = withIds(list, POWER_IDS, normPower); }
 function powerLetter(d) { return ([...d.name.trim()][0] || '?').toUpperCase(); }
 function describePower(d) {
   const out = [], pct = (k, label) => d[k] !== 100 && out.push(`${label} ×${(d[k] / 100).toFixed(2).replace(/\.?0+$/, '')}`);
@@ -599,6 +618,69 @@ function describePower(d) {
   if (d.glide) out.push('glide');
   if (d.projectile) out.push(d.projBounce ? 'bouncing projectiles' : 'projectiles');
   return (out.length ? out.join(' · ') : 'No effect yet') + '<br>' + (d.duration ? `Lasts ${d.duration} s` : 'Lasts until you die') + ' · picking up another power-up replaces it';
+}
+
+// ---------- Enemies ----------
+// Enemy types are made in the Enemies panel and saved with the level, like power-ups. Each type
+// gets its own tile id; 'e' goes to the first one so levels made before enemy types still load.
+const ENEMY_IDS = 'eadhilnoqrtuwxyz0123456789';
+const DIRS8 = [['r','→'], ['l','←'], ['u','↑'], ['d','↓'], ['ur','↗'], ['dr','↘'], ['dl','↙'], ['ul','↖']];
+const DIR_NAMES = { r:'right', l:'left', u:'up', d:'down', ur:'up-right', dr:'down-right', dl:'down-left', ul:'up-left' };
+const ENEMY_MODES = {
+  still: { name:'■ Still',    dirLabel:'Facing',            dirs:[['l','← Left'], ['r','→ Right']] },
+  walk:  { name:'🚶 Walk',    dirLabel:'Starts walking',    dirs:[['l','← Left'], ['r','→ Right']] },
+  path:  { name:'⇄ A ↔ B',    dirLabel:'Direction (A → B)', dirs:DIRS8 },
+  line:  { name:'➜ Endless',  dirLabel:'Direction',         dirs:DIRS8 },
+};
+const ENEMY_FIELDS = [
+  { k:'size',   name:'Size',                unit:'tiles', min:0.5, max:5,     step:0.25, tip:'Width and height of the enemy' },
+  { k:'hp',     name:'Health points',       unit:'HP',    min:1,   max:20,    step:1,    tip:'Stomps or shots needed to defeat it (each one removes 1 HP)' },
+  { k:'points', name:'Score when defeated', unit:'pts',   min:0,   max:10000, step:10,   tip:'Points gained when it is defeated' },
+];
+const ENEMY_MOVE_FIELDS = [
+  { k:'speed', name:'Speed',          unit:'tiles/s', min:0.5, max:15, step:0.5, modes:['walk','path','line'], tip:'Movement speed' },
+  { k:'dist',  name:'Distance A → B', unit:'tiles',   min:1,   max:30, step:0.5, modes:['path'], tip:'Length of the trip (per axis on diagonals)' },
+];
+const ENEMY_DEFAULTS = { name:'Enemy', color:'#c94f6d', size:0.75, hp:1, points:200, stompable:true, mode:'walk', dir:'l', speed:2, dist:4 };
+const ENEMY_PRESETS = [   // starter set, created the first time the editor runs
+  { name:'Walker',  color:'#c94f6d' },
+  { name:'Brute',   color:'#8a4fc9', size:1.5, hp:3, speed:1, points:500 },
+  { name:'Sentry',  color:'#4f8ac9', mode:'still', hp:2, points:300 },
+  { name:'Spiky',   color:'#5d6b2f', stompable:false, speed:1.5, points:300 },
+  { name:'Hoverer', color:'#2fae8a', mode:'path', dir:'r', dist:4, speed:2 },
+  { name:'Swooper', color:'#e07a2f', mode:'path', dir:'dr', dist:3, speed:3 },
+  { name:'Dart',    color:'#6d6d7a', mode:'line', dir:'l', size:0.6, speed:5, points:100 },
+];
+let enemyDefs = [], enemyMap = new Map();
+function indexEnemies() { enemyMap = new Map(enemyDefs.map(d => [d.id, d])); }
+function enemyById(id) { return enemyMap.get(id); }
+function normEnemy(d, id) {
+  const o = { ...ENEMY_DEFAULTS, id };
+  o.name = String(d.name ?? o.name).slice(0, 16);
+  if (/^#[0-9a-f]{6}$/i.test(d.color)) o.color = d.color;
+  for (const f of [...ENEMY_FIELDS, ...ENEMY_MOVE_FIELDS]) {
+    const v = +d[f.k];
+    if (d[f.k] !== undefined && d[f.k] !== '' && Number.isFinite(v)) o[f.k] = Math.max(f.min, Math.min(f.max, f.step === 1 ? Math.round(v) : v));
+  }
+  o.stompable = !!(d.stompable ?? o.stompable);
+  if (ENEMY_MODES[d.mode]) o.mode = d.mode;
+  const dirs = ENEMY_MODES[o.mode].dirs;
+  o.dir = dirs.some(x => x[0] === d.dir) ? d.dir : dirs[0][0];
+  return o;
+}
+function setEnemyDefs(list) { enemyDefs = withIds(list, ENEMY_IDS, normEnemy); indexEnemies(); }
+function enemyFace(d) { return (DIR_VEC[d.dir] || [-1])[0] || -1; }
+function describeEnemy(d) {
+  const sp = `${d.speed} tiles/s`, dn = DIR_NAMES[d.dir];
+  const move = {
+    still: 'Stays where it is placed',
+    walk:  `Walks ${dn} at ${sp}, turning at walls and ledges`,
+    path:  `Flies back and forth ${d.dist} tiles ${dn} at ${sp}, through walls`,
+    line:  `Flies ${dn} at ${sp} through everything once it comes on screen, and never comes back`,
+  }[d.mode];
+  return `${move}<br>${d.size} × ${d.size} tiles · ${d.hp} HP · ${d.points} pts when defeated<br>` +
+    (d.stompable ? `Stomp it or shoot it: each hit removes 1 HP${d.hp > 1 ? ` (${d.hp} hits)` : ''}` : 'Can\'t be stomped: landing on it hurts. Shoot it instead') +
+    '<br><span style="opacity:.7">Edits apply the next time the level (re)starts.</span>';
 }
 
 const SOLID = new Set(['g','b','k']);
@@ -634,7 +716,7 @@ function liveMeta() {   // only keep settings of tiles that are still moving pla
   for (const k in meta) { const [x, y] = k.split(',').map(Number); if (grid[y]?.[x] === 'm') m[k] = meta[k]; }
   return m;
 }
-function serialize() { return JSON.stringify({ w:W, h:H, rows: grid.map(r => r.join('')), char: charCfg, sys: sysCfg, meta: liveMeta(), powerups: powerDefs }); }
+function serialize() { return JSON.stringify({ w:W, h:H, rows: grid.map(r => r.join('')), char: charCfg, sys: sysCfg, meta: liveMeta(), powerups: powerDefs, enemies: enemyDefs }); }
 function deserialize(s) {
   const d = JSON.parse(s);
   const h = Math.max(MIN_H, Math.min(MAX_H, d.h || d.rows.length));
@@ -644,6 +726,11 @@ function deserialize(s) {
   if (d.char) setCharCfg(d.char);
   if (d.sys) { setSysCfg(d.sys); saveSysCfg(); }
   if (Array.isArray(d.powerups)) { setPowerDefs(d.powerups); powerDefsChanged(); }
+  if (Array.isArray(d.enemies)) setEnemyDefs(d.enemies);
+  // Levels made before enemy types: 'e' tiles become the classic Walker (with the old points-per-enemy)
+  if (g.some(r => r.includes('e')) && !enemyById('e'))
+    enemyDefs.unshift(normEnemy({ ...ENEMY_PRESETS[0], points: d.sys?.enemyPoints }, 'e'));
+  enemyDefsChanged();
   return { g, m: d.meta && typeof d.meta === 'object' ? d.meta : {} };
 }
 // Make the global W/H match the current grid and refresh the view.
@@ -686,7 +773,11 @@ function drawIcon(canvas, id) {
   c.fillStyle = '#9fd4f5'; c.beginPath(); c.roundRect(0, 0, n, n, n / 6); c.fill();
   const k = n * 0.8 / T; c.setTransform(k, 0, 0, k, n * 0.1, n * 0.1);
   const main = ctx; ctx = c;
-  try { id === '.' ? drawEraser() : id ? drawTile(id, 0, 0, 0) : drawPowerItem({ color:'#ffcc4d', name:'+' }, 0, 0, 0); } finally { ctx = main; }
+  try {
+    const en = enemyById(id);
+    if (en) drawEnemy(en, 6, 6, 20, { face: enemyFace(en) });   // icons fit the box whatever the enemy's size
+    else id === '.' ? drawEraser() : id ? drawTile(id, 0, 0, 0) : drawPowerItem({ color:'#ffcc4d', name:'+' }, 0, 0, 0);
+  } finally { ctx = main; }
 }
 function esc(s) { return String(s).replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`); }
 function drawEraser() {
@@ -697,16 +788,22 @@ function drawEraser() {
   ctx.restore();
 }
 function closeCats(except) { paletteEl.querySelectorAll('.cat.open').forEach(c => c !== except && c.classList.remove('open')); }
+// Categories whose items are made by the user; their list ends with a shortcut to the editor panel.
+const USER_CATS = {
+  power: { list: () => powerDefs, open: () => togglePowerPanel(true), key:'U' },
+  enemy: { list: () => enemyDefs, open: () => toggleEnemyPanel(true), key:'E' },
+};
 function paletteItems(catId) {
-  return catId === 'power' ? powerDefs.map(d => ({ id:d.id, name:d.name, cat:'power' })) : TOOLS.filter(t => t.cat === catId);
+  const u = USER_CATS[catId];
+  return u ? u.list().map(d => ({ id:d.id, name:d.name, cat:catId })) : TOOLS.filter(t => t.cat === catId);
 }
-function toolCat(id) { return powerById(id) ? 'power' : TOOLS.find(t => t.id === id)?.cat; }
+function toolCat(id) { return powerById(id) ? 'power' : enemyById(id) ? 'enemy' : TOOLS.find(t => t.id === id)?.cat; }
 // (Re)build the palette; called at boot and whenever the power-up list changes.
 function buildPalette() {
   closeCats(); paletteEl.innerHTML = '';
   CATEGORIES.forEach(cat => {
-    const items = paletteItems(cat.id), isPower = cat.id === 'power';
-    if (!items.length && !isPower) return;
+    const items = paletteItems(cat.id), user = USER_CATS[cat.id];
+    if (!items.length && !user) return;
     if (!items.some(t => t.id === catLast[cat.id])) catLast[cat.id] = items[0]?.id;
     const box = document.createElement('div');
     box.className = 'cat'; box.dataset.cat = cat.id;
@@ -722,20 +819,20 @@ function buildPalette() {
       b.onclick = () => { setTool(t.id); closeCats(); b.blur(); };
       fly.appendChild(b);
     });
-    if (isPower) {   // power-ups are user-made: the list ends with a shortcut to the editor
+    if (user) {   // user-made items: the list ends with a shortcut to the editor
       const b = document.createElement('button');
-      b.innerHTML = `<span>✎ Create / edit…</span><kbd>U</kbd>`;
-      b.onclick = () => { togglePowerPanel(true); closeCats(); b.blur(); };
+      b.innerHTML = `<span>✎ Create / edit…</span><kbd>${user.key}</kbd>`;
+      b.onclick = () => { user.open(); closeCats(); b.blur(); };
       fly.appendChild(b);
     }
-    const multi = items.length > 1 || isPower;
+    const multi = items.length > 1 || !!user;
     const btn = document.createElement('button');
     btn.className = 'catbtn';
     btn.title = cat.name + ': ' + (items.length ? items.map(label).join(', ') : 'none yet — click to create one');
     btn.innerHTML = `<canvas width="64" height="64"></canvas><span>${cat.name}</span>${multi ? '<i class="more">▲</i>' : ''}`;
     drawIcon(btn.querySelector('canvas'), catLast[cat.id]);
     btn.onclick = () => {
-      if (isPower && !items.length) { togglePowerPanel(true); closeCats(); btn.blur(); return; }
+      if (user && !items.length) { user.open(); closeCats(); btn.blur(); return; }
       setTool(catLast[cat.id]);
       if (multi) { closeCats(box); box.classList.toggle('open'); } else closeCats();
       btn.blur();
@@ -751,6 +848,7 @@ function setTool(id) {
   tool = id;
   if (typeof updateMovePanel === 'function') updateMovePanel();
   if (powerById(id) && pwSel !== id) { pwSel = id; if (!powerPanel.hidden) refreshPowerUI(); }
+  if (enemyById(id) && enSel !== id) { enSel = id; if (!enemyPanel.hidden) refreshEnemyUI(); }
   markTool();
 }
 // Highlight the selected tool and show it as its category's icon.
@@ -767,7 +865,7 @@ function markTool() {
 function status(msg) { document.getElementById('status').textContent = msg; }
 function updateHelp() {
   document.getElementById('help').innerHTML = mode === 'edit'
-    ? 'Left click: paint · Right click: erase · Middle click: pick · 1–0, B, F, M: tools · C: character · U: power-ups<br>Cheats — I: invincibility · T: endless time · N: no enemy AI · Arrows/WASD or wheel (Shift+wheel: vertical): scroll · Enter: play · H: help'
+    ? 'Left click: paint · Right click: erase · Middle click: pick · 1–0, B, F, M: tools · C: character · U: power-ups · E: enemies<br>Cheats — I: invincibility · T: endless time · N: no enemy AI · Arrows/WASD or wheel (Shift+wheel: vertical): scroll · Enter: play · H: help'
     : '←/→ or A/D: move · Space/W/↑: jump · X/J: shoot · R: restart run · I / T / N: cheats · Enter/Esc: back to editor · H: help';
 }
 
@@ -845,11 +943,16 @@ function refreshMoveUI() {
 function updateMovePanel() { movePanel.hidden = tool !== 'm' || mode !== 'edit'; }
 
 function saveCharCfg() { try { localStorage.setItem('platformer-maker-char', JSON.stringify(charCfg)); } catch {} }
-function toggleCharPanel(show = charPanel.hidden) {
-  if (show) togglePowerPanel(false);   // both panels sit on the right
-  charPanel.hidden = !show;
-  document.getElementById('charBtn').classList.toggle('on', show);
+// Character, Power-ups and Enemies panels share the right side: showing one hides the others.
+const RIGHT_PANELS = [['charPanel', 'charBtn'], ['powerPanel', 'powerBtn'], ['enemyPanel', 'enemyBtn']];
+function setRightPanel(id, show) {
+  for (const [p, b] of RIGHT_PANELS) if (p === id || show) {
+    const on = show && p === id;
+    document.getElementById(p).hidden = !on;
+    document.getElementById(b).classList.toggle('on', on);
+  }
 }
+function toggleCharPanel(show = charPanel.hidden) { setRightPanel('charPanel', show); }
 
 // Power-up panel: list of power-ups + editor for the selected one.
 const powerPanel = document.getElementById('powerPanel'), pwInputs = {}, pwRows = document.getElementById('pwRows');
@@ -940,15 +1043,113 @@ function powerDefsChanged() {
   if (game?.p) applyPowerEffects(game);
 }
 function togglePowerPanel(show = powerPanel.hidden) {
-  if (show) { charPanel.hidden = true; document.getElementById('charBtn').classList.remove('on'); }
-  powerPanel.hidden = !show;
-  document.getElementById('powerBtn').classList.toggle('on', show);
+  setRightPanel('powerPanel', show);
   if (show) { if (powerById(tool)) pwSel = tool; refreshPowerUI(); }
 }
 document.getElementById('powerBtn').onclick = () => togglePowerPanel();
 document.getElementById('powerClose').onclick = () => togglePowerPanel(false);
 document.getElementById('pwDup').onclick = () => { const d = powerById(pwSel); if (d) newPower({ ...d, name: (d.name + ' 2').slice(0, 16) }); };
 document.getElementById('pwDel').onclick = deletePower;
+
+// Enemy panel: list of enemy types + editor for the selected one.
+const enemyPanel = document.getElementById('enemyPanel'), enInputs = {};
+let enSel = null;   // id of the enemy type being edited
+function addEnemyRow(parent, f) {
+  const row = document.createElement('div'); row.className = 'row'; row.title = f.tip || '';
+  row.innerHTML = `<label>${f.name} <span style="opacity:.6">(${f.unit})</span></label>
+    <input type="range" min="${f.min}" max="${f.max}" step="${f.step}"><input type="number" min="${f.min}" max="${f.max}" step="${f.step}">`;
+  const [range, num] = row.querySelectorAll('input');
+  range.oninput = e => editEnemy({ [f.k]: e.target.value });
+  num.onchange = e => { editEnemy({ [f.k]: e.target.value }); num.value = enemyById(enSel)?.[f.k] ?? ''; };
+  enInputs[f.k] = { range, num, row };
+  parent.appendChild(row);
+}
+ENEMY_FIELDS.forEach(f => addEnemyRow(document.getElementById('enRows'), f));
+ENEMY_MOVE_FIELDS.forEach(f => addEnemyRow(document.getElementById('enMoveRows'), f));
+for (const [k, m] of Object.entries(ENEMY_MODES)) {
+  const b = document.createElement('button'); b.dataset.mode = k; b.textContent = m.name;
+  b.onclick = () => { editEnemy({ mode: k }); b.blur(); };
+  document.getElementById('enMode').appendChild(b);
+}
+const enName = document.getElementById('enName'), enColor = document.getElementById('enColor'), enStomp = document.getElementById('enStomp');
+enName.oninput = () => editEnemy({ name: enName.value });
+enColor.oninput = () => editEnemy({ color: enColor.value });
+enStomp.onchange = () => { editEnemy({ stompable: enStomp.checked }); enStomp.blur(); };
+function editEnemy(patch) {
+  const i = enemyDefs.findIndex(d => d.id === enSel); if (i < 0) return;
+  enemyDefs[i] = normEnemy({ ...enemyDefs[i], ...patch }, enSel);
+  indexEnemies(); saveEnemyDefs(); refreshEnemyUI();
+  if (['name', 'color', 'mode', 'dir'].some(k => k in patch)) buildPalette();   // the icon changed
+}
+function refreshEnemyUI() {
+  const list = document.getElementById('enemyList'); list.innerHTML = '';
+  for (const d of enemyDefs) {
+    const b = document.createElement('button'); b.classList.toggle('on', d.id === enSel);
+    b.title = 'Edit and select for painting';
+    b.innerHTML = `<canvas width="40" height="40"></canvas><span>${esc(d.name || '(unnamed)')}</span>`;
+    drawIcon(b.querySelector('canvas'), d.id);
+    b.onclick = () => { setTool(d.id); enSel = d.id; refreshEnemyUI(); b.blur(); };
+    list.appendChild(b);
+  }
+  if (enemyDefs.length < ENEMY_IDS.length) {
+    const b = document.createElement('button'); b.textContent = '＋ New'; b.title = 'Create a new enemy type';
+    b.onclick = () => { newEnemy(); b.blur(); };
+    list.appendChild(b);
+  }
+  const d = enemyById(enSel);
+  document.getElementById('enemyEdit').hidden = !d;
+  document.getElementById('enEmpty').hidden = !!d || enemyDefs.length > 0;
+  if (!d) return;
+  if (document.activeElement !== enName) enName.value = d.name;
+  enColor.value = d.color; enStomp.checked = d.stompable;
+  for (const f of [...ENEMY_FIELDS, ...ENEMY_MOVE_FIELDS]) {
+    const { range, num, row } = enInputs[f.k];
+    range.value = d[f.k];
+    if (document.activeElement !== num) num.value = d[f.k];
+    row.hidden = !!f.modes && !f.modes.includes(d.mode);
+  }
+  document.querySelectorAll('#enMode button').forEach(b => b.classList.toggle('on', b.dataset.mode === d.mode));
+  const m = ENEMY_MODES[d.mode], dirEl = document.getElementById('enDir'); dirEl.innerHTML = '';
+  document.getElementById('enDirLbl').textContent = m.dirLabel;
+  for (const [k, label] of m.dirs) {
+    const b = document.createElement('button'); b.textContent = label; b.title = DIR_NAMES[k];
+    b.classList.toggle('on', k === d.dir);
+    b.onclick = () => { editEnemy({ dir: k }); b.blur(); };
+    dirEl.appendChild(b);
+  }
+  document.getElementById('enInfo').innerHTML = describeEnemy(d);
+}
+function newEnemy(base = {}) {
+  const id = [...ENEMY_IDS].find(c => !enemyById(c));
+  if (!id) return status('Maximum number of enemy types reached');
+  enemyDefs.push(normEnemy({ name: 'Enemy ' + (enemyDefs.length + 1), color: '#' + Math.floor(0x404040 + Math.random() * 0x9f9f9f).toString(16).padStart(6, '0'), ...base }, id));
+  enSel = id; enemyDefsChanged(); setTool(id);
+  status(`Created ${enemyById(id).name} — paint it into the level`);
+}
+function deleteEnemy() {
+  const d = enemyById(enSel); if (!d) return;
+  let n = 0; for (const row of grid) for (const c of row) if (c === d.id) n++;
+  if (!confirm(n ? `Delete "${d.name}" and the ${n} placed in the level?` : `Delete "${d.name}"?`)) return;
+  if (n) { pushUndo(); for (const row of grid) for (let x = 0; x < row.length; x++) if (row[x] === d.id) row[x] = '.'; }
+  const i = enemyDefs.indexOf(d); enemyDefs.splice(i, 1);
+  enSel = enemyDefs[Math.min(i, enemyDefs.length - 1)]?.id ?? null;
+  enemyDefsChanged(); status(`Deleted ${d.name}`);
+}
+function saveEnemyDefs() { try { localStorage.setItem('platformer-maker-enemies', JSON.stringify(enemyDefs)); } catch {} }
+function enemyDefsChanged() {
+  indexEnemies();
+  if (!enemyById(enSel)) enSel = enemyDefs[0]?.id ?? null;
+  saveEnemyDefs(); buildPalette(); refreshEnemyUI();
+}
+function toggleEnemyPanel(show = enemyPanel.hidden) {
+  setRightPanel('enemyPanel', show);
+  if (show) { if (enemyById(tool)) enSel = tool; refreshEnemyUI(); }
+}
+document.getElementById('enemyBtn').onclick = () => toggleEnemyPanel();
+document.getElementById('enemyClose').onclick = () => toggleEnemyPanel(false);
+document.getElementById('enDup').onclick = () => { const d = enemyById(enSel); if (d) newEnemy({ ...d, name: (d.name + ' 2').slice(0, 16) }); };
+document.getElementById('enDel').onclick = deleteEnemy;
+
 document.getElementById('charBtn').onclick = () => toggleCharPanel();
 document.getElementById('charClose').onclick = () => toggleCharPanel(false);
 document.getElementById('charReset').onclick = () => { setCharCfg(CHAR_DEFAULTS); saveCharCfg(); status('Character reset'); };
@@ -1052,9 +1253,9 @@ function refreshSysUI() {
   for (const f of SYS_FIELDS) if (document.activeElement !== sysInputs[f.k]) sysInputs[f.k].value = sysCfg[f.k];
   const n = sysCfg.coinsPerLife;
   document.getElementById('sysNote').textContent =
-    `1 coin = ${sysCfg.coinPoints} pts · 1 enemy = ${sysCfg.enemyPoints} pts · ` +
+    `1 coin = ${sysCfg.coinPoints} pts · ` +
     (n ? `every ${n} coin${n > 1 ? 's' : ''} = +1 life` : 'coins never give lives') +
-    '. Health points and starting lives are set in the Character panel.';
+    '. Points per enemy are set for each enemy type (👾 Enemies). Health points and starting lives are in the Character panel.';
 }
 
 // ---------- Cheats ----------
@@ -1245,6 +1446,8 @@ window.addEventListener('keydown', e => {
     if ((e.ctrlKey || e.metaKey) && e.code === 'KeyZ') { undo(); e.preventDefault(); return; }
     if (e.code === 'KeyC' && !e.ctrlKey && !e.metaKey) { toggleCharPanel(); return; }
     if (e.code === 'KeyU' && !e.ctrlKey && !e.metaKey) { togglePowerPanel(); return; }
+    if (e.code === 'KeyE' && !e.ctrlKey && !e.metaKey) { toggleEnemyPanel(); return; }
+    if (e.key === '5') { const id = catLast.enemy || enemyDefs[0]?.id; if (id) setTool(id); else toggleEnemyPanel(true); return; }
     const t = TOOLS.find(t => t.key === e.key); if (t) setTool(t.id);
   } else {
     if (['Space','ArrowUp','KeyW','KeyZ'].includes(e.code)) { game.jumpBuffer = 0.12; e.preventDefault(); }
