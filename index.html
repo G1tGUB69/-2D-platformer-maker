@@ -156,6 +156,20 @@
   .panel .ability .row { margin-bottom:6px; }
   .panel .ability.off .row { display:none; }
   .panel [hidden] { display:none !important; }
+  /* Screen menu: device / orientation switches */
+  .menu .seg2 { display:flex; gap:4px; margin:0 0 4px; }
+  #bar .menu .seg2 button, .menu .seg2 button { flex:1; justify-content:center; }
+  .menu .opts .wide { grid-column:1 / -1; }
+  /* Touch controls (Mobile & Tablet version, play mode) */
+  #touch { position:absolute; pointer-events:none; z-index:4; display:none; }
+  #touch.on { display:block; }
+  #touch .tpad { position:absolute; bottom:4%; display:flex; gap:10px; align-items:flex-end; }
+  #touch .tpad.l { left:4%; } #touch .tpad.r { right:4%; }
+  #touch button { pointer-events:auto; touch-action:none; user-select:none; -webkit-user-select:none; width:clamp(48px, 13vmin, 84px); height:clamp(48px, 13vmin, 84px); border-radius:50%;
+    border:3px solid #fff8; background:#3f2a56aa; color:#fff; font:800 clamp(16px, 4.5vmin, 28px) system-ui, sans-serif; display:flex; align-items:center; justify-content:center; padding:0; }
+  #touch button.down { background:#f0963ccc; border-color:#fff; transform:scale(.94); }
+  #touch button.jump { background:#179fdbaa; width:clamp(58px, 16vmin, 100px); height:clamp(58px, 16vmin, 100px); }
+  #touch button.small { width:clamp(40px, 10vmin, 64px); height:clamp(40px, 10vmin, 64px); font-size:clamp(13px, 3.4vmin, 20px); }
   #help { position:absolute; left:10px; bottom:10px; background:#0009; padding:8px 10px; border-radius:6px; font-size:12px; line-height:1.5; pointer-events:none; }
   /* In-game guide (same content as README.md) */
   /* Title screen shown at launch */
@@ -309,10 +323,20 @@
     <div class="dd">
       <button id="screenBtn" aria-haspopup="true" aria-expanded="false">🖥 <span id="screenLbl">Screen</span> <span class="caret">▼</span></button>
       <div class="menu" id="screenMenu" role="menu">
-        <h4>Screen size</h4>
-        <div class="opts" id="screenOpts">
-          <button data-size="fit" style="grid-column:1/-1">Fit window <small>auto</small></button>
+        <h4>Version</h4>
+        <div class="seg2" id="devSeg">
+          <button data-dev="pc">🖥 PC</button>
+          <button data-dev="mobile">📱 Mobile &amp; Tablet</button>
         </div>
+        <div id="orientBox">
+          <h4>Orientation</h4>
+          <div class="seg2" id="orientSeg">
+            <button data-orient="portrait">▯ Portrait</button>
+            <button data-orient="landscape">▭ Landscape</button>
+          </div>
+        </div>
+        <h4>Screen size</h4>
+        <div class="opts" id="screenOpts"></div>
         <hr>
         <h4>Level size (tiles)</h4>
         <div class="row" title="Adds/removes columns on the right">
@@ -364,6 +388,10 @@
 </div>
 <div id="wrap">
   <canvas id="c"></canvas>
+  <div id="touch" aria-hidden="true">
+    <div class="tpad l"><button data-key="ArrowLeft">◀</button><button data-key="ArrowRight">▶</button></div>
+    <div class="tpad r"><button class="small" data-key="ArrowDown" title="Talk / shop">▼</button><button data-key="KeyX" title="Shoot">B</button><button class="jump" data-key="Space" title="Jump">A</button></div>
+  </div>
   <div id="help"></div>
 </div>
 <div class="dock" id="dockBottom">
@@ -575,7 +603,7 @@
             <tr><td>⭐ Power-ups</td><td>Game design</td><td><kbd>U</kbd></td><td>Create and edit power-ups.</td></tr>
             <tr><td>👾 Enemies</td><td>Game design</td><td><kbd>E</kbd></td><td>Create and edit enemy types.</td></tr>
             <tr><td>⚙ Game system</td><td>Game design</td><td></td><td>Score, coins, lives and hazard settings.</td></tr>
-            <tr><td>🖥 Screen</td><td>Game design</td><td></td><td>Screen resolution and level size.</td></tr>
+            <tr><td>🖥 Screen</td><td>Game design</td><td></td><td>PC or Mobile &amp; Tablet version, screen size and level size.</td></tr>
             <tr><td>🎮 Cheats</td><td>Game design</td><td><kbd>I</kbd> <kbd>T</kbd> <kbd>N</kbd></td><td>Invincibility, endless time, no enemy AI.</td></tr>
             <tr><td>🧩 Layout</td><td>Layout &amp; Help</td><td></td><td>Dock each bar on any edge of the screen.</td></tr>
             <tr><td>⌨ Keys</td><td>Layout &amp; Help</td><td><kbd>²</kbd></td><td>Keyboard map: every key and what it does (see <i>Controls</i>).</td></tr>
@@ -807,11 +835,16 @@
         <section data-title="Screen & level size">
           <h3>Screen &amp; level size</h3>
           <p>Open the <b>🖥 Screen</b> menu.</p>
+          <h4>Version</h4>
+          <ul>
+            <li><b>🖥 PC</b> (default): monitor resolutions (16:9, 4:3, 1:1, 21:9).</li>
+            <li><b>📱 Mobile &amp; Tablet</b>: phone and tablet sizes (Small phone 360×640 up to Tablet XL 1024×1366), in <b>▯ Portrait</b> or <b>▭ Landscape</b>. Switching to this version selects <i>Phone</i>. In play mode, on-screen touch buttons appear: ◀ ▶ move, <b>A</b> jump, <b>B</b> shoot, ▼ talk / shop. They also appear on any touch screen.</li>
+          </ul>
           <h4>Screen size</h4>
           <ul>
-            <li><b>Fit window</b> (default) fills the available space.</li>
-            <li>Fixed resolutions (16:9, 4:3, 1:1, 21:9) are letterboxed and scaled down if the window is too small.</li>
-            <li>At most 18 rows are visible at once; taller levels scroll vertically.</li>
+            <li><b>Fit window</b> fills the available space.</li>
+            <li>Fixed sizes are letterboxed and scaled down if the window is too small.</li>
+            <li>At most 18 rows are visible at once, and at least 12 columns; the view scrolls to follow the player.</li>
           </ul>
           <h4>Level size (tiles)</h4>
           <table>
@@ -871,6 +904,8 @@
             <tr><td>Keyboard map (pauses)</td><td><kbd>²</kbd></td></tr>
             <tr><td>Back to editor</td><td><kbd>Enter</kbd> / <kbd>Esc</kbd></td></tr>
           </table>
+          <h4>Touch controls</h4>
+          <p>In play mode, round buttons appear over the game for the <b>📱 Mobile &amp; Tablet</b> version and on any touch screen: <b>◀ ▶</b> move, <b>A</b> jump (hold for higher), <b>B</b> shoot, <b>▼</b> talk / shop. Dash, pause and the other shortcuts have no touch button.</p>
         </section>
 
         <section data-title="Gameplay rules">
@@ -897,7 +932,7 @@
         <section data-title="Saving & files">
           <h3>Saving, loading &amp; files</h3>
           <ul>
-            <li>The browser remembers automatically: character, game-system, power-up, enemy, moving-platform, spring, flame-jet, bubble, goal, text-box, NPC and merchant settings, screen size, editor layout, cheats and which panel sections are open.</li>
+            <li>The browser remembers automatically: character, game-system, power-up, enemy, moving-platform, spring, flame-jet, bubble, goal, text-box, NPC and merchant settings, screen version, orientation and size, editor layout, cheats and which panel sections are open.</li>
             <li>The <b>level itself</b> is only stored when you click <b>Save</b> (browser) or <b>Export</b> (file). The level saved in the browser loads on start-up.</li>
             <li>Saved and exported levels include tiles, character, game system, moving platforms, springs, flame jets, bubble spawners, goals, text boxes, NPCs, merchants, hidden items, power-ups and enemies, so a level file is self-contained. Loading or importing a level replaces your current settings with the level's. Older levels without enemy types still load: their enemies become a Walker.</li>
             <li><b>Export</b> often: browser storage can be cleared.</li>
@@ -913,6 +948,7 @@
 // ---------- Config ----------
 const T = 32;            // tile size in world pixels
 let W = 120, H = 18;     // level size in tiles (editable from the toolbar)
+const MIN_COLS = 12;      // min columns visible on narrow (portrait) screens
 const VIEW_ROWS = 18;     // max rows visible on screen; taller levels scroll vertically
 const MIN_W = 20, MAX_W = 1000, MIN_H = 8, MAX_H = 200;
 // Categories of game elements, in toolbar order.
@@ -2155,32 +2191,98 @@ function undo() { if (mode === 'edit' && undoStack.length) { ({ g: grid, m: meta
 
 // Screen size: 'fit' fills the available area; 'WxH' renders at that resolution,
 // shown letterboxed and scaled down if it doesn't fit the window.
-const SCREEN_SIZES = [
-  ['640x360', '16:9'], ['960x540', '16:9'], ['1280x720', '16:9'], ['1920x1080', '16:9'],
-  ['640x480', '4:3'],  ['800x600', '4:3'],  ['1024x768', '4:3'],
-  ['576x576', '1:1'],  ['1280x540', '21:9'],
-];
+// Two versions: PC (landscape monitor resolutions) and Mobile & Tablet (device sizes, portrait or
+// landscape). Mobile sizes are stored portrait (w < h) and swapped for landscape.
+const SCREEN_SIZES = {
+  pc: [
+    ['640x360', '16:9'], ['960x540', '16:9'], ['1280x720', '16:9'], ['1920x1080', '16:9'],
+    ['640x480', '4:3'],  ['800x600', '4:3'],  ['1024x768', '4:3'],
+    ['576x576', '1:1'],  ['1280x540', '21:9'],
+  ],
+  mobile: [
+    ['360x640', 'Small phone'], ['390x844', 'Phone'], ['430x932', 'Large phone'],
+    ['768x1024', 'Tablet'], ['820x1180', 'Large tablet'], ['1024x1366', 'Tablet XL'],
+  ],
+};
 const screenBtn = document.getElementById('screenBtn'), screenMenu = document.getElementById('screenMenu');
 const screenOpts = document.getElementById('screenOpts');
-SCREEN_SIZES.forEach(([v, ar]) => {
-  const b = document.createElement('button');
-  b.dataset.size = v;
-  b.innerHTML = `${v.replace('x', ' × ')} <small>${ar}</small>`;
-  screenOpts.appendChild(b);
-});
-let screenSize = 'fit';
-try { const s = localStorage.getItem('platformer-maker-screen'); if (s && screenOpts.querySelector(`[data-size="${s}"]`)) screenSize = s; } catch {}
+// screenCfg.size: 'fit' or a preset key from SCREEN_SIZES[device]; screenSize: the effective 'fit' / 'WxH'.
+let screenCfg = { device:'pc', orient:'landscape', size:'fit' }, screenSize = 'fit';
+try {
+  const c = JSON.parse(localStorage.getItem('platformer-maker-screen-cfg'));
+  if (c && SCREEN_SIZES[c.device]) screenCfg = { ...screenCfg, ...c };
+  else { const old = localStorage.getItem('platformer-maker-screen'); if (old) screenCfg.size = old; }   // older single-value setting
+} catch {}
+const orientSize = v => {
+  if (v === 'fit' || screenCfg.device !== 'mobile') return v;
+  const [w, h] = v.split('x').map(Number);
+  return screenCfg.orient === 'landscape' ? `${Math.max(w, h)}x${Math.min(w, h)}` : `${Math.min(w, h)}x${Math.max(w, h)}`;
+};
+function buildScreenOpts() {
+  const list = SCREEN_SIZES[screenCfg.device];
+  if (screenCfg.size !== 'fit' && !list.some(([v]) => v === screenCfg.size)) screenCfg.size = 'fit';
+  screenOpts.innerHTML = `<button data-size="fit" class="wide">Fit window <small>auto</small></button>` +
+    list.map(([v, lab]) => `<button data-size="${v}">${orientSize(v).replace('x', ' × ')} <small>${lab}</small></button>`).join('');
+}
+function screenLabel() {
+  const dev = screenCfg.device === 'mobile' ? (screenCfg.orient === 'portrait' ? '📱▯' : '📱▭') : '🖥';
+  return `${dev} ${screenSize === 'fit' ? 'Fit' : screenSize.replace('x', '×')}`;
+}
+function applyScreen(msg) {
+  screenSize = orientSize(screenCfg.size);
+  try { localStorage.setItem('platformer-maker-screen-cfg', JSON.stringify(screenCfg)); } catch {}
+  updateScreenUI(); resize();
+  if (msg) status('Screen: ' + screenLabel());
+}
 function updateScreenUI() {
-  screenOpts.querySelectorAll('[data-size]').forEach(b => b.classList.toggle('on', b.dataset.size === screenSize));
-  document.getElementById('screenLbl').textContent = screenSize === 'fit' ? 'Screen' : screenSize.replace('x', '×');
+  screenOpts.querySelectorAll('[data-size]').forEach(b => b.classList.toggle('on', b.dataset.size === screenCfg.size));
+  document.querySelectorAll('#devSeg [data-dev]').forEach(b => b.classList.toggle('on', b.dataset.dev === screenCfg.device));
+  document.querySelectorAll('#orientSeg [data-orient]').forEach(b => b.classList.toggle('on', b.dataset.orient === screenCfg.orient));
+  document.getElementById('orientBox').hidden = screenCfg.device !== 'mobile';
+  document.getElementById('screenLbl').textContent = screenLabel();
+  updateTouch();
 }
 screenOpts.addEventListener('click', e => {
   const b = e.target.closest('[data-size]'); if (!b) return;
-  screenSize = b.dataset.size;
-  try { localStorage.setItem('platformer-maker-screen', screenSize); } catch {}
-  updateScreenUI(); resize(); b.blur();
-  status('Screen: ' + (screenSize === 'fit' ? 'fit window' : screenSize.replace('x', ' × ')));
+  screenCfg.size = b.dataset.size; b.blur(); applyScreen(true);
 });
+document.getElementById('devSeg').addEventListener('click', e => {
+  const b = e.target.closest('[data-dev]'); if (!b || b.dataset.dev === screenCfg.device) return;
+  screenCfg.device = b.dataset.dev;
+  screenCfg.size = b.dataset.dev === 'mobile' ? '390x844' : 'fit';   // sensible default per version
+  if (b.dataset.dev === 'mobile' && !screenCfg.orient) screenCfg.orient = 'landscape';
+  b.blur(); buildScreenOpts(); applyScreen(true);
+});
+document.getElementById('orientSeg').addEventListener('click', e => {
+  const b = e.target.closest('[data-orient]'); if (!b) return;
+  screenCfg.orient = b.dataset.orient; b.blur(); buildScreenOpts(); applyScreen(true);
+});
+
+// On-screen touch controls: shown over the game in play mode for the Mobile & Tablet version
+// (and on any touch screen). Each button sends the matching key, so all game logic stays keyboard-based.
+var touchEl = document.getElementById('touch');   // var: resize() may run before this line
+var isTouchDevice = matchMedia('(pointer: coarse)').matches;
+function sendKey(type, code) { window.dispatchEvent(new KeyboardEvent(type, { code, key:'', bubbles:true })); }
+touchEl.querySelectorAll('button[data-key]').forEach(b => {
+  const code = b.dataset.key;
+  const press = e => { e.preventDefault(); if (b.classList.contains('down')) return; b.classList.add('down'); try { b.setPointerCapture(e.pointerId); } catch {} sendKey('keydown', code); };
+  const release = e => { e.preventDefault(); if (!b.classList.contains('down')) return; b.classList.remove('down'); sendKey('keyup', code); };
+  b.addEventListener('pointerdown', press);
+  b.addEventListener('pointerup', release);
+  b.addEventListener('pointercancel', release);
+  b.addEventListener('lostpointercapture', release);
+  b.addEventListener('contextmenu', e => e.preventDefault());
+});
+function updateTouch() {
+  if (!touchEl) return;
+  const on = mode === 'play' && (screenCfg.device === 'mobile' || isTouchDevice);
+  if (!on) touchEl.querySelectorAll('button.down').forEach(b => { b.classList.remove('down'); sendKey('keyup', b.dataset.key); });
+  touchEl.classList.toggle('on', on);
+  // cover exactly the canvas (it is centred / letterboxed inside #wrap)
+  Object.assign(touchEl.style, { left: cv.offsetLeft + 'px', top: cv.offsetTop + 'px', width: cv.offsetWidth + 'px', height: cv.offsetHeight + 'px' });
+}
+buildScreenOpts();
+screenSize = orientSize(screenCfg.size);
 // ---------- Editor layout ----------
 // Each toolbar group is a bar that can be docked on any screen edge. Saved per browser.
 const LAYOUT_GROUPS = [   // also the order of bars inside a dock
@@ -2338,8 +2440,11 @@ function resize() {
     cv.width = sw; cv.height = sh;
     cv.style.width = Math.floor(sw * k) + 'px'; cv.style.height = Math.floor(sh * k) + 'px';
   }
-  scale = cv.height / (Math.min(H, VIEW_ROWS) * T);
+  // Fit up to VIEW_ROWS rows in the height, but always show at least MIN_COLS columns
+  // (portrait phones would otherwise be only a few tiles wide; the view then scrolls vertically).
+  scale = Math.min(cv.height / (Math.min(H, VIEW_ROWS) * T), cv.width / (MIN_COLS * T));
   clampCam();
+  if (typeof updateTouch === 'function') updateTouch();
 }
 window.addEventListener('resize', resize);
 ['lvlw','lvlh'].forEach(id => document.getElementById(id).addEventListener('change', () => {
@@ -2752,7 +2857,7 @@ function toggleMode() {
   b.textContent = mode === 'edit' ? '▶ Play' : '■ Stop';
   b.classList.toggle('stop', mode === 'play');
   updatePauseButton();
-  updateHelp(); updateMovePanel();
+  updateHelp(); updateMovePanel(); updateTouch();
 }
 
 // A run lasts from pressing Play until game over: score and lives carry over between lives,

@@ -68,7 +68,7 @@ A tile-based 2D platformer editor that runs in a single HTML file. Build a level
 | **⭐ Power-ups** | Game design | `U` | Open the Power-ups editor. |
 | **👾 Enemies** | Game design | `E` | Open the Enemies editor. |
 | **⚙ Game system** | Game design | — | Score, coins, lives and hazard settings. |
-| **🖥 Screen** | Game design | — | Screen resolution and level size. |
+| **🖥 Screen** | Game design | — | PC or Mobile & Tablet version, screen size and level size. |
 | **🎮 Cheats** | Game design | `I` `T` `N` | Invincibility, endless time, no enemy AI. |
 | **🧩 Layout** | Layout & Help | — | Dock each bar on any edge of the screen. |
 | **⌨ Keys** | Layout & Help | `²` | Open the [keyboard map](#keyboard-map): every key and what it does. |
@@ -486,12 +486,20 @@ With a time limit, the timer is shown in the HUD (red and blinking in the last 1
 
 Open the **🖥 Screen** menu.
 
+**Version** — which kind of device you are designing for:
+
+| Version | Screen sizes | Notes |
+|---|---|---|
+| **🖥 PC** (default) | Fit window · 640×360, 960×540, 1280×720, 1920×1080 (16:9) · 640×480, 800×600, 1024×768 (4:3) · 576×576 (1:1) · 1280×540 (21:9) | Keyboard play. |
+| **📱 Mobile & Tablet** | Fit window · Small phone 360×640 · Phone 390×844 · Large phone 430×932 · Tablet 768×1024 · Large tablet 820×1180 · Tablet XL 1024×1366 | Choose **▯ Portrait** or **▭ Landscape** (sizes are swapped to match). Switching to this version selects *Phone*. On-screen [touch buttons](#touch-controls) appear in play mode. |
+
 **Screen size** — the resolution the game is drawn at:
 
-- **Fit window** (default): fills the available space.
-- Fixed sizes: 640×360, 960×540, 1280×720, 1920×1080 (16:9) · 640×480, 800×600, 1024×768 (4:3) · 576×576 (1:1) · 1280×540 (21:9). Fixed sizes are letterboxed and scaled down if the window is too small.
+- **Fit window** fills the available space.
+- Fixed sizes are letterboxed and scaled down if the window is too small.
+- At most 18 rows are visible at once, and always at least 12 columns (so portrait phones still see enough of the level); the view scrolls to follow the player.
 
-At most 18 rows are visible at once; taller levels scroll vertically.
+The toolbar button shows the current choice, e.g. `🖥 Fit` or `📱▭ 844×390`.
 
 **Level size (tiles)**:
 
@@ -559,6 +567,19 @@ Open the **🎮 Cheats** menu or use the keys below (they work in both modes). T
 | Keyboard map (pauses the game) | `²` |
 | Back to the editor | `Enter` / `Esc` |
 
+### Touch controls
+
+In play mode, round buttons appear over the game for the **📱 Mobile & Tablet** version, and on any touch screen:
+
+| Button | Does the same as |
+|---|---|
+| **◀** / **▶** (bottom-left) | Move left / right |
+| **A** (bottom-right, large) | Jump (hold for higher) |
+| **B** | Shoot / throw |
+| **▼** (small) | Talk / open shop |
+
+Dash, pause and the other keyboard shortcuts have no touch button.
+
 ### Keyboard map
 
 Press `²` (the key under `Esc`, `` ` `` on QWERTY) or click **⌨ Keys** to see a drawn keyboard with every key that does something, coloured by group (tools, movement, actions, panels, cheats, system), followed by a list of all actions.
@@ -594,7 +615,7 @@ Press `²` (the key under `Esc`, `` ` `` on QWERTY) or click **⌨ Keys** to see
 
 ## Saving, loading & file format
 
-**What the browser remembers automatically**: character settings, game-system settings, power-ups, enemies, moving-platform, spring, flame-jet, bubble, goal, text-box, NPC and merchant settings, screen size, editor layout, cheats and which panel sections are open.
+**What the browser remembers automatically**: character settings, game-system settings, power-ups, enemies, moving-platform, spring, flame-jet, bubble, goal, text-box, NPC and merchant settings, screen version, orientation and size, editor layout, cheats and which panel sections are open.
 
 **The level itself** is only stored when you click **Save** (browser) or **Export** (file). On start-up, the level saved in the browser is loaded.
 
