@@ -292,7 +292,7 @@ Abilities the character always has. Each perk's setting appears once it is ticke
 
 ## Power-ups
 
-Open with **⭐ Power-ups** or `U`. Power-ups are made by you and saved with the level. The first time the editor runs you get seven examples:
+Open with **⭐ Power-ups** or `U`. Power-ups are made by you and saved with the level. The first time the editor runs you get eight examples:
 
 | Preset | Effect |
 |---|---|
@@ -303,6 +303,7 @@ Open with **⭐ Power-ups** or `U`. Power-ups are made by you and saved with the
 | **Twister** | Rotating jump (3 turns/s) |
 | **Climber** | Wall jump |
 | **Fire** | Throws bouncing projectiles |
+| **Star** | Invincibility for 10 s, speed 115 % |
 
 ### Managing power-ups
 
@@ -330,6 +331,7 @@ Open with **⭐ Power-ups** or `U`. Power-ups are made by you and saved with the
 | **🌀 Rotating jump** | Spin speed: 0.5 – 6 turns/s | Jumps spin the character; while spinning, touching an enemy from any side hits it and bounces you off. |
 | **🧗 Wall jump** | Wall slide speed: 0.5 – 20 tiles/s | Jump off walls in mid-air; hold toward a wall to slide down it slowly. |
 | **🔥 Projectile throwing** | Projectiles on screen: 1 – 10 · Throw speed: 2 – 40 tiles/s · Bounce height: 0 – 4 tiles (0 = fly straight) | Throw with `X` / `J`. Replaces the character's normal shots while active. |
+| **⭐ Invincibility** | — | Spikes, flames, poison, enemies and their shots can't hurt you, and touching an enemy defeats it (and gives its score). A rainbow outline shows it is on. **Pits and lava still cost a life**, unlike the Invincibility cheat. |
 
 When both the character and the active power-up have glide, wall jump or rotating jump, the power-up's setting is used.
 
@@ -454,7 +456,7 @@ Open the **🎮 Cheats** menu or use the keys below (they work in both modes). T
 
 | Cheat | Key | Effect |
 |---|---|---|
-| **🛡 Invincibility** | `I` | Spikes and enemies can't hurt you (touching an enemy defeats it), and falling into a pit puts you back on the last solid ground you stood on. A golden outline shows it is on. |
+| **🛡 Invincibility** | `I` | Spikes, flames, poison, enemies and their shots can't hurt you (touching an enemy defeats it), and falling into a pit or lava puts you back on the last solid ground you stood on. A golden outline shows it is on. The ⭐ Invincibility power-up ability does the same, except for pits and lava. |
 | **⏳ Endless time** | `T` | Timed power-ups never run out. |
 | **🧊 No enemy AI** | `N` | Enemies stand still and don't shoot. You can still stomp them, and touching them still hurts. |
 
@@ -508,6 +510,7 @@ Open the **🎮 Cheats** menu or use the keys below (they work in both modes). T
 - **Shots** fly straight, stop at solid tiles, remove 1 HP from the enemy they hit and disappear off screen.
 - **Jump feel**: releasing jump early cuts the jump short. A short grace period lets you jump just after walking off a ledge (or leaving a wall) or just before landing.
 - **Rotating jump**: every jump spins you until you land (gliding, wall-sliding, swimming or getting hit also stops it). While spinning, touching an enemy from any side — even one that can't be stomped — removes 1 of its HP and bounces you off, unless the enemy is immune.
+- **Invincibility** from a ⭐ power-up (rainbow outline) protects you from spikes, flames, poison, enemies and their shots, and defeats any enemy you touch. Pits and lava still cost a life.
 - **Wall jump** kicks you away from the wall in a full-size jump; you briefly can't steer back toward it.
 - **Bricks, coins and power-ups** come back on each new life.
 - **Level edges** act as walls on the left and right.

@@ -177,6 +177,48 @@
   @media (prefers-reduced-motion: reduce) { #titleScreen * { animation:none !important; } }
   #guide { position:fixed; inset:0; z-index:20; background:#000a; display:flex; align-items:center; justify-content:center; padding:16px; }
   #guide[hidden] { display:none; }
+  /* Keyboard map (² key) */
+  #keymap { position:fixed; inset:0; z-index:21; background:#000a; display:flex; align-items:center; justify-content:center; padding:16px; }
+  #keymap[hidden] { display:none; }
+  #keymap .box { width:min(1060px, 100%); max-height:92vh; overflow-y:auto; background:var(--panel); border:1px solid var(--line); border-radius:10px; box-shadow:0 12px 40px #000a; padding:0 0 14px; }
+  #keymap header { position:sticky; top:0; z-index:1; display:flex; flex-wrap:wrap; align-items:center; gap:10px; padding:10px 14px; background:var(--panel); border-bottom:1px solid var(--line); }
+  #keymap h2 { margin:0; font-size:16px; }
+  #keymap header small { opacity:.6; }
+  #keymap header button, #keymap header select { background:var(--btn); color:var(--txt); border:2px solid transparent; border-radius:6px; padding:4px 10px; cursor:pointer; font:inherit; }
+  #keymap header button:hover { background:var(--btnh); }
+  #keymap header button.on { border-color:var(--acc); }
+  #keymap .kmtabs { display:flex; gap:4px; }
+  #keymap #kmClose { margin-left:auto; background:none; font-size:16px; }
+  .kb { --u:clamp(24px, 5vw, 46px); --gap:4px; display:flex; gap:calc(var(--u) * .4); justify-content:center; align-items:flex-end; padding:16px 14px 6px; }
+  .kb .blk { display:flex; flex-direction:column; gap:var(--gap); }
+  .kb .krow { display:flex; gap:var(--gap); }
+  .kb .krow.fn { margin-bottom:calc(var(--u) * .25); }
+  .key { width:calc(var(--u) * var(--w, 1) + var(--gap) * (var(--w, 1) - 1)); height:var(--u); flex:none; border-radius:6px; background:var(--btn); border:1px solid var(--line); border-bottom-width:3px;
+         display:flex; flex-direction:column; justify-content:space-between; padding:2px 4px; font-size:clamp(9px, 1.2vw, 13px); overflow:hidden; cursor:default; user-select:none; transition:transform .06s; }
+  .key b { font-weight:600; }
+  .key i { font-style:normal; font-size:clamp(7px, .85vw, 9.5px); line-height:1.1; opacity:.9; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .key.gap { visibility:hidden; }
+  .key.none { opacity:.35; }
+  .key[data-g="tool"]  { background:color-mix(in srgb, #ffcc4d 32%, var(--btn)); border-color:#ffcc4d; }
+  .key[data-g="move"]  { background:color-mix(in srgb, #4da3ff 35%, var(--btn)); border-color:#4da3ff; }
+  .key[data-g="act"]   { background:color-mix(in srgb, #4fd18b 32%, var(--btn)); border-color:#4fd18b; }
+  .key[data-g="panel"] { background:color-mix(in srgb, #b18cff 35%, var(--btn)); border-color:#b18cff; }
+  .key[data-g="cheat"] { background:color-mix(in srgb, #ff6fa8 32%, var(--btn)); border-color:#ff6fa8; }
+  .key[data-g="sys"]   { background:color-mix(in srgb, #9aa3b8 30%, var(--btn)); border-color:#9aa3b8; }
+  .key:hover, .key.hit { outline:2px solid #fff; outline-offset:1px; }
+  .key.hit { transform:translateY(2px); }
+  #kmInfo { min-height:22px; margin:6px 16px 0; text-align:center; font-size:14px; }
+  #kmInfo .dim { opacity:.55; }
+  #keymap kbd, #kmInfo kbd { display:inline-block; min-width:18px; padding:1px 6px; border-radius:4px; background:var(--inset); border:1px solid var(--line); font:12px system-ui; text-align:center; }
+  #kmLegend { display:flex; flex-wrap:wrap; justify-content:center; gap:6px 14px; margin:10px 16px 0; font-size:12px; }
+  #kmLegend span { display:flex; align-items:center; gap:6px; }
+  #kmLegend span::before { content:''; width:12px; height:12px; border-radius:3px; background:var(--c); }
+  #kmList { columns:3 260px; column-gap:22px; margin:14px 18px 0; font-size:13px; }
+  #kmList section { break-inside:avoid; margin-bottom:12px; }
+  #kmList h4 { margin:0 0 4px; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; opacity:.6; }
+  #kmList .r { display:flex; gap:8px; align-items:baseline; padding:2px 0; }
+  #kmList .r .k { flex:none; min-width:96px; }
+  #kmList .note { font-size:11px; opacity:.55; margin-top:4px; }
   #guide .box { width:min(980px, 100%); height:min(86vh, 900px); display:flex; flex-direction:column; background:var(--panel); border:1px solid var(--line); border-radius:10px; box-shadow:0 12px 40px #000a; overflow:hidden; }
   #guide header { display:flex; align-items:center; gap:10px; padding:10px 14px; border-bottom:1px solid var(--line); }
   #guide header h2 { margin:0; font-size:16px; flex:1; }
@@ -286,7 +328,7 @@
         <label class="chk"><input type="checkbox" data-cheat="invincible"> 🛡 Invincibility <small>I</small></label>
         <label class="chk"><input type="checkbox" data-cheat="endlessTime"> ⏳ Endless time <small>T</small></label>
         <label class="chk"><input type="checkbox" data-cheat="noAI"> 🧊 No enemy AI <small>N</small></label>
-        <div class="note">Invincibility: spikes and enemies can't hurt you; falling into a pit puts you back on the last solid ground.<br>
+        <div class="note">Invincibility: spikes, flames, poison, enemies and their shots can't hurt you; falling into a pit or lava puts you back on the last solid ground.<br>
           Endless time: timed power-ups never run out.<br>
           No enemy AI: enemies stand still and don't shoot (you can still stomp them, and touching them still hurts).</div>
       </div>
@@ -307,6 +349,7 @@
         <div class="note">Put each bar on any edge of the screen. Bars on the same edge sit side by side.</div>
       </div>
     </div>
+    <button id="kmBtn" title="Keyboard map (²)">⌨ Keys</button>
     <button id="guideBtn" title="How to use the editor (H / F1)">❓ Help</button>
   </div>
 </div>
@@ -437,6 +480,23 @@
 </div>
 
 <!-- In-game guide: keep in sync with README.md. Setting tables marked data-gen are filled from the config arrays. -->
+<div id="keymap" hidden role="dialog" aria-modal="true" aria-labelledby="kmTitle">
+  <div class="box">
+    <header>
+      <h2 id="kmTitle">⌨ Keyboard map</h2>
+      <div class="kmtabs"><button data-km="edit">✏️ Editor</button><button data-km="play">▶ Play</button></div>
+      <select id="kmLayout" title="Keyboard layout used for the key labels">
+        <option value="auto">Layout: auto</option><option value="qwerty">QWERTY</option><option value="azerty">AZERTY</option>
+      </select>
+      <small>Press any key to see what it does · ² or Esc to close</small>
+      <button id="kmClose" title="Close (² / Esc)">✕</button>
+    </header>
+    <div class="kb" id="kmKeys"></div>
+    <div id="kmInfo"></div>
+    <div id="kmLegend"></div>
+    <div id="kmList"></div>
+  </div>
+</div>
 <div id="guide" hidden role="dialog" aria-modal="true" aria-labelledby="guideTitle">
   <div class="box">
     <header><h2 id="guideTitle">📖 Platformer Maker guide</h2><small>H / F1 / Esc to close · the game is paused</small><button id="guideClose" title="Close (Esc)">✕</button></header>
@@ -572,7 +632,7 @@
             <tr><td>🔥 Flame jet</td><td>Solid burner you can stand on. On a cycle, it shoots a flame straight up; touching the flame costs 1 HP. The burner flickers just before it fires. Flames stop at solid tiles.</td></tr>
             <tr><td>🌋 Lava</td><td>Touching it costs a whole life, like falling into a pit. With invincibility on you are put back on the last solid ground.</td></tr>
             <tr><td>💧 Water</td><td>Swim: you move at 60 % speed, sink slowly and can press jump at any time to swim up. With your head at the surface, jump leaps out of the water. Air jumps refill in water; gliding and the rotating jump stop.</td></tr>
-            <tr><td>☠️ Poison</td><td>Toxic gas you can move through, but it costs 1 HP every <i>Poison: seconds per HP</i> (<b>⚙ Game system › Hazards</b>, 1 s by default); the first hit comes after half that time. Blinking after a hit doesn't protect you; invincibility does.</td></tr>
+            <tr><td>☠️ Poison</td><td>Toxic gas you can move through, but it costs 1 HP every <i>Poison: seconds per HP</i> (<b>⚙ Game system › Hazards</b>, 1 s by default); the first hit comes after half that time. Blinking after a hit doesn't protect you; invincibility (cheat or ⭐ power-up) does.</td></tr>
           </table>
           <h4>Flame jets</h4>
           <p>When the <b>Flame jet</b> tool is selected, the <b>Flame jet</b> panel opens on the left. Its settings apply to the next burners you paint; <b>paint over</b> a burner to apply them, <b>middle-click</b> one to copy its settings. Each burner's reach is outlined in the editor and its flame plays live.</p>
@@ -617,7 +677,7 @@
 
         <section data-title="Power-ups">
           <h3>Power-ups</h3>
-          <p>Open with <b>⭐ Power-ups</b> or <kbd>U</kbd>. Power-ups are made by you and saved with the level. Seven examples are created the first time: <b>Giant</b>, <b>Tiny</b>, <b>Wings</b> (double jump), <b>Feather</b> (glide), <b>Twister</b> (rotating jump), <b>Climber</b> (wall jump) and <b>Fire</b> (bouncing projectiles).</p>
+          <p>Open with <b>⭐ Power-ups</b> or <kbd>U</kbd>. Power-ups are made by you and saved with the level. Eight examples are created the first time: <b>Giant</b>, <b>Tiny</b>, <b>Wings</b> (double jump), <b>Feather</b> (glide), <b>Twister</b> (rotating jump), <b>Climber</b> (wall jump), <b>Fire</b> (bouncing projectiles) and <b>Star</b> (10 s of invincibility).</p>
           <h4>Managing power-ups</h4>
           <ul>
             <li>Click a power-up in the list to edit it <b>and</b> select it for painting.</li>
@@ -635,6 +695,7 @@
             <li>A timed power-up's headband blinks during its last 2 seconds.</li>
             <li>Editing a power-up while playing updates it live.</li>
             <li>When both the character's perks and the power-up have glide, wall jump or rotating jump, the power-up's setting is used.</li>
+            <li><b>⭐ Invincibility</b> shows as a rainbow outline. Unlike the Invincibility cheat, it doesn't save you from pits or lava.</li>
           </ul>
         </section>
 
@@ -694,7 +755,7 @@
           <p>Open the <b>🎮 Cheats</b> menu or use the keys below (they work in both modes). The Cheats button stays highlighted while any cheat is on, and the status bar shows its icon while playing.</p>
           <table>
             <tr><th>Cheat</th><th>Key</th><th>Effect</th></tr>
-            <tr><td>🛡 Invincibility</td><td><kbd>I</kbd></td><td>Spikes and enemies can't hurt you (touching an enemy defeats it), and falling into a pit puts you back on the last solid ground. A golden outline shows it is on.</td></tr>
+            <tr><td>🛡 Invincibility</td><td><kbd>I</kbd></td><td>Spikes, flames, poison, enemies and their shots can't hurt you (touching an enemy defeats it), and falling into a pit or lava puts you back on the last solid ground. A golden outline shows it is on. The ⭐ Invincibility power-up ability does the same, except for pits and lava.</td></tr>
             <tr><td>⏳ Endless time</td><td><kbd>T</kbd></td><td>Timed power-ups never run out.</td></tr>
             <tr><td>🧊 No enemy AI</td><td><kbd>N</kbd></td><td>Enemies stand still and don't shoot. You can still stomp them, and touching them still hurts.</td></tr>
           </table>
@@ -714,6 +775,7 @@
             <tr><td>Panels</td><td><kbd>C</kbd> Character · <kbd>U</kbd> Power-ups · <kbd>E</kbd> Enemies</td></tr>
             <tr><td>Cheats</td><td><kbd>I</kbd> invincibility · <kbd>T</kbd> endless time · <kbd>N</kbd> no enemy AI</td></tr>
             <tr><td>Help</td><td><kbd>H</kbd> / <kbd>F1</kbd></td></tr>
+            <tr><td>Keyboard map</td><td><kbd>²</kbd> (the key under <kbd>Esc</kbd>; <kbd>`</kbd> on QWERTY) or the ⌨ Keys button</td></tr>
             <tr><td>Play</td><td><kbd>Enter</kbd></td></tr>
             <tr><td>Close menu / list / help</td><td><kbd>Esc</kbd></td></tr>
           </table>
@@ -731,6 +793,7 @@
             <tr><td>Restart the run</td><td><kbd>R</kbd></td></tr>
             <tr><td>Cheats</td><td><kbd>I</kbd> / <kbd>T</kbd> / <kbd>N</kbd></td></tr>
             <tr><td>Help (pauses)</td><td><kbd>H</kbd> / <kbd>F1</kbd></td></tr>
+            <tr><td>Keyboard map (pauses)</td><td><kbd>²</kbd></td></tr>
             <tr><td>Back to editor</td><td><kbd>Enter</kbd> / <kbd>Esc</kbd></td></tr>
           </table>
         </section>
@@ -745,6 +808,7 @@
             <li><b>Shots</b> fly straight, stop at solid tiles, remove 1 HP from the enemy they hit and disappear off screen. <b>Enemy projectiles</b> cost you 1 HP.</li>
             <li><b>Jump feel</b>: releasing jump early cuts the jump short. A short grace period lets you jump just after leaving a ledge (or a wall) or just before landing.</li>
             <li><b>Rotating jump</b>: every jump spins you until you land (gliding, wall-sliding or getting hit also stops it). While spinning, touching an enemy from any side — even one that can't be stomped — removes 1 of its HP and bounces you off.</li>
+            <li><b>Invincibility</b> from a ⭐ power-up (rainbow outline) protects you from spikes, flames, poison, enemies and their shots, and defeats any enemy you touch. Pits and lava still cost a life.</li>
             <li><b>Wall jump</b> kicks you away from the wall in a full-size jump; you briefly can't steer back toward it.</li>
             <li>Bricks, coins, power-ups and <b>Falling</b> platforms come back on each new life.</li>
             <li><b>Goal</b>: touching the pole completes the level and gives flag points by height (shown on the end screen). <kbd>R</kbd> plays again, <kbd>Enter</kbd> goes back to editing.</li>
@@ -1040,9 +1104,10 @@ const POWER_ABILITIES = [
     { k:'projMax',    name:'Projectiles on screen', unit:'max', min:1, max:10, step:1 },
     { k:'projSpeed',  name:'Throw speed', unit:'tiles/s', min:2, max:40, step:0.5 },
     { k:'projBounce', name:'Bounce height', unit:'tiles · 0 = fly straight', min:0, max:4, step:0.25 } ] },
+  { k:'invincible', name:'⭐ Invincibility', tip:'Spikes, flames, poison, enemies and their shots can\'t hurt you, and touching an enemy defeats it. Pits and lava still cost a life', fields:[] },
 ];
 const POWER_DEFAULTS = { name:'Power-up', color:'#ff6b9a', duration:0, size:100, jumpH:100, jumpW:100, speed:100,
-  doubleJump:false, airJumps:1, glide:false, glideFall:2, spinJump:false, spinSpeed:2, wallJump:false, wallSlide:3, projectile:false, projMax:2, projSpeed:12, projBounce:1 };
+  doubleJump:false, airJumps:1, glide:false, glideFall:2, spinJump:false, spinSpeed:2, wallJump:false, wallSlide:3, projectile:false, projMax:2, projSpeed:12, projBounce:1, invincible:false };
 const POWER_PRESETS = [   // starter set, created the first time the editor runs
   { name:'Giant',   color:'#e94560', size:160, speed:90 },
   { name:'Tiny',    color:'#4fc3f7', size:55, jumpH:120, speed:115 },
@@ -1051,6 +1116,7 @@ const POWER_PRESETS = [   // starter set, created the first time the editor runs
   { name:'Twister', color:'#26c6da', spinJump:true, spinSpeed:3 },
   { name:'Climber', color:'#8bc34a', wallJump:true },
   { name:'Fire',    color:'#ff8c1a', projectile:true },
+  { name:'Star',    color:'#ffd54f', invincible:true, duration:10, speed:115 },
 ];
 let powerDefs = [];
 function powerById(id) { return powerDefs.find(d => d.id === id); }
@@ -1087,6 +1153,7 @@ function describePower(d) {
   if (d.spinJump) out.push('rotating jump');
   if (d.wallJump) out.push('wall jump');
   if (d.projectile) out.push(d.projBounce ? 'bouncing projectiles' : 'projectiles');
+  if (d.invincible) out.push('invincible');
   return (out.length ? out.join(' · ') : 'No effect yet') + '<br>' + (d.duration ? `Lasts ${d.duration} s` : 'Lasts until you die') + ' · picking up another power-up replaces it';
 }
 
@@ -1369,8 +1436,8 @@ function markTool() {
 function status(msg) { document.getElementById('status').textContent = msg; }
 function updateHelp() {
   document.getElementById('help').innerHTML = mode === 'edit'
-    ? 'Left click: paint · Right click: erase · Middle click: pick · 1–0, B, F, M: tools · C: character · U: power-ups · E: enemies<br>Cheats — I: invincibility · T: endless time · N: no enemy AI · Arrows/WASD or wheel (Shift+wheel: vertical): scroll · Enter: play · H: help'
-    : '←/→ or A/D: move · Space/W/↑: jump · X/J: shoot · P: pause · R: restart run · I / T / N: cheats · Enter/Esc: back to editor · H: help';
+    ? 'Left click: paint · Right click: erase · Middle click: pick · 1–0, B, F, M, X, O, Y, G: tools · R: rotate spring / bubbles · C: character · U: power-ups · E: enemies<br>Cheats — I: invincibility · T: endless time · N: no enemy AI · Arrows/WASD or wheel (Shift+wheel: vertical): scroll · Enter: play · H: help · ²: key map'
+    : '←/→ or A/D: move · Space/W/↑: jump · X/J: shoot · P: pause · R: restart run · I / T / N: cheats · Enter/Esc: back to editor · H: help · ²: key map';
 }
 document.getElementById('pause').onclick = e => { togglePause(); e.currentTarget.blur(); };
 
@@ -2186,7 +2253,7 @@ function buildGuide() {
     jumpH: "Multiplies the character's jump height.", jumpW: "Multiplies the character's jump width.", speed: "Multiplies the character's speed.",
   }[f.k] || '']));
   gen('abilities').innerHTML = guideTable(['Ability', 'Settings', 'Description'],
-    POWER_ABILITIES.map(a => [a.name, a.fields.map(f => `${f.name}: ${fmtRange(f)}`).join('<br>'), a.tip]));
+    POWER_ABILITIES.map(a => [a.name, a.fields.map(f => `${f.name}: ${fmtRange(f)}`).join('<br>') || '—', a.tip]));
   gen('enemy').innerHTML = guideTable(['Setting', 'Range', 'Default', 'Description'],
     [...ENEMY_FIELDS, ...ENEMY_MOVE_FIELDS, ...ENEMY_SHOT_FIELDS].map(f => [f.name, fmtRange(f), ENEMY_DEFAULTS[f.k], f.tip]));
   gen('sys').innerHTML = guideTable(['Setting', 'Range', 'Default', 'Description'],
@@ -2217,6 +2284,151 @@ document.getElementById('guideBtn').onclick = e => { toggleGuide(); e.currentTar
 document.getElementById('guideClose').onclick = () => toggleGuide(false);
 guideEl.addEventListener('mousedown', e => { if (e.target === guideEl) toggleGuide(false); });   // click outside the box
 
+// ---------- Keyboard map (² / ` key) ----------
+// A drawn keyboard showing what every key does in the editor or in play. Keys are placed by
+// physical position (KeyboardEvent.code); labels follow the user's layout.
+const KB_LETTERS = s => [...s].map(c => ['Key' + c]);
+const KB_MAIN = [
+  [['Escape', 1, 'Esc'], [null, .5], ['F1'], ['F2'], ['F3'], ['F4'], [null, .25], ['F5'], ['F6'], ['F7'], ['F8'], [null, .25], ['F9'], ['F10'], ['F11'], ['F12']],
+  [['Backquote'], ...'1234567890'.split('').map(d => ['Digit' + d]), ['Minus'], ['Equal'], ['Backspace', 2, '⌫']],
+  [['Tab', 1.5, 'Tab'], ...KB_LETTERS('QWERTYUIOP'), ['BracketLeft'], ['BracketRight'], ['Backslash', 1.5]],
+  [['CapsLock', 1.75, 'Caps'], ...KB_LETTERS('ASDFGHJKL'), ['Semicolon'], ['Quote'], ['Enter', 2.25, 'Enter']],
+  [['ShiftLeft', 1.25, 'Shift'], ['IntlBackslash'], ...KB_LETTERS('ZXCVBNM'), ['Comma'], ['Period'], ['Slash'], ['ShiftRight', 2.75, 'Shift']],
+  [['ControlLeft', 1.5, 'Ctrl'], ['MetaLeft', 1.25, '⊞'], ['AltLeft', 1.25, 'Alt'], ['Space', 6.25, 'Space'], ['AltRight', 1.25, 'AltGr'], ['ControlRight', 1.5, 'Ctrl']],
+];
+const KB_ARROWS = [[[null], ['ArrowUp', 1, '↑'], [null]], [['ArrowLeft', 1, '←'], ['ArrowDown', 1, '↓'], ['ArrowRight', 1, '→']]];
+const KB_QWERTY = { Backquote:'`', Minus:'-', Equal:'=', BracketLeft:'[', BracketRight:']', Backslash:'\\', Semicolon:';', Quote:"'", Comma:',', Period:'.', Slash:'/', IntlBackslash:'\\' };
+const KB_AZERTY = { Backquote:'²', Digit1:'&', Digit2:'é', Digit3:'"', Digit4:"'", Digit5:'(', Digit6:'-', Digit7:'è', Digit8:'_', Digit9:'ç', Digit0:'à',
+  Minus:')', Equal:'=', KeyQ:'A', KeyW:'Z', KeyA:'Q', KeyZ:'W', KeyM:',', Semicolon:'M', BracketLeft:'^', BracketRight:'$', Quote:'ù', Backslash:'*',
+  Comma:';', Period:':', Slash:'!', IntlBackslash:'<' };
+const KM_GROUPS = { tool:['Tools', '#ffcc4d'], move:['Movement', '#4da3ff'], act:['Actions', '#4fd18b'], panel:['Panels', '#b18cff'], cheat:['Cheats', '#ff6fa8'], sys:['System', '#9aa3b8'] };
+const kmEl = document.getElementById('keymap');
+let kmMode = 'edit', kbBrowserMap = null, kbChoice = 'auto';
+try { kbChoice = localStorage.getItem('platformer-maker-kblayout') || 'auto'; } catch {}
+document.getElementById('kmLayout').value = kbChoice;
+navigator.keyboard?.getLayoutMap?.().then(m => { kbBrowserMap = m; if (keymapOpen()) renderKeymap(); }).catch(() => {});
+// Effective layout: the user's choice, else the browser's real layout map, else a guess from the language.
+function kbLabels() {
+  if (kbChoice === 'azerty') return KB_AZERTY;
+  if (kbChoice === 'qwerty') return KB_QWERTY;
+  if (kbBrowserMap) return null;
+  return /^fr(-FR|-BE)?$/i.test(navigator.language || '') ? KB_AZERTY : KB_QWERTY;
+}
+function keyLabel(code, text) {
+  if (text) return text;
+  const L = kbLabels(), ch = L ? L[code] : kbBrowserMap.get(code);
+  if (ch) return ch.toUpperCase();
+  if (code.startsWith('Key')) return code.slice(3);
+  if (code.startsWith('Digit')) return code.slice(5);
+  return KB_QWERTY[code] || code;
+}
+// Physical key that types a character (tools are chosen by character, so they move with the layout).
+function codeForChar(ch) {
+  ch = ch.toLowerCase();
+  for (const row of KB_MAIN) for (const [code] of row) if (code && (code.startsWith('Key') || code.startsWith('Digit')) && keyLabel(code).toLowerCase() === ch) return code;
+  return /^\d$/.test(ch) ? 'Digit' + ch : null;   // AZERTY: digits are Shift + the number row
+}
+function keymapActions(m) {
+  const A = new Map(), add = (codes, text, g) => [].concat(codes).forEach(c => { if (!A.has(c)) A.set(c, []); A.get(c).push({ text, g }); });
+  if (m === 'edit') {
+    const shiftDigits = !/\d/.test(keyLabel('Digit1'));
+    const tools = TOOLS.filter(t => t.key);
+    if (!tools.some(t => t.key === '5')) tools.push({ key:'5', name:'Enemy (last used)' });
+    for (const t of tools) { const c = codeForChar(t.key); if (c) add(c, t.name + (shiftDigits && /\d/.test(t.key) ? ' (Shift)' : ''), 'tool'); }
+    add(['ArrowLeft', 'KeyA', 'KeyQ'], 'Scroll left', 'move'); add(['ArrowRight', 'KeyD'], 'Scroll right', 'move');
+    add(['ArrowUp', 'KeyW', 'KeyZ'], 'Scroll up', 'move'); add(['ArrowDown', 'KeyS'], 'Scroll down', 'move');
+    add('Enter', 'Play the level', 'act');
+    const z = codeForChar('z'); if (z) add(z, 'Ctrl + this: undo', 'act');
+    add('KeyR', 'Rotate spring / bubbles (that tool selected)', 'act');
+    add(['ShiftLeft', 'ShiftRight'], 'With R: rotate the other way · with wheel: scroll vertically', 'act');
+    add(['ControlLeft', 'ControlRight'], 'With Z: undo', 'act');
+    add('KeyC', 'Character panel', 'panel'); add('KeyU', 'Power-ups panel', 'panel'); add('KeyE', 'Enemies panel', 'panel');
+    add('Escape', 'Close menu / list', 'sys');
+  } else {
+    add(['ArrowLeft', 'KeyA', 'KeyQ'], 'Move left', 'move'); add(['ArrowRight', 'KeyD'], 'Move right', 'move');
+    add(['Space', 'ArrowUp', 'KeyW', 'KeyZ'], 'Jump (hold = higher, swim up)', 'move');
+    add(['KeyX', 'KeyJ'], 'Shoot / throw', 'act'); add('KeyP', 'Pause / resume', 'act'); add('KeyR', 'Restart the run', 'act');
+    add(['Enter', 'Escape'], 'Back to the editor', 'sys');
+  }
+  add('KeyI', 'Cheat: invincibility', 'cheat'); add('KeyT', 'Cheat: endless time', 'cheat'); add('KeyN', 'Cheat: no enemy AI', 'cheat');
+  add(['KeyH', 'F1'], 'Help guide', 'sys'); add('Backquote', 'Keyboard map (this)', 'sys');
+  return A;
+}
+const kmEsc = t => String(t).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+const kmShort = t => t.replace(/^(Cheat): /, '').replace(/ \(.*\)$/, '').replace(/ panel$/, '');
+let kmActs = new Map();
+function renderKeymap() {
+  kmActs = keymapActions(kmMode);
+  const key = ([code, w = 1, text]) => {
+    if (!code) return `<span class="key gap" style="--w:${w}"></span>`;
+    const a = kmActs.get(code) || [];
+    return `<span class="key${a.length ? '' : ' none'}" data-code="${code}"${a.length ? ` data-g="${a[0].g}"` : ''} style="--w:${w}">` +
+      `<b>${kmEsc(keyLabel(code, text))}</b>${a.length ? `<i>${kmEsc(kmShort(a[0].text))}</i>` : ''}</span>`;
+  };
+  const block = rows => '<div class="blk">' + rows.map((r, i) => `<div class="krow${rows === KB_MAIN && i === 0 ? ' fn' : ''}">${r.map(key).join('')}</div>`).join('') + '</div>';
+  document.getElementById('kmKeys').innerHTML = block(KB_MAIN) + block(KB_ARROWS);
+  document.querySelectorAll('#keymap [data-km]').forEach(b => b.classList.toggle('on', b.dataset.km === kmMode));
+  const used = new Set([...kmActs.values()].flat().map(a => a.g));
+  document.getElementById('kmLegend').innerHTML = Object.entries(KM_GROUPS).filter(([g]) => used.has(g))
+    .map(([, [name, c]]) => `<span style="--c:${c}">${name}</span>`).join('');
+  // Text list: one row per action with all of its keys
+  const byGroup = {};
+  for (const [code, acts] of kmActs) for (const a of acts) {
+    const g = (byGroup[a.g] ??= new Map());
+    if (!g.has(a.text)) g.set(a.text, []);
+    g.get(a.text).push(code);
+  }
+  const allCodes = [...KB_MAIN, ...KB_ARROWS].flat().map(k => k[0]).filter(Boolean);
+  const lbl = c => { const k = [...KB_MAIN, ...KB_ARROWS].flat().find(k => k[0] === c); return keyLabel(c, k && k[2]); };
+  let html = Object.keys(KM_GROUPS).filter(g => byGroup[g]).map(g =>
+    `<section><h4>${KM_GROUPS[g][0]}</h4>` + [...byGroup[g]].map(([text, codes]) =>
+      `<div class="r"><span class="k">${codes.sort((a, b) => allCodes.indexOf(a) - allCodes.indexOf(b)).map(c => `<kbd>${kmEsc(lbl(c))}</kbd>`).join(' ')}</span><span>${kmEsc(text)}</span></div>`).join('') + '</section>').join('');
+  if (kmMode === 'edit') html += `<section><h4>Mouse</h4>
+    <div class="r"><span class="k"><kbd>Left</kbd></span><span>Paint (drag for several)</span></div>
+    <div class="r"><span class="k"><kbd>Right</kbd></span><span>Erase</span></div>
+    <div class="r"><span class="k"><kbd>Middle</kbd></span><span>Pick the tile under the cursor</span></div>
+    <div class="r"><span class="k"><kbd>Wheel</kbd></span><span>Scroll (Shift: vertical)</span></div></section>`;
+  if (kmMode === 'edit' && !/\d/.test(keyLabel('Digit1')))
+    html += '<section><div class="note">On this layout the number row types symbols: hold Shift (or use the numpad) for the 0–9 tool keys.</div></section>';
+  document.getElementById('kmList').innerHTML = html;
+  kmInfo(null);
+}
+function kmInfo(code) {
+  const el = document.getElementById('kmInfo');
+  if (!code) { el.innerHTML = '<span class="dim">Hover or press a key</span>'; return; }
+  const k = [...KB_MAIN, ...KB_ARROWS].flat().find(k => k[0] === code);
+  const a = kmActs.get(code) || [];
+  el.innerHTML = `<kbd>${kmEsc(keyLabel(code, k && k[2]))}</kbd> ` + (a.length ? a.map(x => kmEsc(x.text)).join(' · ') : `<span class="dim">no action ${kmMode === 'edit' ? 'in the editor' : 'while playing'}</span>`);
+}
+function keymapOpen() { return !kmEl.hidden; }
+function toggleKeymap(show = kmEl.hidden) {
+  if (show) {
+    setMenu(false); closeCats(); for (const k in keys) keys[k] = false;
+    if (mode === 'play' && game && !game.paused) togglePause();   // freeze the game while reading
+    kmMode = mode === 'play' ? 'play' : 'edit';
+    renderKeymap();
+  }
+  kmEl.hidden = !show;
+  document.getElementById('kmBtn').classList.toggle('on', show);
+}
+function keymapKey(e) {
+  e.preventDefault();
+  if (e.code === 'Escape' || e.code === 'Backquote') { toggleKeymap(false); return; }
+  const el = kmEl.querySelector(`.key[data-code="${e.code}"]`);
+  if (el) { el.classList.add('hit'); setTimeout(() => el.classList.remove('hit'), 160); }
+  kmInfo(e.code);
+}
+document.getElementById('kmBtn').onclick = e => { toggleKeymap(); e.currentTarget.blur(); };
+document.getElementById('kmClose').onclick = () => toggleKeymap(false);
+kmEl.addEventListener('mousedown', e => { if (e.target === kmEl) toggleKeymap(false); });
+kmEl.querySelectorAll('[data-km]').forEach(b => b.onclick = () => { kmMode = b.dataset.km; renderKeymap(); b.blur(); });
+document.getElementById('kmKeys').addEventListener('mouseover', e => { const k = e.target.closest('.key[data-code]'); if (k) kmInfo(k.dataset.code); });
+document.getElementById('kmLayout').onchange = e => {
+  kbChoice = e.target.value;
+  try { localStorage.setItem('platformer-maker-kblayout', kbChoice); } catch {}
+  renderKeymap(); e.target.blur();
+};
+
 // Title screen: blocks the editor until dismissed (capture phase runs before the editor's key handler).
 const titleEl = document.getElementById('titleScreen');
 function closeTitle() {
@@ -2237,6 +2449,10 @@ window.addEventListener('keydown', e => {
     if (e.code === 'Escape' || e.code === 'KeyH' || e.code === 'F1') { toggleGuide(false); e.preventDefault(); }
     return;
   }
+  if (keymapOpen()) { keymapKey(e); return; }   // the keyboard map is modal too: keys are shown, not run
+  if (e.code === 'Backquote' && !e.ctrlKey && !e.metaKey && !e.altKey && !(e.target.tagName === 'INPUT' && e.target.type !== 'checkbox')) {
+    toggleKeymap(true); e.preventDefault(); return;
+  }
   if ((e.code === 'F1' || (e.code === 'KeyH' && !e.ctrlKey && !e.metaKey && !e.altKey)) && !(e.target.tagName === 'INPUT' && e.target.type !== 'checkbox')) {
     toggleGuide(true); e.preventDefault(); return;
   }
@@ -2248,7 +2464,7 @@ window.addEventListener('keydown', e => {
   if (!e.ctrlKey && !e.metaKey) keys[e.code] = true;   // Ctrl+Z etc. must not pan
   if (e.code === 'Enter' || (e.code === 'Escape' && mode === 'play')) { toggleMode(); e.preventDefault(); return; }
   if (mode === 'edit') {
-    if ((e.ctrlKey || e.metaKey) && e.code === 'KeyZ') { undo(); e.preventDefault(); return; }
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { undo(); e.preventDefault(); return; }   // by character, so it works on AZERTY too
     if (e.code === 'KeyC' && !e.ctrlKey && !e.metaKey) { toggleCharPanel(); return; }
     if (e.code === 'KeyR' && tool === 'j' && !e.ctrlKey && !e.metaKey) { rotateSpring(e.shiftKey ? -1 : 1); return; }
     if (e.code === 'KeyR' && tool === '+' && !e.ctrlKey && !e.metaKey) { rotateBubbles(e.shiftKey ? -1 : 1); return; }
@@ -2579,7 +2795,7 @@ function damageEnemy(G, e) {
 // (the level was restarted or the game is over), so the caller must stop updating.
 function hurt(G, fromX) {
   const p = G.p;
-  if (cheats.invincible || p.hurt > 0) return false;
+  if (shielded(G) || p.hurt > 0) return false;
   if (--p.hp <= 0) { loseLife(); return true; }
   p.hurt = HURT_TIME;
   const away = Math.sign(p.x + p.w / 2 - fromX) || -p.face;   // knock back away from the source
@@ -2670,6 +2886,9 @@ function updateEnemyShots(G, dt) {
 // ---------- Power-ups in play ----------
 const BASE_W = 22, BASE_H = 28;   // player hitbox at 100% size
 function activePower(G) { return G?.power ? powerById(G.power.id) : null; }
+// Protected from damage: the Invincibility cheat or an active power-up with invincibility.
+// (Only the cheat also saves you from pits and lava.)
+function shielded(G) { return cheats.invincible || !!activePower(G)?.invincible; }
 function powerStatus(G) {
   const pw = activePower(G);
   return pw ? ` · ⭐ ${pw.name}${pw.duration ? ' ' + Math.ceil(G.power.t) + 's' : ''}` : '';
@@ -2900,7 +3119,7 @@ function update(dt) {
   if (!poisoned) p.poisonT = sysCfg.poisonRate / 2;   // grace on entering: half the rate
   else if ((p.poisonT -= dt) <= 0) {
     p.poisonT = sysCfg.poisonRate;
-    if (!cheats.invincible) {
+    if (!shielded(G)) {
       addPop(G, p.x + p.w / 2, p.y - 6, '−1 HP', '#9be45a');
       G.fx.push({ x: p.x + p.w / 2, y: p.y + p.h / 2, t: 0, color: '#7bd23a' });
       if (--p.hp <= 0) return loseLife();
@@ -2924,7 +3143,7 @@ function update(dt) {
     if (overlaps(p, e.x, e.y, e.w, e.h)) {
       const fromAbove = p.vy > 0 && p.y + p.h - e.y < 16;
       if (p.spinning && e.cfg.spinImmune) {   // immune to the rotating jump: no damage, and it hurts like touching its side
-        if (cheats.invincible) killEnemy(G, e);
+        if (shielded(G)) killEnemy(G, e);
         else if (!(e.grace > 0) && hurt(G, e.x + e.w / 2)) return;
       } else if (p.spinning) {   // rotating jump: hit from any side (even unstompable enemies), bounce off
         if (!(e.grace > 0)) { e.grace = 0.25; damageEnemy(G, e); }
@@ -2932,7 +3151,7 @@ function update(dt) {
       } else if (fromAbove && e.cfg.stompable) {   // stomp: -1 HP for the enemy, bounce for the player
         if (!(e.grace > 0)) { e.grace = 0.25; damageEnemy(G, e); }
         if (held) doJump(p, C, C.jump); else { p.vy = -C.stomp; p.grav = 0; } G.jumpHeld = held;
-      } else if (cheats.invincible) killEnemy(G, e);   // invincible: plough straight through enemies
+      } else if (shielded(G)) killEnemy(G, e);   // invincible: plough straight through enemies
       else if (!(e.grace > 0) && hurt(G, e.x + e.w / 2)) return;   // grace: no hit right after a stomp
     }
   }
@@ -3539,6 +3758,13 @@ function render(t) {
       ctx.fillStyle = q.color; ctx.fillText(q.text, q.x, q.y);
     }
     ctx.globalAlpha = 1;
+    if (activePower(game)?.invincible && !game.over) {   // invincibility power-up: cycling rainbow aura (blinks in the last 2 s of a timed one)
+      const pw = activePower(game), ending = pw.duration && game.power.t < 2 && Math.floor(t * 10) % 2;
+      if (!ending) {
+        ctx.strokeStyle = `hsla(${(t * 360) % 360},100%,62%,.9)`; ctx.lineWidth = 3;
+        ctx.strokeRect(game.p.x - 4, game.p.y - 4, game.p.w + 8, game.p.h + 8);
+      }
+    }
     if (cheats.invincible) {   // pulsing golden aura
       ctx.strokeStyle = `rgba(255,204,77,${0.55 + 0.35 * Math.sin(t * 10)})`; ctx.lineWidth = 3;
       ctx.strokeRect(game.p.x - 3, game.p.y - 3, game.p.w + 6, game.p.h + 6);
