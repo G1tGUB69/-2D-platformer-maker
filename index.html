@@ -578,6 +578,7 @@
             <tr><td>🖥 Screen</td><td>Game design</td><td></td><td>Screen resolution and level size.</td></tr>
             <tr><td>🎮 Cheats</td><td>Game design</td><td><kbd>I</kbd> <kbd>T</kbd> <kbd>N</kbd></td><td>Invincibility, endless time, no enemy AI.</td></tr>
             <tr><td>🧩 Layout</td><td>Layout &amp; Help</td><td></td><td>Dock each bar on any edge of the screen.</td></tr>
+            <tr><td>⌨ Keys</td><td>Layout &amp; Help</td><td><kbd>²</kbd></td><td>Keyboard map: every key and what it does (see <i>Controls</i>).</td></tr>
             <tr><td>❓ Help</td><td>Layout &amp; Help</td><td><kbd>H</kbd> <kbd>F1</kbd></td><td>This guide.</td></tr>
           </table>
           <p>The <b>Level elements</b> bar holds the tile categories. Only one dropdown menu is open at a time; click outside or press <kbd>Esc</kbd> to close it.</p>
@@ -747,7 +748,7 @@
 
         <section data-title="Power-ups">
           <h3>Power-ups</h3>
-          <p>Open with <b>⭐ Power-ups</b> or <kbd>U</kbd>. Power-ups are made by you and saved with the level. Eight examples are created the first time: <b>Giant</b>, <b>Tiny</b>, <b>Wings</b> (double jump), <b>Feather</b> (glide), <b>Twister</b> (rotating jump), <b>Climber</b> (wall jump), <b>Fire</b> (bouncing projectiles) and <b>Star</b> (10 s of invincibility).</p>
+          <p>Open with <b>⭐ Power-ups</b> or <kbd>U</kbd>. Power-ups are made by you and saved with the level. Nine examples are created the first time: <b>Giant</b>, <b>Tiny</b>, <b>Wings</b> (double jump), <b>Feather</b> (glide), <b>Twister</b> (rotating jump), <b>Dasher</b> (dash), <b>Climber</b> (wall jump), <b>Fire</b> (bouncing projectiles) and <b>Star</b> (10 s of invincibility).</p>
           <h4>Managing power-ups</h4>
           <ul>
             <li>Click a power-up in the list to edit it <b>and</b> select it for painting.</li>
@@ -764,7 +765,7 @@
             <li>Power-ups are <b>lost when you lose a life</b>; pick-ups come back with the level.</li>
             <li>A timed power-up's headband blinks during its last 2 seconds.</li>
             <li>Editing a power-up while playing updates it live.</li>
-            <li>When both the character's perks and the power-up have glide, wall jump or rotating jump, the power-up's setting is used.</li>
+            <li>When both the character's perks and the power-up have glide, wall jump, rotating jump or dash, the power-up's setting is used.</li>
             <li><b>⭐ Invincibility</b> shows as a rainbow outline. Unlike the Invincibility cheat, it doesn't save you from pits or lava.</li>
           </ul>
         </section>
@@ -858,6 +859,7 @@
             <tr><td>Wall jump <small>(perk / ability)</small></td><td>Jump while touching a wall in mid-air</td></tr>
             <tr><td>Glide <small>(perk / ability)</small></td><td>Hold jump while falling</td></tr>
             <tr><td>Rotating jump <small>(perk / ability)</small></td><td>Any jump spins you</td></tr>
+            <tr><td>Dash <small>(perk / ability)</small></td><td><kbd>Shift</kbd> / <kbd>K</kbd></td></tr>
             <tr><td>Swim <small>(in water)</small></td><td>Press jump to swim up; jump at the surface to leap out</td></tr>
             <tr><td>Shoot / throw</td><td><kbd>X</kbd> / <kbd>J</kbd></td></tr>
             <tr><td>Talk / open shop</td><td><kbd>↓</kbd> / <kbd>S</kbd> next to an NPC or Merchant</td></tr>
@@ -880,6 +882,7 @@
             <li><b>Stomping</b> an enemy removes 1 of its HP and bounces you up; hold jump for a full-height bounce. Enemies that can't be stomped hurt you instead.</li>
             <li><b>Shots</b> fly straight, stop at solid tiles, remove 1 HP from the enemy they hit and disappear off screen. <b>Enemy projectiles</b> cost you 1 HP.</li>
             <li><b>Jump feel</b>: releasing jump early cuts the jump short. A short grace period lets you jump just after leaving a ledge (or a wall) or just before landing.</li>
+            <li><b>Dash</b> (<kbd>Shift</kbd> or <kbd>K</kbd>, with the perk or power-up): a quick horizontal burst in the direction you hold (or face), ignoring gravity. It stops at walls; jumping cancels it. Short cooldown, and only one dash in the air until you land.</li>
             <li><b>Rotating jump</b>: every jump spins you until you land (gliding, wall-sliding or getting hit also stops it). While spinning, touching an enemy from any side — even one that can't be stomped — removes 1 of its HP and bounces you off.</li>
             <li><b>Invincibility</b> from a ⭐ power-up (rainbow outline) protects you from spikes, flames, poison, enemies and their shots, and defeats any enemy you touch. Pits and lava still cost a life.</li>
             <li><b>Wall jump</b> kicks you away from the wall in a full-size jump; you briefly can't steer back toward it.</li>
@@ -972,8 +975,10 @@ const CHAR_FIELDS = [
   { k:'glideFall', perk:'glide', name:'Glide fall speed', unit:'tiles/s', min:0.5, max:8, step:0.5, tip:'Fall speed while gliding (when glide is on)' },
   { k:'spinJump',  type:'bool', perk:true, name:'🌀 Rotating jump', tip:'Jumps spin the character until it lands; while spinning, touching an enemy from any side hits it (−1 HP) and bounces you off' },
   { k:'spinSpeed', perk:'spinJump', name:'Spin speed', unit:'turns/s', min:0.5, max:6, step:0.5, tip:'How fast the character rotates during a rotating jump (when rotating jump is on)' },
+  { k:'dash',      type:'bool', perk:true, name:'💨 Dash', tip:'Shift or K: a quick horizontal burst (no gravity while dashing). One dash in the air until you land again' },
+  { k:'dashDist',  perk:'dash', name:'Dash distance', unit:'tiles', min:1, max:10, step:0.5, tip:'How far one dash carries the character (when dash is on)' },
 ];
-const CHAR_DEFAULTS = { jumpH:3.4, jumpW:4.8, speed:7.2, impact:0, projSpeed:14, projMax:3, hp:3, lives:3, lifePrice:50, hpPrice:10, wallJump:false, wallSlide:3, glide:false, glideFall:2, spinJump:false, spinSpeed:2 };
+const CHAR_DEFAULTS = { jumpH:3.4, jumpW:4.8, speed:7.2, impact:0, projSpeed:14, projMax:3, hp:3, lives:3, lifePrice:50, hpPrice:10, wallJump:false, wallSlide:3, glide:false, glideFall:2, spinJump:false, spinSpeed:2, dash:false, dashDist:3 };
 let charCfg = { ...CHAR_DEFAULTS };
 function setCharCfg(c) {
   for (const f of CHAR_FIELDS) {
@@ -1219,6 +1224,8 @@ const POWER_ABILITIES = [
     { k:'glideFall', name:'Glide fall speed', unit:'tiles/s', min:0.5, max:8, step:0.5 } ] },
   { k:'spinJump', name:'🌀 Rotating jump', tip:'Jumps spin the character; while spinning, touching an enemy from any side hits it and bounces you off', fields:[
     { k:'spinSpeed', name:'Spin speed', unit:'turns/s', min:0.5, max:6, step:0.5 } ] },
+  { k:'dash', name:'💨 Dash', tip:'Shift or K: a quick horizontal burst; one dash in the air until you land again', fields:[
+    { k:'dashDist', name:'Dash distance', unit:'tiles', min:1, max:10, step:0.5 } ] },
   { k:'wallJump', name:'🧗 Wall jump', tip:'Jump off walls in mid-air; hold toward a wall to slide down it slowly', fields:[
     { k:'wallSlide', name:'Wall slide speed', unit:'tiles/s', min:0.5, max:20, step:0.5 } ] },
   { k:'projectile', name:'🔥 Projectile throwing', tip:'Throw projectiles with X or J (replaces the character\'s normal shots while active)', fields:[
@@ -1228,13 +1235,14 @@ const POWER_ABILITIES = [
   { k:'invincible', name:'⭐ Invincibility', tip:'Spikes, flames, poison, enemies and their shots can\'t hurt you, and touching an enemy defeats it. Pits and lava still cost a life', fields:[] },
 ];
 const POWER_DEFAULTS = { name:'Power-up', color:'#ff6b9a', duration:0, size:100, jumpH:100, jumpW:100, speed:100, price:10,
-  doubleJump:false, airJumps:1, glide:false, glideFall:2, spinJump:false, spinSpeed:2, wallJump:false, wallSlide:3, projectile:false, projMax:2, projSpeed:12, projBounce:1, invincible:false };
+  doubleJump:false, airJumps:1, glide:false, glideFall:2, spinJump:false, spinSpeed:2, dash:false, dashDist:3, wallJump:false, wallSlide:3, projectile:false, projMax:2, projSpeed:12, projBounce:1, invincible:false };
 const POWER_PRESETS = [   // starter set, created the first time the editor runs
   { name:'Giant',   color:'#e94560', size:160, speed:90 },
   { name:'Tiny',    color:'#4fc3f7', size:55, jumpH:120, speed:115 },
   { name:'Wings',   color:'#b388ff', doubleJump:true },
   { name:'Feather', color:'#f0f0f0', glide:true },
   { name:'Twister', color:'#26c6da', spinJump:true, spinSpeed:3 },
+  { name:'Dasher',  color:'#ffd54f', dash:true, dashDist:4 },
   { name:'Climber', color:'#8bc34a', wallJump:true },
   { name:'Fire',    color:'#ff8c1a', projectile:true },
   { name:'Star',    color:'#ffd54f', invincible:true, duration:10, speed:115 },
@@ -1272,6 +1280,7 @@ function describePower(d) {
   if (d.doubleJump) out.push(d.airJumps > 1 ? `${d.airJumps} air jumps` : 'double jump');
   if (d.glide) out.push('glide');
   if (d.spinJump) out.push('rotating jump');
+  if (d.dash) out.push(`dash ${d.dashDist} tiles`);
   if (d.wallJump) out.push('wall jump');
   if (d.projectile) out.push(d.projBounce ? 'bouncing projectiles' : 'projectiles');
   if (d.invincible) out.push('invincible');
@@ -1559,7 +1568,7 @@ function status(msg) { document.getElementById('status').textContent = msg; }
 function updateHelp() {
   document.getElementById('help').innerHTML = mode === 'edit'
     ? 'Left click: paint · Right click: erase · Middle click: pick · 1–0, B, F, M, X, O, Y, G: tools · R: rotate spring / bubbles · C: character · U: power-ups · E: enemies<br>Cheats — I: invincibility · T: endless time · N: no enemy AI · Arrows/WASD or wheel (Shift+wheel: vertical): scroll · Enter: play · H: help · ²: key map'
-    : '←/→ or A/D: move · Space/W/↑: jump · X/J: shoot · ↓/S: talk / shop · P: pause · R: restart run · I / T / N: cheats · Enter/Esc: back to editor · H: help · ²: key map';
+    : '←/→ or A/D: move · Space/W/↑: jump · X/J: shoot · Shift/K: dash · ↓/S: talk / shop · P: pause · R: restart run · I / T / N: cheats · Enter/Esc: back to editor · H: help · ²: key map';
 }
 document.getElementById('pause').onclick = e => { togglePause(); e.currentTarget.blur(); };
 
@@ -1634,6 +1643,7 @@ function refreshCharUI() {
     `${charCfg.wallJump ? `Wall jump on · slides down walls at ${charCfg.wallSlide} tiles/s` : 'Wall jump off'}` +
     `<br>${charCfg.glide ? `Glide on · hold jump while falling to drop at ${charCfg.glideFall} tiles/s` : 'Glide off'}` +
     `<br>${charCfg.spinJump ? `Rotating jump on · ${charCfg.spinSpeed} turns/s, hits enemies from any side` : 'Rotating jump off'}` +
+    `<br>${charCfg.dash ? `Dash on · Shift or K dashes ${charCfg.dashDist} tiles` : 'Dash off'}` +
     `<br><span style="opacity:.8">Perks are always on; power-ups can still grant them temporarily.</span>`;
   const on = CHAR_FIELDS.filter(f => f.perk === true && charCfg[f.k]).map(f => f.name.replace(/^\S+\s/, '').toLowerCase());
   document.getElementById('perkSummary').textContent = on.length ? on.join(' · ') : 'none active';
@@ -2565,7 +2575,8 @@ function keymapActions(m) {
     add(['ArrowLeft', 'KeyA', 'KeyQ'], 'Move left', 'move'); add(['ArrowRight', 'KeyD'], 'Move right', 'move');
     add(['Space', 'ArrowUp', 'KeyW', 'KeyZ'], 'Jump (hold = higher, swim up)', 'move');
     add(['ArrowDown', 'KeyS'], 'Talk / open shop (next to an NPC)', 'act');
-    add(['KeyX', 'KeyJ'], 'Shoot / throw', 'act'); add('KeyP', 'Pause / resume', 'act'); add('KeyR', 'Restart the run', 'act');
+    add(['KeyX', 'KeyJ'], 'Shoot / throw', 'act');
+    add(['ShiftLeft', 'ShiftRight', 'KeyK'], 'Dash (dash perk or power-up)', 'move'); add('KeyP', 'Pause / resume', 'act'); add('KeyR', 'Restart the run', 'act');
     add(['Enter', 'Escape'], 'Back to the editor', 'sys');
   }
   add('KeyI', 'Cheat: invincibility', 'cheat'); add('KeyT', 'Cheat: endless time', 'cheat'); add('KeyN', 'Cheat: no enemy AI', 'cheat');
@@ -2704,6 +2715,7 @@ window.addEventListener('keydown', e => {
     if ((e.code === 'ArrowDown' || e.code === 'KeyS') && !e.repeat && game.near && !game.won && !game.over) { openNPC(game, game.near); return; }
     if (['Space','ArrowUp','KeyW','KeyZ'].includes(e.code)) game.jumpBuffer = 0.12;
     if ((e.code === 'KeyX' || e.code === 'KeyJ') && !e.repeat) shoot();
+    if (['ShiftLeft', 'ShiftRight', 'KeyK'].includes(e.code) && !e.repeat) game.dashPress = true;
   }
 });
 window.addEventListener('keyup', e => { keys[e.code] = false; });
@@ -2780,7 +2792,8 @@ function startGame() {
   });
   // Power-up state: lost on each new life (the pick-ups respawn with the level)
   Object.assign(game, { power: null, fx: [] });
-  Object.assign(game.p, { scale: 1, targetScale: 1, airJumps: 0, gliding: false, sliding: false, spinning: false, spin: 0, wallLock: 0, wallCoyote: 0 });
+  Object.assign(game.p, { scale: 1, targetScale: 1, airJumps: 0, gliding: false, sliding: false, spinning: false, spin: 0, wallLock: 0, wallCoyote: 0, dashCD: 0, airDash: true, dash: null });
+  game.dashPress = false;
   // Hazards: flame jets (each with its own cycle), water / poison state
   game.flames = [];
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (game.g[y][x] === '^') game.flames.push({ tx: x, ty: y, cfg: flameOf(x, y) });
@@ -3303,6 +3316,23 @@ function update(dt) {
     if (!dir) p.vx -= p.vx * Math.min(1, 4 * dt);
   }
 
+  // Dash (character perk or power-up; the power-up's distance wins while active): fixed horizontal
+  // velocity for DASH_TIME, no gravity. Uses p.dash like straight spring launches.
+  const dashOn = charCfg.dash || !!pw?.dash;
+  p.dashCD = Math.max(0, (p.dashCD || 0) - dt);
+  if (p.onGround) p.airDash = true;
+  if (G.dashPress) {
+    G.dashPress = false;
+    if (dashOn && !p.dash && p.dashCD <= 0 && (p.onGround || p.airDash) && !(p.hurt > HURT_TIME - 0.25)) {
+      const d = dir || p.face || 1, v = (pw?.dash ? pw.dashDist : charCfg.dashDist) * T / DASH_TIME;
+      p.face = d; p.vx = d * v; p.vy = 0; p.grav = 0;
+      p.dash = { vx: d * v, vy: 0, left: DASH_TIME, kind: 'dash' };
+      p.dashCD = DASH_CD; if (!p.onGround) p.airDash = false;
+      p.spinning = false; p.launched = false; G.jumpHeld = false;
+      G.fx.push({ x: p.x + p.w / 2, y: p.y + p.h / 2, t: 0, color: pw?.dash ? pw.color : '#ffffff' });
+    }
+  }
+
   // Rotating jump (character perk or power-up; the power-up's spin speed wins while active)
   const spinOn = charCfg.spinJump || !!pw?.spinJump;
   const spinRate = (pw?.spinJump ? pw.spinSpeed : charCfg.spinSpeed) * Math.PI * 2;
@@ -3331,6 +3361,7 @@ function update(dt) {
   if (G.jumpHeld && !held && p.vy < 0) { p.vy *= 0.45; G.jumpHeld = false; }
   if (p.vy >= 0) G.jumpHeld = false;
 
+  if (p.dash?.kind === 'dash' && p.vy < 0) p.dash = null;   // jumping cancels a dash
   if (wet) p.vy = Math.min(p.vy + C.grav * WATER_GRAV * dt, WATER_SINK * T);   // slow sinking
   else p.vy = Math.min(p.vy + (p.grav || C.grav) * dt, C.maxFall);
   // Glide: holding jump while falling caps the fall speed
@@ -3347,8 +3378,9 @@ function update(dt) {
   const prevBottom = p.y + p.h;
   const r = moveBody(p, G.g, dt, true);
   p.onGround = r.landed;
-  if (p.dash && (p.dash.left <= 0 || r.hitWall || r.hitCeil || r.landed)) {   // straight launch over: gravity takes over
+  if (p.dash && (p.dash.left <= 0 || r.hitWall || r.hitCeil || (r.landed && p.dash.kind !== 'dash'))) {   // launch / dash over: gravity takes over
     if (p.vy < 0) p.vy = 0;
+    if (p.dash.kind === 'dash') p.vx = Math.sign(p.vx) * Math.min(Math.abs(p.vx), C.run);   // back to run speed
     p.dash = null;
   }
   if (r.landed || r.hitWall) p.launched = false;
@@ -3637,8 +3669,17 @@ function drawPowerItem(d, x, y, t) {
 }
 // The player in play mode: scaled to its current size, with a headband in the power-up's
 // colour (blinking during the last 2 s of a timed power-up) and wings while gliding.
+const DASH_TIME = 0.16, DASH_CD = 0.35;   // dash duration and cooldown (s)
 function drawHero(G, t) {
   const p = G.p, pw = activePower(G), k = p.w / BASE_W;
+  if (p.dash?.kind === 'dash') {   // dash: fading after-images behind the player
+    ctx.fillStyle = pw?.dash ? pw.color : '#4da3ff';
+    for (let i = 1; i <= 3; i++) {
+      ctx.globalAlpha = 0.3 / i;
+      ctx.fillRect(p.x - Math.sign(p.dash.vx) * i * 12 * k, p.y, p.w, p.h);
+    }
+    ctx.globalAlpha = 1;
+  }
   if (p.gliding) {   // wings: power-up colour when the power-up grants glide, white for the character's own glide
     const flap = Math.sin(t * 18) * 3 * k, sy = p.y + p.h * 0.35;
     ctx.fillStyle = pw?.glide ? pw.color : '#f0f0f0'; ctx.globalAlpha = 0.85; ctx.beginPath();

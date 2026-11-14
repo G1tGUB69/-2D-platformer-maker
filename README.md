@@ -71,6 +71,7 @@ A tile-based 2D platformer editor that runs in a single HTML file. Build a level
 | **🖥 Screen** | Game design | — | Screen resolution and level size. |
 | **🎮 Cheats** | Game design | `I` `T` `N` | Invincibility, endless time, no enemy AI. |
 | **🧩 Layout** | Layout & Help | — | Dock each bar on any edge of the screen. |
+| **⌨ Keys** | Layout & Help | `²` | Open the [keyboard map](#keyboard-map): every key and what it does. |
 | **❓ Help** | Layout & Help | `H` / `F1` | Open this guide in the game (pauses the game). |
 
 The **Level elements** bar holds the tile categories (see [Tile palette](#tile-palette)). Only one dropdown menu is open at a time; click outside or press `Esc` to close it.
@@ -330,6 +331,7 @@ Abilities the character always has. Each perk's setting appears once it is ticke
 | **🧗 Wall jump** | Wall slide speed: 0.5 – 20 tiles/s (default 3) | off | Jump off walls while in the air; hold toward a wall to slide down it slowly. |
 | **🪂 Glide** | Glide fall speed: 0.5 – 8 tiles/s (default 2) | off | Hold jump while falling to float down slowly. |
 | **🌀 Rotating jump** | Spin speed: 0.5 – 6 turns/s (default 2) | off | Jumps spin the character until it lands. While spinning, touching an enemy from any side hits it (−1 HP) and bounces you off, and Spin bricks shatter. |
+| **💨 Dash** | Dash distance: 1 – 10 tiles (default 3) | off | `Shift` or `K`: a quick horizontal burst (no gravity while dashing). One dash in the air until you land again. |
 
 **Reset defaults** restores the values above. The panel's info lines summarise air time, standing-jump size, shooting, health and perks.
 
@@ -337,7 +339,7 @@ Abilities the character always has. Each perk's setting appears once it is ticke
 
 ## Power-ups
 
-Open with **⭐ Power-ups** or `U`. Power-ups are made by you and saved with the level. The first time the editor runs you get eight examples:
+Open with **⭐ Power-ups** or `U`. Power-ups are made by you and saved with the level. The first time the editor runs you get nine examples:
 
 | Preset | Effect |
 |---|---|
@@ -346,6 +348,7 @@ Open with **⭐ Power-ups** or `U`. Power-ups are made by you and saved with the
 | **Wings** | Double jump |
 | **Feather** | Glide |
 | **Twister** | Rotating jump (3 turns/s) |
+| **Dasher** | Dash (4 tiles) |
 | **Climber** | Wall jump |
 | **Fire** | Throws bouncing projectiles |
 | **Star** | Invincibility for 10 s, speed 115 % |
@@ -375,11 +378,12 @@ Open with **⭐ Power-ups** or `U`. Power-ups are made by you and saved with the
 | **🪽 Double jump** | Extra jumps in the air: 1 – 5 | Press jump again in mid-air. Refills on landing. |
 | **🪂 Glide** | Glide fall speed: 0.5 – 8 tiles/s | Hold jump while falling to float down slowly. |
 | **🌀 Rotating jump** | Spin speed: 0.5 – 6 turns/s | Jumps spin the character; while spinning, touching an enemy from any side hits it and bounces you off. |
+| **💨 Dash** | Dash distance: 1 – 10 tiles | `Shift` or `K`: a quick horizontal burst; one dash in the air until you land again. |
 | **🧗 Wall jump** | Wall slide speed: 0.5 – 20 tiles/s | Jump off walls in mid-air; hold toward a wall to slide down it slowly. |
 | **🔥 Projectile throwing** | Projectiles on screen: 1 – 10 · Throw speed: 2 – 40 tiles/s · Bounce height: 0 – 4 tiles (0 = fly straight) | Throw with `X` / `J`. Replaces the character's normal shots while active. |
 | **⭐ Invincibility** | — | Spikes, flames, poison, enemies and their shots can't hurt you, and touching an enemy defeats it (and gives its score). A rainbow outline shows it is on. **Pits and lava still cost a life**, unlike the Invincibility cheat. |
 
-When both the character and the active power-up have glide, wall jump or rotating jump, the power-up's setting is used.
+When both the character and the active power-up have glide, wall jump, rotating jump or dash, the power-up's setting is used.
 
 ### Rules
 
@@ -529,6 +533,7 @@ Open the **🎮 Cheats** menu or use the keys below (they work in both modes). T
 | Character / Power-ups / Enemies panel | `C` / `U` / `E` |
 | Cheats | `I` invincibility · `T` endless time · `N` no enemy AI |
 | Help | `H` / `F1` |
+| Keyboard map | `²` (the key under `Esc`; `` ` `` on QWERTY) or the **⌨ Keys** button |
 | Play | `Enter` |
 | Close menu / palette list / help | `Esc` |
 
@@ -541,6 +546,7 @@ Open the **🎮 Cheats** menu or use the keys below (they work in both modes). T
 | Wall jump (with the perk/ability) | Jump while touching a wall in mid-air |
 | Glide (with the perk/ability) | Hold jump while falling |
 | Rotating jump (with the perk/ability) | Any jump spins you |
+| Dash (with the perk/ability) | `Shift` / `K` |
 | Swim (in water) | Press jump to swim up; jump at the surface to leap out |
 | Shoot / throw | `X` / `J` |
 | Talk / open shop | `↓` / `S` next to an NPC or Merchant |
@@ -550,7 +556,17 @@ Open the **🎮 Cheats** menu or use the keys below (they work in both modes). T
 | Restart the run | `R` |
 | Cheats | `I` / `T` / `N` |
 | Help (pauses the game) | `H` / `F1` |
+| Keyboard map (pauses the game) | `²` |
 | Back to the editor | `Enter` / `Esc` |
+
+### Keyboard map
+
+Press `²` (the key under `Esc`, `` ` `` on QWERTY) or click **⌨ Keys** to see a drawn keyboard with every key that does something, coloured by group (tools, movement, actions, panels, cheats, system), followed by a list of all actions.
+
+- **✏️ Editor** / **▶ Play** tabs switch between the two sets of keys (it opens on the current mode).
+- Press any key, or hover the mouse over one, to see what it does.
+- **Layout**: *auto* follows your keyboard (or browser language); you can force **QWERTY** or **AZERTY**. Keys are matched by position, so labels follow your layout.
+- `²` or `Esc` closes it. Opening it while playing pauses the game.
 
 ---
 
@@ -564,6 +580,7 @@ Open the **🎮 Cheats** menu or use the keys below (they work in both modes). T
 - **Jump feel**: releasing jump early cuts the jump short. A short grace period lets you jump just after walking off a ledge (or leaving a wall) or just before landing.
 - **Rotating jump**: every jump spins you until you land (gliding, wall-sliding, swimming or getting hit also stops it). While spinning, touching an enemy from any side — even one that can't be stomped — removes 1 of its HP and bounces you off, unless the enemy is immune.
 - **Invincibility** from a ⭐ power-up (rainbow outline) protects you from spikes, flames, poison, enemies and their shots, and defeats any enemy you touch. Pits and lava still cost a life.
+- **Dash** (`Shift` or `K`, with the perk or power-up): a quick horizontal burst in the direction you hold (or face), ignoring gravity. It stops at walls; jumping cancels it. Short cooldown, and only one dash in the air until you land.
 - **Wall jump** kicks you away from the wall in a full-size jump; you briefly can't steer back toward it.
 - **Bricks, coins and power-ups** come back on each new life.
 - **Level edges** act as walls on the left and right.
@@ -591,7 +608,7 @@ Saved and exported levels include the tiles, character settings, game-system set
   "h": 18,
   "rows": ["....", "..."],
   "char": { "jumpH": 3.4, "jumpW": 4.8, "speed": 7.2, "impact": 0, "projSpeed": 14, "projMax": 3, "hp": 3, "lives": 3, "lifePrice": 50, "hpPrice": 10,
-            "wallJump": false, "wallSlide": 3, "glide": false, "glideFall": 2, "spinJump": false, "spinSpeed": 2 },
+            "wallJump": false, "wallSlide": 3, "glide": false, "glideFall": 2, "spinJump": false, "spinSpeed": 2, "dash": false, "dashDist": 3 },
   "sys": { "coinPoints": 100, "flagTop": 5000, "flagBottom": 100, "flagSteps": 0, "coinsPerLife": 100,
            "coinVal": 1, "bigVal": 5, "megaVal": 10, "bigSize": 100, "megaSize": 100, "poisonRate": 1,
            "timeLimit": 0, "timePrice": 1 },
