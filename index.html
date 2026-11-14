@@ -344,10 +344,13 @@
 
         <section data-title="Cheats">
           <h3>Cheats</h3>
-          <p>Open the <b>🎮 Cheats</b> menu or press <kbd>I</kbd> (works in both modes).</p>
-          <ul>
-            <li><b>🛡 Invincibility</b>: spikes and enemies can't hurt you (touching an enemy defeats it), and falling into a pit puts you back on the last solid ground. A golden outline shows it is on.</li>
-          </ul>
+          <p>Open the <b>🎮 Cheats</b> menu or use the keys below (they work in both modes). The Cheats button stays highlighted while any cheat is on, and the status bar shows its icon while playing.</p>
+          <table>
+            <tr><th>Cheat</th><th>Key</th><th>Effect</th></tr>
+            <tr><td>🛡 Invincibility</td><td><kbd>I</kbd></td><td>Spikes and enemies can't hurt you (touching an enemy defeats it), and falling into a pit puts you back on the last solid ground. A golden outline shows it is on.</td></tr>
+            <tr><td>⏳ Endless time</td><td><kbd>T</kbd></td><td>Timed power-ups never run out.</td></tr>
+            <tr><td>🧊 No enemy AI</td><td><kbd>N</kbd></td><td>Enemies stand still. You can still stomp them, and touching them still hurts.</td></tr>
+          </table>
         </section>
 
         <section data-title="Controls">
@@ -764,8 +767,8 @@ function markTool() {
 function status(msg) { document.getElementById('status').textContent = msg; }
 function updateHelp() {
   document.getElementById('help').innerHTML = mode === 'edit'
-    ? 'Left click: paint · Right click: erase · Middle click: pick · 1–0, B, F, M: tools · C: character · U: power-ups<br>Cheats — I: invincibility · T: endless time · N: no enemy AI · Arrows/WASD or wheel (Shift+wheel: vertical): scroll · Enter: play'
-    : '←/→ or A/D: move · Space/W/↑: jump · X/J: shoot · R: restart run · I / T / N: cheats · Enter/Esc: back to editor';
+    ? 'Left click: paint · Right click: erase · Middle click: pick · 1–0, B, F, M: tools · C: character · U: power-ups<br>Cheats — I: invincibility · T: endless time · N: no enemy AI · Arrows/WASD or wheel (Shift+wheel: vertical): scroll · Enter: play · H: help'
+    : '←/→ or A/D: move · Space/W/↑: jump · X/J: shoot · R: restart run · I / T / N: cheats · Enter/Esc: back to editor · H: help';
 }
 
 // Character panel
@@ -1151,7 +1154,86 @@ cv.addEventListener('wheel', e => {
   clampCam();
 }, { passive:false });
 
+// ---------- In-game guide (mirrors README.md) ----------
+// Setting tables are generated from the config arrays so ranges and defaults are always current.
+const guideEl = document.getElementById('guide'), guideBody = document.getElementById('guideBody');
+const TILE_DOCS = {
+  g: 'Solid block with a grass top.',
+  b: 'Solid block (looks different from Ground, behaves the same).',
+  k: 'Solid block that shatters when the player hits it <b>from below</b>.',
+  p: 'One-way platform: jump up through it, land on top.',
+  v: 'One-way platform that shakes for 0.5 s after you land on it, then falls.',
+  m: 'One-way platform that moves along a path (see <i>Moving platforms</i>).',
+  s: 'Touching them costs 1 HP.',
+  e: 'Walks left and right, turning at walls and ledges. Touching it costs 1 HP. Stomp it or shoot it to defeat it.',
+  c: 'Gives points; enough coins give an extra life (see <i>Game system</i>).',
+  j: 'Bounces the player very high (about 2.7× a normal jump).',
+  P: 'Where the player appears. Only one per level: placing a new one removes the old one. Required to play.',
+  f: 'Flag. Touching it completes the level.',
+  '.': 'Removes tiles (same as right-click).',
+};
+function guideTable(head, rows) {
+  return `<tr>${head.map(h => `<th>${h}</th>`).join('')}</tr>` + rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('');
+}
+const fmtRange = f => `${f.min} – ${f.max} ${f.unit}`;
+function buildGuide() {
+  const gen = id => guideBody.querySelector(`[data-gen="${id}"]`);
+  const tileRows = [];
+  for (const cat of CATEGORIES) {
+    if (cat.id === 'power') {
+      tileRows.push([cat.name, '', 'Every power-up made in the Power-ups panel appears here' + (powerDefs.length ? ` (currently: ${powerDefs.map(d => esc(d.name)).join(', ')})` : '') + '. <b>✎ Create / edit…</b> (<kbd>U</kbd>) opens the editor.']);
+      continue;
+    }
+    for (const t of TOOLS.filter(t => t.cat === cat.id))
+      tileRows.push([`<span class="tile"><canvas width="48" height="48" data-icon="${t.id}"></canvas>${t.name}</span>`, `<kbd>${t.key.toUpperCase()}</kbd>`, `<small style="opacity:.6">${cat.name}</small> · ${TILE_DOCS[t.id] || ''}`]);
+  }
+  gen('tiles').innerHTML = guideTable(['Tile', 'Key', 'Behaviour'], tileRows);
+  gen('tiles').querySelectorAll('canvas[data-icon]').forEach(c => drawIcon(c, c.dataset.icon));
+  gen('char').innerHTML = guideTable(['Setting', 'Range', 'Default', 'Description'],
+    CHAR_FIELDS.map(f => [f.name, fmtRange(f), CHAR_DEFAULTS[f.k], f.tip]));
+  gen('power').innerHTML = guideTable(['Setting', 'Range', 'Description'], POWER_FIELDS.map(f => [f.name, fmtRange(f), {
+    duration: 'How long it lasts. <b>0 = until you lose a life.</b>',
+    size: 'Player size. Growing waits until there is enough room.',
+    jumpH: "Multiplies the character's jump height.", jumpW: "Multiplies the character's jump width.", speed: "Multiplies the character's speed.",
+  }[f.k] || '']));
+  gen('abilities').innerHTML = guideTable(['Ability', 'Settings', 'Description'],
+    POWER_ABILITIES.map(a => [a.name, a.fields.map(f => `${f.name}: ${fmtRange(f)}`).join('<br>'), a.tip]));
+  gen('sys').innerHTML = guideTable(['Setting', 'Range', 'Default', 'Description'],
+    SYS_FIELDS.map(f => [f.name, `${f.min} – ${f.max}`, SYS_DEFAULTS[f.k], f.tip]));
+}
+// Side navigation: one button per section, highlighting the one being read.
+const guideNav = document.getElementById('guideNav'), guideSections = [...guideBody.querySelectorAll('section')];
+guideSections.forEach(sec => {
+  const b = document.createElement('button'); b.textContent = sec.dataset.title;
+  b.onclick = () => { guideBody.scrollTo({ top: sec.offsetTop - guideBody.offsetTop - 4, behavior: 'smooth' }); b.blur(); };
+  guideNav.appendChild(b);
+});
+function markGuideNav() {
+  const y = guideBody.scrollTop + guideBody.offsetTop + 40;
+  let i = 0; guideSections.forEach((s, k) => { if (s.offsetTop <= y) i = k; });
+  if (guideBody.scrollTop + guideBody.clientHeight >= guideBody.scrollHeight - 2) i = guideSections.length - 1;
+  [...guideNav.children].forEach((b, k) => b.classList.toggle('on', k === i));
+}
+guideBody.addEventListener('scroll', markGuideNav);
+function guideOpen() { return !guideEl.hidden; }
+function toggleGuide(show = guideEl.hidden) {
+  if (show) { setMenu(false); closeCats(); buildGuide(); for (const k in keys) keys[k] = false; }   // release held keys so nothing keeps moving
+  guideEl.hidden = !show;
+  document.getElementById('guideBtn').classList.toggle('on', show);
+  if (show) markGuideNav();
+}
+document.getElementById('guideBtn').onclick = e => { toggleGuide(); e.currentTarget.blur(); };
+document.getElementById('guideClose').onclick = () => toggleGuide(false);
+guideEl.addEventListener('mousedown', e => { if (e.target === guideEl) toggleGuide(false); });   // click outside the box
+
 window.addEventListener('keydown', e => {
+  if (guideOpen()) {   // the guide is modal: only its own keys work while it is open
+    if (e.code === 'Escape' || e.code === 'KeyH' || e.code === 'F1') { toggleGuide(false); e.preventDefault(); }
+    return;
+  }
+  if ((e.code === 'F1' || (e.code === 'KeyH' && !e.ctrlKey && !e.metaKey && !e.altKey)) && !(e.target.tagName === 'INPUT' && e.target.type !== 'checkbox')) {
+    toggleGuide(true); e.preventDefault(); return;
+  }
   if (e.code === 'Escape' && anyMenuOpen()) { setMenu(false); return; }
   if (e.code === 'Escape' && paletteEl.querySelector('.cat.open')) { closeCats(); return; }
   if (e.target.tagName === 'INPUT' && e.target.type !== 'checkbox') { if (e.code === 'Enter') e.target.blur(); return; }
@@ -1857,6 +1939,8 @@ function frame(now) {
     const pan = (keys.ArrowRight || keys.KeyD ? 1 : 0) - (keys.ArrowLeft || keys.KeyA || keys.KeyQ ? 1 : 0);
     const panY = (keys.ArrowDown || keys.KeyS ? 1 : 0) - (keys.ArrowUp || keys.KeyW || keys.KeyZ ? 1 : 0);
     if (pan || panY) { cam.x += pan * 700 * dt; cam.y += panY * 700 * dt; clampCam(); }
+  } else if (guideOpen()) {
+    acc = 0;   // paused while the guide is open
   } else {
     acc += dt;
     while (acc >= STEP && mode === 'play') { update(STEP); acc -= STEP; }
