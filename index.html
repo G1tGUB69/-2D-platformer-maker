@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Platformer Maker</title>
+<title>2D Platformer Maker</title>
 <style>
   :root { --bg:#1b1d2a; --panel:#262a3b; --btn:#353a52; --btnh:#454b69; --acc:#ffcc4d; --txt:#e8eaf3; }
   * { box-sizing: border-box; }
@@ -108,6 +108,28 @@
   .panel [hidden] { display:none !important; }
   #help { position:absolute; left:10px; bottom:10px; background:#0009; padding:8px 10px; border-radius:6px; font-size:12px; line-height:1.5; pointer-events:none; }
   /* In-game guide (same content as README.md) */
+  /* Title screen shown at launch */
+  #titleScreen { position:fixed; inset:0; z-index:40; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; overflow:hidden; cursor:pointer;
+    background:linear-gradient(#6ec3f4, #cdeefe 70%); transition:opacity .35s; }
+  #titleScreen.hide { opacity:0; pointer-events:none; }
+  #titleScreen .hills { position:absolute; left:-10%; right:-10%; bottom:64px; height:180px; background:radial-gradient(ellipse 260px 180px at 15% 100%, #9fd8a0 98%, transparent), radial-gradient(ellipse 300px 160px at 55% 100%, #9fd8a0 98%, transparent), radial-gradient(ellipse 240px 200px at 90% 100%, #9fd8a0 98%, transparent); }
+  #titleScreen .ground { position:absolute; left:0; right:0; bottom:0; height:64px; background:repeating-linear-gradient(90deg, #7a5532 0 32px, #6b4a2b 32px 64px); border-top:8px solid #4caf50; }
+  #titleScreen .hero { position:absolute; bottom:64px; left:-40px; width:22px; height:28px; background:#4da3ff; border-radius:4px; box-shadow:inset 0 -6px #2b6fc0; animation:heroRun 7s linear infinite, heroHop .7s ease-out infinite alternate; }
+  #titleScreen .hero::after { content:''; position:absolute; top:7px; right:4px; width:4px; height:5px; background:#fff; border-radius:1px; }
+  @keyframes heroRun { to { left:calc(100% + 40px); } }
+  @keyframes heroHop { from { transform:translateY(0); } to { transform:translateY(-70px); } }
+  #titleScreen h1 { position:relative; margin:0; font:900 clamp(40px, 9vw, 96px)/1 system-ui, sans-serif; letter-spacing:.02em; color:#ffcc4d; text-align:center;
+    text-shadow:0 4px 0 #b5562f, 0 8px 0 #6b4a2b, 0 14px 24px #0005; -webkit-text-stroke:2px #6b4a2b; animation:titleIn .6s cubic-bezier(.2,1.6,.4,1) both; }
+  #titleScreen .presents { position:relative; color:#fff; font:700 clamp(14px, 2.4vw, 22px) system-ui, sans-serif; letter-spacing:.25em; text-transform:uppercase; text-shadow:0 2px 0 #2b6fc0, 0 4px 12px #0004; animation:titleIn .6s ease-out both; }
+  #titleScreen h1 small { font-size:.4em; vertical-align:middle; -webkit-text-stroke:1px #6b4a2b; }
+  #titleScreen .tag { position:relative; color:#1b1d2a; font-size:clamp(14px, 2.2vw, 20px); font-weight:600; opacity:.75; }
+  #titleScreen button { position:relative; margin-top:10px; background:#2f8f4e; color:#fff; border:0; border-radius:10px; padding:14px 34px; font:700 20px system-ui, sans-serif; cursor:pointer; box-shadow:0 5px 0 #1d5e33; }
+  #titleScreen button:hover { background:#38a65b; }
+  #titleScreen button:active { transform:translateY(3px); box-shadow:0 2px 0 #1d5e33; }
+  #titleScreen .hint { position:relative; color:#1b1d2a; font-size:13px; opacity:.6; animation:blink 1.4s ease-in-out infinite; }
+  @keyframes titleIn { from { transform:scale(.4); opacity:0; } }
+  @keyframes blink { 50% { opacity:.2; } }
+  @media (prefers-reduced-motion: reduce) { #titleScreen * { animation:none !important; } }
   #guide { position:fixed; inset:0; z-index:20; background:#000a; display:flex; align-items:center; justify-content:center; padding:16px; }
   #guide[hidden] { display:none; }
   #guide .box { width:min(980px, 100%); height:min(86vh, 900px); display:flex; flex-direction:column; background:var(--panel); border:1px solid #444a66; border-radius:10px; box-shadow:0 12px 40px #000a; overflow:hidden; }
@@ -138,6 +160,14 @@
 </style>
 </head>
 <body>
+<div id="titleScreen" role="dialog" aria-labelledby="titleName">
+  <div class="hills"></div><div class="ground"></div><div class="hero"></div>
+  <div class="presents">Gub &amp; Gamesup presents</div>
+  <h1 id="titleName"><small>a</small> 2D Platformer<br>Maker</h1>
+  <div class="tag">Build a level · Press play · Jump in</div>
+  <button id="titleStart">▶ Start</button>
+  <div class="hint">Press Enter, Space or click to start</div>
+</div>
 <div id="bar">
   <button id="play" title="Play / Stop (Enter)">▶ Play</button>
   <button id="pause" title="Pause / Resume (P)" hidden>❚❚ Pause</button>
@@ -1691,6 +1721,21 @@ function toggleGuide(show = guideEl.hidden) {
 document.getElementById('guideBtn').onclick = e => { toggleGuide(); e.currentTarget.blur(); };
 document.getElementById('guideClose').onclick = () => toggleGuide(false);
 guideEl.addEventListener('mousedown', e => { if (e.target === guideEl) toggleGuide(false); });   // click outside the box
+
+// Title screen: blocks the editor until dismissed (capture phase runs before the editor's key handler).
+const titleEl = document.getElementById('titleScreen');
+function closeTitle() {
+  if (titleEl.classList.contains('hide')) return;
+  titleEl.classList.add('hide');
+  setTimeout(() => titleEl.remove(), 400);
+}
+titleEl.addEventListener('click', closeTitle);
+window.addEventListener('keydown', e => {
+  if (!titleEl.isConnected || titleEl.classList.contains('hide')) return;
+  e.stopImmediatePropagation(); e.preventDefault();
+  if (['Enter', 'Space', 'NumpadEnter', 'Escape'].includes(e.code)) closeTitle();
+}, true);
+document.getElementById('titleStart').focus();
 
 window.addEventListener('keydown', e => {
   if (guideOpen()) {   // the guide is modal: only its own keys work while it is open
