@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Platformer Maker</title>
+<style>
+  :root { --bg:#1b1d2a; --panel:#262a3b; --btn:#353a52; --btnh:#454b69; --acc:#ffcc4d; --txt:#e8eaf3; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; height:100%; background:var(--bg); color:var(--txt); font:14px system-ui, sans-serif; overflow:hidden; }
+  #bar { display:flex; flex-wrap:wrap; gap:6px; align-items:center; padding:8px 10px; background:var(--panel); }
+  #bar button, #palette button { background:var(--btn); color:var(--txt); border:2px solid transparent; border-radius:6px; padding:6px 10px; cursor:pointer; font:inherit; display:flex; align-items:center; gap:6px; }
+  #bar button:hover, #palette button:hover { background:var(--btnh); }
+  #bar button.on, #palette button.on { border-color:var(--acc); }
+  #bar .sep { width:1px; height:26px; background:#444a66; margin:0 4px; }
+  #play { background:#2f8f4e !important; font-weight:600; }
+  #play.stop { background:#b23b3b !important; }
+  .group { display:flex; align-items:center; gap:4px; padding:3px 4px 3px 8px; background:#1f2232; border-radius:8px; }
+  .group.active { box-shadow:inset 0 0 0 1px #ffcc4d55; }
+  .glabel { font-size:10px; text-transform:uppercase; letter-spacing:.06em; opacity:.6; margin-right:2px; }
+  .sw { width:16px; height:16px; border-radius:3px; display:inline-block; }
+  #status { margin-left:auto; opacity:.8; white-space:nowrap; }
+  #wrap { position:absolute; top:50px; left:0; right:0; bottom:50px; display:flex; align-items:center; justify-content:center; background:#11131c; }
+  .dd { position:relative; }
+  .dd .caret { font-size:10px; opacity:.7; }
+  .menu { position:absolute; top:calc(100% + 6px); left:0; z-index:10; min-width:240px; background:var(--panel); border:1px solid #444a66; border-radius:8px; padding:8px; box-shadow:0 8px 24px #0008; display:none; }
+  .menu.open { display:block; }
+  .menu h4 { margin:8px 4px 4px; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; opacity:.6; }
+  .menu h4:first-child { margin-top:2px; }
+  .menu .opts { display:grid; grid-template-columns:1fr 1fr; gap:4px; }
+  #bar .menu button { padding:5px 8px; justify-content:space-between; font-size:13px; }
+  #bar .menu button small { opacity:.55; font-size:11px; }
+  .menu hr { border:0; border-top:1px solid #444a66; margin:10px 0 6px; }
+  .menu .row { display:flex; align-items:center; gap:6px; margin:4px; }
+  .menu .row span { width:52px; opacity:.85; }
+  .menu .row input { width:64px; text-align:center; background:var(--btn); color:var(--txt); border:2px solid transparent; border-radius:6px; padding:4px; font:inherit; }
+  .menu .row input:focus { outline:none; border-color:var(--acc); }
+  #bar .menu .row button { padding:4px 9px; }
+  .menu .note { margin:6px 4px 0; font-size:11px; opacity:.55; line-height:1.4; }
+  #palette { position:absolute; left:0; right:0; bottom:0; display:flex; flex-wrap:wrap; gap:6px; align-items:center; justify-content:center; padding:8px 10px; background:var(--panel); }
+  canvas { display:block; image-rendering:pixelated; }
+  #charPanel { position:absolute; top:56px; right:10px; z-index:5; width:300px; background:var(--panel); border:1px solid #444a66; border-radius:8px; padding:12px 14px; box-shadow:0 8px 24px #0008; }
+  #charPanel h3 { margin:0 0 10px; font-size:13px; text-transform:uppercase; letter-spacing:.06em; opacity:.8; display:flex; justify-content:space-between; align-items:center; }
+  #charPanel h3 button { background:none; border:0; color:var(--txt); font-size:16px; cursor:pointer; opacity:.7; }
+  #charPanel .row { display:grid; grid-template-columns:1fr 64px; gap:4px 8px; align-items:center; margin-bottom:10px; }
+  #charPanel .row label { grid-column:1 / -1; font-size:12px; opacity:.85; }
+  #charPanel input[type=range] { width:100%; accent-color:var(--acc); }
+  #charPanel input[type=number] { width:64px; background:var(--btn); color:var(--txt); border:2px solid transparent; border-radius:6px; padding:4px; font:inherit; }
+  #charPanel input[type=number]:focus { outline:none; border-color:var(--acc); }
+  #charPanel .info { font-size:11px; opacity:.7; line-height:1.5; margin:4px 0 10px; }
+  #charPanel .foot { display:flex; justify-content:space-between; }
+  #charPanel .foot button { background:var(--btn); color:var(--txt); border:0; border-radius:6px; padding:5px 10px; cursor:pointer; font:inherit; }
+  #charPanel .foot button:hover { background:var(--btnh); }
+  #help { position:absolute; left:10px; bottom:10px; background:#0009; padding:8px 10px; border-radius:6px; font-size:12px; line-height:1.5; pointer-events:none; }
+</style>
+</head>
+<body>
+<div id="bar">
+  <button id="play" title="Play / Stop (Enter)">▶ Play</button>
+  <span class="sep"></span>
+  <button id="undo" title="Ctrl+Z">↶ Undo</button>
+  <button id="clear">Clear</button>
+  <button id="save">Save</button>
+  <button id="load">Load</button>
+  <button id="export">Export</button>
+  <button id="import">Import</button>
+  <input id="file" type="file" accept=".json,application/json" hidden>
+  <span class="sep"></span>
+  <button id="charBtn" title="Character settings (C)">🏃 Character</button>
+  <span class="sep"></span>
+  <div class="dd">
+    <button id="screenBtn" aria-haspopup="true" aria-expanded="false">🖥 <span id="screenLbl">Screen</span> <span class="caret">▼</span></button>
+    <div class="menu" id="screenMenu" role="menu">
+      <h4>Screen size</h4>
+      <div class="opts" id="screenOpts">
+        <button data-size="fit" style="grid-column:1/-1">Fit window <small>auto</small></button>
+      </div>
+      <hr>
+      <h4>Level size (tiles)</h4>
+      <div class="row" title="Adds/removes columns on the right">
+        <span>Width</span>
+        <button data-step="w" data-d="-10">−</button>
+        <input id="lvlw" type="number" min="20" max="1000" step="1">
+        <button data-step="w" data-d="10">+</button>
+      </div>
+      <div class="row" title="Adds/removes rows at the top">
+        <span>Height</span>
+        <button data-step="h" data-d="-1">−</button>
+        <input id="lvlh" type="number" min="8" max="200" step="1">
+        <button data-step="h" data-d="1">+</button>
+      </div>
+      <div class="note">Width grows on the right, height grows at the top.</div>
+    </div>
+  </div>
+  <span id="status"></span>
+</div>
+<div id="wrap">
+  <canvas id="c"></canvas>
+  <div id="help"></div>
+</div>
+<div id="palette"></div>
+<div id="charPanel" hidden>
+  <h3>Character <button id="charClose" title="Close">✕</button></h3>
+  <div id="charRows"></div>
+  <div class="info" id="charInfo"></div>
+  <div class="foot"><button id="charReset">Reset defaults</button><span style="font-size:11px;opacity:.6;align-self:center">Arcs shown on Start tile</span></div>
+</div>
+
+<script>
+// ---------- Config ----------
+const T = 32;            // tile size in world pixels
+let W = 120, H = 18;     // level size in tiles (editable from the toolbar)
+const VIEW_ROWS = 18;     // max rows visible on screen; taller levels scroll vertically
+const MIN_W = 20, MAX_W = 1000, MIN_H = 8, MAX_H = 200;
+// Categories of game elements, in toolbar order.
+const CATEGORIES = [
+  { id:'terrain', name:'Terrain' },
+  { id:'hazard',  name:'Hazards' },
+  { id:'enemy',   name:'Enemies' },
+  { id:'item',    name:'Items' },
+  { id:'gadget',  name:'Gadgets' },
+  { id:'level',   name:'Level' },
+  { id:'edit',    name:'Edit' },
+];
+const TOOLS = [
+  { id:'g', name:'Ground',   cat:'terrain', color:'#6b4a2b', key:'1' },
+  { id:'b', name:'Brick',    cat:'terrain', color:'#b5562f', key:'2' },
+  { id:'p', name:'Platform', cat:'terrain', color:'#8fa3b8', key:'3' },
+  { id:'s', name:'Spikes',   cat:'hazard',  color:'#d8dde6', key:'4' },
+  { id:'e', name:'Enemy',    cat:'enemy',   color:'#c94f6d', key:'5' },
+  { id:'c', name:'Coin',     cat:'item',    color:'#ffcc4d', key:'6' },
+  { id:'j', name:'Spring',   cat:'gadget',  color:'#4fd18b', key:'7' },
+  { id:'P', name:'Start',    cat:'level',   color:'#4da3ff', key:'8' },
+  { id:'f', name:'Goal',     cat:'level',   color:'#ffffff', key:'9' },
+  { id:'.', name:'Eraser',   cat:'edit',    color:'transparent', key:'0' },
+];
+// ---------- Character config ----------
+// jumpH / jumpW: height and horizontal distance (in tiles) of a full jump taken at top speed.
+// speed: top run speed in tiles/second.
+// impact: % by which a jump from standstill shrinks (height and air time); 0 = speed doesn't matter.
+const CHAR_FIELDS = [
+  { k:'jumpH',  name:'Jump height', unit:'tiles',   min:0.5, max:20,  step:0.1, tip:'Peak height of a full jump at top speed' },
+  { k:'jumpW',  name:'Jump width',  unit:'tiles',   min:1,   max:30,  step:0.1, tip:'Horizontal distance from take-off to landing (same level) at top speed' },
+  { k:'speed',  name:'Speed',       unit:'tiles/s', min:1,   max:30,  step:0.1, tip:'Top running speed' },
+  { k:'impact', name:'Speed impact on jump', unit:'%', min:0, max:100, step:1, tip:'How much a jump shrinks when not running: 0% = same jump at any speed, 100% = standing jump is tiny' },
+];
+const CHAR_DEFAULTS = { jumpH:3.4, jumpW:4.8, speed:7.2, impact:0 };
+let charCfg = { ...CHAR_DEFAULTS };
+function setCharCfg(c) {
+  for (const f of CHAR_FIELDS) {
+    const v = +c[f.k];
+    if (c[f.k] !== undefined && c[f.k] !== '' && Number.isFinite(v)) charCfg[f.k] = Math.max(f.min, Math.min(f.max, v));
+  }
+  if (typeof refreshCharUI === 'function') refreshCharUI();
+}
+// Derive physics constants (world px / s) from the tile-based config.
+function charPhys() {
+  const run = charCfg.speed * T, h = charCfg.jumpH * T;
+  const tUp = (charCfg.jumpW * T / run) / 2;      // time to apex
+  const grav = 2 * h / (tUp * tUp), jump = 2 * h / tUp + grav / 240;   // + half a 120 Hz step of gravity: integration loss
+  return {
+    run, grav, jump,
+    accel: run * 9.5, airAccel: run * 6, friction: run * 11.3,
+    maxFall: Math.max(950, jump * 1.1),
+    spring: jump * 1.64, stomp: jump * 0.66,
+  };
+}
+// Jump size factor for a given speed fraction s (0..1). Applied to height and air time.
+function jumpFactor(s) { return Math.max(0.15, 1 - charCfg.impact / 100 * (1 - Math.min(1, s))); }
+
+const SOLID = new Set(['g','b']);
+const ONEWAY = new Set(['p','j']);
+
+// ---------- State ----------
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+let grid, tool = 'g', mode = 'edit';
+let cam = { x:0, y:0 }, scale = 1;
+let mouse = { x:0, y:0, down:0, inside:false };
+let undoStack = [];
+const keys = {};
+let game = null;
+
+function emptyGrid() { return Array.from({ length:H }, () => Array(W).fill('.')); }
+function defaultLevel() {
+  const g = emptyGrid();
+  for (let x = 0; x < W; x++) { g[H-1][x] = 'g'; g[H-2][x] = 'g'; }
+  for (let x = 14; x < 17; x++) { g[H-1][x] = '.'; g[H-2][x] = '.'; }
+  for (let x = 8; x < 12; x++) g[H-6][x] = 'p';
+  g[H-7][9] = 'c'; g[H-7][10] = 'c';
+  g[H-3][22] = 'e';
+  g[H-3][3] = 'P';
+  g[H-3][30] = 'f';
+  return g;
+}
+function cloneGrid(g) { return g.map(r => r.slice()); }
+function serialize() { return JSON.stringify({ w:W, h:H, rows: grid.map(r => r.join('')), char: charCfg }); }
+function deserialize(s) {
+  const d = JSON.parse(s);
+  const h = Math.max(MIN_H, Math.min(MAX_H, d.h || d.rows.length));
+  const w = Math.max(MIN_W, Math.min(MAX_W, d.w || Math.max(...d.rows.map(r => r.length))));
+  const g = Array.from({ length:h }, () => Array(w).fill('.'));
+  d.rows.forEach((row, y) => { if (y < h) [...row].forEach((ch, x) => { if (x < w) g[y][x] = ch; }); });
+  if (d.char) setCharCfg(d.char);
+  return g;
+}
+// Make the global W/H match the current grid and refresh the view.
+function syncSize() {
+  H = grid.length; W = grid[0].length;
+  document.getElementById('lvlw').value = W;
+  document.getElementById('lvlh').value = H;
+  if (typeof resize === 'function' && cv.width) resize();
+}
+// Resize the level: width grows/shrinks on the right, height on the top (ground stays put).
+function setLevelSize(w, h) {
+  if (mode !== 'edit') { status('Stop playing to resize the level'); return syncSize(); }
+  w = Math.max(MIN_W, Math.min(MAX_W, Math.round(w) || W));
+  h = Math.max(MIN_H, Math.min(MAX_H, Math.round(h) || H));
+  if (w === W && h === H) return syncSize();
+  pushUndo();
+  const g = Array.from({ length:h }, () => Array(w).fill('.'));
+  const dy = h - H;
+  for (let y = 0; y < H; y++) {
+    const ny = y + dy; if (ny < 0 || ny >= h) continue;
+    for (let x = 0; x < Math.min(w, W); x++) g[ny][x] = grid[y][x];
+  }
+  cam.y += dy * T;   // keep the same area in view
+  grid = g; syncSize(); status(`Level size ${w} × ${h}`);
+}
+
+// ---------- UI ----------
+const toolsEl = document.getElementById('palette');
+CATEGORIES.forEach(cat => {
+  const items = TOOLS.filter(t => t.cat === cat.id);
+  if (!items.length) return;
+  const grp = document.createElement('span');
+  grp.className = 'group';
+  grp.dataset.cat = cat.id;
+  grp.innerHTML = `<span class="glabel">${cat.name}</span>`;
+  items.forEach(t => {
+    const b = document.createElement('button');
+    b.dataset.tool = t.id;
+    b.title = `${t.name} (${t.key})`;
+    b.innerHTML = `<span class="sw" style="background:${t.color};${t.id==='.'?'border:1px dashed #aaa':''}"></span>${t.name}`;
+    b.onclick = () => setTool(t.id);
+    grp.appendChild(b);
+  });
+  toolsEl.appendChild(grp);
+});
+function setTool(id) {
+  tool = id;
+  document.querySelectorAll('[data-tool]').forEach(b => b.classList.toggle('on', b.dataset.tool === id));
+  const cat = TOOLS.find(t => t.id === id)?.cat;
+  document.querySelectorAll('.group').forEach(g => g.classList.toggle('active', g.dataset.cat === cat));
+}
+function status(msg) { document.getElementById('status').textContent = msg; }
+function updateHelp() {
+  document.getElementById('help').innerHTML = mode === 'edit'
+    ? 'Left click: paint · Right click: erase · 1–0: tools · C: character<br>Arrows/WASD or wheel (Shift+wheel: vertical): scroll · Enter: play'
+    : '←/→ or A/D: move · Space/W/↑: jump · R: restart · Enter/Esc: back to editor';
+}
+
+// Character panel
+const charPanel = document.getElementById('charPanel'), charInputs = {};
+CHAR_FIELDS.forEach(f => {
+  const row = document.createElement('div'); row.className = 'row'; row.title = f.tip;
+  row.innerHTML = `<label>${f.name} <span style="opacity:.6">(${f.unit})</span></label>
+    <input type="range" min="${f.min}" max="${f.max}" step="${f.step}"><input type="number" min="${f.min}" max="${f.max}" step="${f.step}">`;
+  const [range, num] = row.querySelectorAll('input');
+  const onInput = e => { setCharCfg({ [f.k]: e.target.value }); saveCharCfg(); };
+  range.oninput = onInput;
+  num.onchange = e => { onInput(e); num.value = charCfg[f.k]; };
+  charInputs[f.k] = { range, num };
+  document.getElementById('charRows').appendChild(row);
+});
+function refreshCharUI() {
+  for (const f of CHAR_FIELDS) {
+    const { range, num } = charInputs[f.k];
+    range.value = charCfg[f.k];
+    if (document.activeElement !== num) num.value = charCfg[f.k];
+  }
+  const P = charPhys(), f0 = jumpFactor(0), air = 2 * P.jump / P.grav;
+  document.getElementById('charInfo').innerHTML =
+    `Full-speed jump: ${charCfg.jumpH.toFixed(1)} high × ${charCfg.jumpW.toFixed(1)} long, ${air.toFixed(2)} s in the air<br>` +
+    (charCfg.impact > 0 ? `Standing jump: ${(charCfg.jumpH * f0).toFixed(1)} tiles high, ${(air * f0).toFixed(2)} s in the air` : 'Jump height is the same at any speed');
+}
+function saveCharCfg() { try { localStorage.setItem('platformer-maker-char', JSON.stringify(charCfg)); } catch {} }
+function toggleCharPanel(show = charPanel.hidden) {
+  charPanel.hidden = !show;
+  document.getElementById('charBtn').classList.toggle('on', show);
+}
+document.getElementById('charBtn').onclick = () => toggleCharPanel();
+document.getElementById('charClose').onclick = () => toggleCharPanel(false);
+document.getElementById('charReset').onclick = () => { setCharCfg(CHAR_DEFAULTS); saveCharCfg(); status('Character reset'); };
+
+document.getElementById('play').onclick = toggleMode;
+document.getElementById('undo').onclick = undo;
+document.getElementById('clear').onclick = () => {
+  if (!confirm('Clear the whole level?')) return;
+  pushUndo(); grid = emptyGrid(); status('Cleared');
+};
+document.getElementById('save').onclick = () => {
+  try { localStorage.setItem('platformer-maker-level', serialize()); status('Saved to browser'); }
+  catch { status('Save failed'); }
+};
+document.getElementById('load').onclick = () => {
+  try {
+    const s = localStorage.getItem('platformer-maker-level');
+    if (!s) return status('Nothing saved yet');
+    pushUndo(); grid = deserialize(s); syncSize(); status('Loaded');
+  } catch { status('Load failed'); }
+};
+document.getElementById('export').onclick = () => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([serialize()], { type:'application/json' }));
+  a.download = 'level.json'; a.click();
+  URL.revokeObjectURL(a.href);
+};
+document.getElementById('import').onclick = () => document.getElementById('file').click();
+document.getElementById('file').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try { const g = deserialize(await f.text()); pushUndo(); grid = g; syncSize(); status('Imported ' + f.name); }
+  catch { status('Invalid level file'); }
+  e.target.value = '';
+};
+
+function pushUndo() { undoStack.push(cloneGrid(grid)); if (undoStack.length > 100) undoStack.shift(); }
+function undo() { if (mode === 'edit' && undoStack.length) { grid = undoStack.pop(); syncSize(); status('Undo'); } }
+
+// Screen size: 'fit' fills the available area; 'WxH' renders at that resolution,
+// shown letterboxed and scaled down if it doesn't fit the window.
+const SCREEN_SIZES = [
+  ['640x360', '16:9'], ['960x540', '16:9'], ['1280x720', '16:9'], ['1920x1080', '16:9'],
+  ['640x480', '4:3'],  ['800x600', '4:3'],  ['1024x768', '4:3'],
+  ['576x576', '1:1'],  ['1280x540', '21:9'],
+];
+const screenBtn = document.getElementById('screenBtn'), screenMenu = document.getElementById('screenMenu');
+const screenOpts = document.getElementById('screenOpts');
+SCREEN_SIZES.forEach(([v, ar]) => {
+  const b = document.createElement('button');
+  b.dataset.size = v;
+  b.innerHTML = `${v.replace('x', ' × ')} <small>${ar}</small>`;
+  screenOpts.appendChild(b);
+});
+let screenSize = 'fit';
+try { const s = localStorage.getItem('platformer-maker-screen'); if (s && screenOpts.querySelector(`[data-size="${s}"]`)) screenSize = s; } catch {}
+function updateScreenUI() {
+  screenOpts.querySelectorAll('[data-size]').forEach(b => b.classList.toggle('on', b.dataset.size === screenSize));
+  document.getElementById('screenLbl').textContent = screenSize === 'fit' ? 'Screen' : screenSize.replace('x', '×');
+}
+screenOpts.addEventListener('click', e => {
+  const b = e.target.closest('[data-size]'); if (!b) return;
+  screenSize = b.dataset.size;
+  try { localStorage.setItem('platformer-maker-screen', screenSize); } catch {}
+  updateScreenUI(); resize(); b.blur();
+  status('Screen: ' + (screenSize === 'fit' ? 'fit window' : screenSize.replace('x', ' × ')));
+});
+function setMenu(open) {
+  screenMenu.classList.toggle('open', open);
+  screenBtn.classList.toggle('on', open);
+  screenBtn.setAttribute('aria-expanded', open);
+}
+screenBtn.onclick = e => { e.stopPropagation(); setMenu(!screenMenu.classList.contains('open')); screenBtn.blur(); };
+document.addEventListener('mousedown', e => { if (!e.target.closest('.dd')) setMenu(false); });
+screenMenu.querySelectorAll('[data-step]').forEach(b => b.onclick = () => {
+  const d = +b.dataset.d;
+  setLevelSize(W + (b.dataset.step === 'w' ? d : 0), H + (b.dataset.step === 'h' ? d : 0));
+  b.blur();
+});
+updateScreenUI();
+
+function resize() {
+  const wrap = document.getElementById('wrap');
+  wrap.style.top = document.getElementById('bar').offsetHeight + 'px';
+  wrap.style.bottom = document.getElementById('palette').offsetHeight + 'px';
+  const aw = wrap.clientWidth, ah = wrap.clientHeight;
+  if (screenSize === 'fit') {
+    cv.width = aw; cv.height = ah;
+    cv.style.width = aw + 'px'; cv.style.height = ah + 'px';
+  } else {
+    const [sw, sh] = screenSize.split('x').map(Number);
+    const k = Math.min(1, aw / sw, ah / sh);
+    cv.width = sw; cv.height = sh;
+    cv.style.width = Math.floor(sw * k) + 'px'; cv.style.height = Math.floor(sh * k) + 'px';
+  }
+  scale = cv.height / (Math.min(H, VIEW_ROWS) * T);
+  clampCam();
+}
+window.addEventListener('resize', resize);
+['lvlw','lvlh'].forEach(id => document.getElementById(id).addEventListener('change', () => {
+  if (mode !== 'edit') return syncSize();
+  setLevelSize(+document.getElementById('lvlw').value, +document.getElementById('lvlh').value);
+}));
+
+function viewW() { return cv.width / scale; }
+function viewH() { return cv.height / scale; }
+function clampCam() {
+  cam.x = Math.max(0, Math.min(cam.x, W * T - viewW()));
+  if (W * T < viewW()) cam.x = 0;
+  cam.y = Math.max(0, Math.min(cam.y, H * T - viewH()));
+}
+
+// ---------- Editor input ----------
+function tileAtMouse() {
+  return { tx: Math.floor((mouse.x / scale + cam.x) / T), ty: Math.floor((mouse.y / scale + cam.y) / T) };
+}
+function paint() {
+  const { tx, ty } = tileAtMouse();
+  if (tx < 0 || ty < 0 || tx >= W || ty >= H) return;
+  const id = mouse.down === 2 ? '.' : tool;
+  if (id === 'P') for (const row of grid) for (let x = 0; x < W; x++) if (row[x] === 'P') row[x] = '.';
+  grid[ty][tx] = id;
+}
+cv.addEventListener('contextmenu', e => e.preventDefault());
+cv.addEventListener('mousedown', e => {
+  if (mode !== 'edit') return;
+  mouse.down = e.button === 2 ? 2 : (e.button === 0 ? 1 : 0);
+  if (mouse.down) { pushUndo(); paint(); }
+});
+window.addEventListener('mouseup', () => mouse.down = 0);
+cv.addEventListener('mousemove', e => {
+  const r = cv.getBoundingClientRect();
+  mouse.x = (e.clientX - r.left) * cv.width / r.width;
+  mouse.y = (e.clientY - r.top) * cv.height / r.height; mouse.inside = true;
+  if (mode === 'edit' && mouse.down) paint();
+});
+cv.addEventListener('mouseleave', () => mouse.inside = false);
+cv.addEventListener('wheel', e => {
+  e.preventDefault();
+  if (mode !== 'edit') return;
+  if (e.shiftKey) cam.y += (e.deltaY || e.deltaX); else cam.x += (e.deltaX || e.deltaY);
+  clampCam();
+}, { passive:false });
+
+window.addEventListener('keydown', e => {
+  if (e.code === 'Escape' && screenMenu.classList.contains('open')) { setMenu(false); return; }
+  if (e.target.tagName === 'INPUT') { if (e.code === 'Enter') e.target.blur(); return; }
+  if (!e.ctrlKey && !e.metaKey) keys[e.code] = true;   // Ctrl+Z etc. must not pan
+  if (e.code === 'Enter' || (e.code === 'Escape' && mode === 'play')) { toggleMode(); e.preventDefault(); return; }
+  if (mode === 'edit') {
+    if ((e.ctrlKey || e.metaKey) && e.code === 'KeyZ') { undo(); e.preventDefault(); return; }
+    if (e.code === 'KeyC' && !e.ctrlKey && !e.metaKey) { toggleCharPanel(); return; }
+    const t = TOOLS.find(t => t.key === e.key); if (t) setTool(t.id);
+  } else {
+    if (['Space','ArrowUp','KeyW','KeyZ'].includes(e.code)) { game.jumpBuffer = 0.12; e.preventDefault(); }
+    if (e.code === 'KeyR') startGame();
+    if (e.code.startsWith('Arrow') || e.code === 'Space') e.preventDefault();
+  }
+});
+window.addEventListener('keyup', e => { keys[e.code] = false; });
+
+// ---------- Play mode ----------
+function toggleMode() {
+  if (mode === 'edit') {
+    let found = false;
+    for (const row of grid) if (row.includes('P')) found = true;
+    if (!found) return status('Place a Start tile first (8)');
+    mode = 'play'; game = { deaths: 0 }; startGame();
+  } else {
+    mode = 'edit'; game = null; status('Editing');
+  }
+  const b = document.getElementById('play');
+  b.textContent = mode === 'edit' ? '▶ Play' : '■ Stop';
+  b.classList.toggle('stop', mode === 'play');
+  updateHelp();
+}
+
+function startGame() {
+  const g = cloneGrid(grid), enemies = [];
+  let sx = 0, sy = 0, coins = 0;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const c = g[y][x];
+    if (c === 'P') { sx = x; sy = y; g[y][x] = '.'; }
+    else if (c === 'e') { enemies.push({ x:x*T+4, y:y*T+8, w:24, h:24, vx:-60, vy:0, dead:0 }); g[y][x] = '.'; }
+    else if (c === 'c') coins++;
+  }
+  Object.assign(game, {
+    g, enemies, totalCoins: coins, coins: 0, won: false, t: 0,
+    p: { x: sx*T+5, y: sy*T+4, w:22, h:28, vx:0, vy:0, onGround:false, coyote:0, face:1, grav:0 },
+    phys: charPhys(),
+    jumpBuffer: 0, jumpHeld: false,
+  });
+  cam.x = game.p.x - viewW() / 2; cam.y = game.p.y - viewH() / 2; clampCam();
+  status(`Coins 0/${coins} · Deaths ${game.deaths}`);
+}
+
+function tileAt(g, tx, ty) {
+  if (tx < 0 || tx >= W) return 'g';     // side walls
+  if (ty < 0 || ty >= H) return '.';
+  return g[ty][tx];
+}
+function overlaps(a, bx, by, bw, bh) { return a.x < bx+bw && a.x+a.w > bx && a.y < by+bh && a.y+a.h > by; }
+
+// Move a body with axis-separated tile collision. Returns flags.
+function moveBody(b, g, dt, useOneWay) {
+  const res = { hitWall:false, landed:false, landedOn:null, hitCeil:false };
+  // X
+  b.x += b.vx * dt;
+  let y0 = Math.floor(b.y / T), y1 = Math.floor((b.y + b.h - 0.01) / T);
+  if (b.vx > 0) {
+    const tx = Math.floor((b.x + b.w) / T);
+    for (let ty = y0; ty <= y1; ty++) if (SOLID.has(tileAt(g, tx, ty))) { b.x = tx*T - b.w; b.vx = 0; res.hitWall = true; break; }
+  } else if (b.vx < 0) {
+    const tx = Math.floor(b.x / T);
+    for (let ty = y0; ty <= y1; ty++) if (SOLID.has(tileAt(g, tx, ty))) { b.x = (tx+1)*T; b.vx = 0; res.hitWall = true; break; }
+  }
+  // Y
+  const prevBottom = b.y + b.h;
+  b.y += b.vy * dt;
+  const x0 = Math.floor(b.x / T), x1 = Math.floor((b.x + b.w - 0.01) / T);
+  if (b.vy > 0) {
+    const ty = Math.floor((b.y + b.h) / T);
+    for (let tx = x0; tx <= x1; tx++) {
+      const c = tileAt(g, tx, ty);
+      if (SOLID.has(c) || (useOneWay && ONEWAY.has(c) && prevBottom <= ty*T + 0.5)) {
+        b.y = ty*T - b.h; b.vy = 0; res.landed = true; res.landedOn = c;
+        if (c === 'j') break;  // spring takes priority
+      }
+    }
+  } else if (b.vy < 0) {
+    const ty = Math.floor(b.y / T);
+    for (let tx = x0; tx <= x1; tx++) if (SOLID.has(tileAt(g, tx, ty))) { b.y = (ty+1)*T; b.vy = 0; res.hitCeil = true; break; }
+  }
+  return res;
+}
+
+const PHYS = { grav: 1900, maxFall: 950 };   // enemies only; the player uses charPhys()
+
+// Start a jump with velocity v0. Gravity is scaled per jump so height and air time
+// both shrink by jumpFactor(speed) while take-off velocity stays the same.
+function doJump(p, P, v0) {
+  const f = jumpFactor(Math.abs(p.vx) / P.run);
+  p.vy = -v0; p.grav = P.grav / f;
+}
+
+function die() { game.deaths++; startGame(); }
+
+function update(dt) {
+  const G = game, p = G.p, C = G.phys;
+  G.t += dt;
+  if (G.won) return;
+
+  // Horizontal input
+  const dir = (keys.ArrowRight || keys.KeyD ? 1 : 0) - (keys.ArrowLeft || keys.KeyA || keys.KeyQ ? 1 : 0);
+  if (dir) {
+    p.face = dir;
+    p.vx += dir * (p.onGround ? C.accel : C.airAccel) * dt;
+    p.vx = Math.max(-C.run, Math.min(C.run, p.vx));
+  } else if (p.onGround) {
+    const f = C.friction * dt;
+    p.vx = Math.abs(p.vx) <= f ? 0 : p.vx - Math.sign(p.vx) * f;
+  }
+
+  // Jump (buffer + coyote time + variable height)
+  const held = keys.Space || keys.ArrowUp || keys.KeyW || keys.KeyZ;
+  G.jumpBuffer -= dt; p.coyote -= dt;
+  if (G.jumpBuffer > 0 && p.coyote > 0) {
+    doJump(p, C, C.jump); G.jumpBuffer = 0; p.coyote = 0; G.jumpHeld = true;
+  }
+  if (G.jumpHeld && !held && p.vy < 0) { p.vy *= 0.45; G.jumpHeld = false; }
+  if (p.vy >= 0) G.jumpHeld = false;
+
+  p.vy = Math.min(p.vy + (p.grav || C.grav) * dt, C.maxFall);
+  const r = moveBody(p, G.g, dt, true);
+  p.onGround = r.landed;
+  if (r.landed) {
+    p.grav = 0;
+    if (r.landedOn === 'j') { p.vy = -C.spring; p.onGround = false; G.jumpHeld = false; }
+    else p.coyote = 0.1;
+  }
+
+  // Tile interactions
+  const x0 = Math.floor(p.x / T), x1 = Math.floor((p.x + p.w - 0.01) / T);
+  const y0 = Math.floor(p.y / T), y1 = Math.floor((p.y + p.h - 0.01) / T);
+  for (let ty = y0; ty <= y1; ty++) for (let tx = x0; tx <= x1; tx++) {
+    const c = tileAt(G.g, tx, ty);
+    if (c === 'c' && overlaps(p, tx*T+8, ty*T+8, 16, 16)) {
+      G.g[ty][tx] = '.'; G.coins++;
+    } else if (c === 's' && overlaps(p, tx*T+4, ty*T+14, 24, 18)) {
+      return die();
+    } else if (c === 'f' && overlaps(p, tx*T+10, ty*T, 12, T)) {
+      G.won = true;
+    }
+  }
+  if (p.y > H * T + 64) return die();
+
+  // Enemies
+  for (const e of G.enemies) {
+    if (e.dead) { e.dead += dt; continue; }
+    e.vy = Math.min(e.vy + PHYS.grav * dt, PHYS.maxFall);
+    const er = moveBody(e, G.g, dt, true);
+    if (er.hitWall) e.vx = -Math.sign(e.vx || -1) * 60;
+    else if (er.landed) {
+      // turn around at ledges
+      const fx = e.vx > 0 ? e.x + e.w + 1 : e.x - 1;
+      const below = tileAt(G.g, Math.floor(fx / T), Math.floor((e.y + e.h + 1) / T));
+      if (!SOLID.has(below) && !ONEWAY.has(below)) e.vx = -e.vx;
+    }
+    if (e.y > H * T + 64) e.dead = 99;
+    if (overlaps(p, e.x, e.y, e.w, e.h)) {
+      if (p.vy > 0 && p.y + p.h - e.y < 16) {
+        e.dead = 0.001; if (held) doJump(p, C, C.jump); else { p.vy = -C.stomp; p.grav = 0; } G.jumpHeld = held;
+      } else return die();
+    }
+  }
+  G.enemies = G.enemies.filter(e => !e.dead || e.dead < 0.4);
+
+  // Camera
+  const target = p.x + p.w / 2 - viewW() / 2 + p.face * 40;
+  cam.x += (target - cam.x) * Math.min(1, dt * 6);
+  const targetY = p.y + p.h / 2 - viewH() * 0.55;
+  cam.y += (targetY - cam.y) * Math.min(1, dt * 5);
+  clampCam();
+
+  status(G.won ? `Level complete! Coins ${G.coins}/${G.totalCoins} · Deaths ${G.deaths}` : `Coins ${G.coins}/${G.totalCoins} · Deaths ${G.deaths}`);
+}
+
+// ---------- Rendering ----------
+function drawTile(c, x, y, t) {
+  switch (c) {
+    case 'g':
+      ctx.fillStyle = '#6b4a2b'; ctx.fillRect(x, y, T, T);
+      ctx.fillStyle = '#5a3d23'; ctx.fillRect(x+6, y+12, 6, 6); ctx.fillRect(x+20, y+22, 5, 5);
+      ctx.fillStyle = '#4caf50'; ctx.fillRect(x, y, T, 6);
+      break;
+    case 'b':
+      ctx.fillStyle = '#b5562f'; ctx.fillRect(x, y, T, T);
+      ctx.fillStyle = '#7a3519';
+      ctx.fillRect(x, y+15, T, 2); ctx.fillRect(x, y+31, T, 1);
+      ctx.fillRect(x+15, y, 2, 15); ctx.fillRect(x+7, y+17, 2, 15); ctx.fillRect(x+23, y+17, 2, 15);
+      break;
+    case 'p':
+      ctx.fillStyle = '#8fa3b8'; ctx.fillRect(x, y, T, 8);
+      ctx.fillStyle = '#5f7287'; ctx.fillRect(x, y+8, T, 3);
+      break;
+    case 's':
+      ctx.fillStyle = '#d8dde6';
+      ctx.beginPath();
+      for (let i = 0; i < 4; i++) { ctx.moveTo(x+i*8, y+T); ctx.lineTo(x+i*8+4, y+12); ctx.lineTo(x+i*8+8, y+T); }
+      ctx.fill();
+      break;
+    case 'c': {
+      const w = Math.abs(Math.cos(t * 3 + x * 0.05)) * 8 + 2;
+      ctx.fillStyle = '#ffcc4d';
+      ctx.beginPath(); ctx.ellipse(x+16, y+16, w, 10, 0, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#e0a020'; ctx.fillRect(x+15, y+10, 2, 12);
+      break;
+    }
+    case 'j':
+      ctx.fillStyle = '#888'; ctx.fillRect(x+6, y+18, 20, 14);
+      ctx.fillStyle = '#4fd18b'; ctx.fillRect(x+2, y+12, 28, 6);
+      ctx.strokeStyle = '#333'; ctx.lineWidth = 2; ctx.beginPath();
+      for (let i = 0; i < 3; i++) { ctx.moveTo(x+8, y+21+i*4); ctx.lineTo(x+24, y+23+i*4); }
+      ctx.stroke();
+      break;
+    case 'e': drawEnemy(x+4, y+8, 24, 24, 0); break;
+    case 'P': drawPlayer(x+5, y+4, 22, 28, 1); break;
+    case 'f':
+      ctx.fillStyle = '#ddd'; ctx.fillRect(x+14, y, 3, T);
+      ctx.fillStyle = '#e94560';
+      ctx.beginPath(); ctx.moveTo(x+17, y+2); ctx.lineTo(x+30, y+8); ctx.lineTo(x+17, y+14); ctx.fill();
+      break;
+  }
+}
+function drawPlayer(x, y, w, h, face) {
+  ctx.fillStyle = '#4da3ff'; ctx.fillRect(x, y, w, h);
+  ctx.fillStyle = '#2a6fc0'; ctx.fillRect(x, y+h-6, w, 6);
+  ctx.fillStyle = '#fff';
+  const ex = face > 0 ? x+12 : x+3;
+  ctx.fillRect(ex, y+7, 6, 7);
+  ctx.fillStyle = '#111'; ctx.fillRect(ex + (face > 0 ? 3 : 0), y+9, 3, 4);
+}
+function drawEnemy(x, y, w, h, squash) {
+  ctx.fillStyle = '#c94f6d';
+  if (squash) { ctx.fillRect(x, y+h-8, w, 8); return; }
+  ctx.beginPath(); ctx.roundRect(x, y, w, h, [10, 10, 2, 2]); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.fillRect(x+5, y+7, 5, 6); ctx.fillRect(x+14, y+7, 5, 6);
+  ctx.fillStyle = '#111'; ctx.fillRect(x+6, y+9, 3, 3); ctx.fillRect(x+15, y+9, 3, 3);
+}
+
+// Preview the jump trajectory (player feet) from the Start tile, both directions.
+function drawJumpArcs() {
+  let sx = -1, sy = -1;
+  for (let y = 0; y < H && sx < 0; y++) { const x = grid[y].indexOf('P'); if (x >= 0) { sx = x; sy = y; } }
+  if (sx < 0) return;
+  const P = charPhys(), cx = sx * T + 16, by = sy * T + 32;
+  const arcs = [{ s:1, color:'#ffcc4d' }];
+  if (charCfg.impact > 0) arcs.push({ s:0, color:'#ff8a4d' });   // standing jump (straight up)
+  ctx.lineWidth = 2 / scale; ctx.setLineDash([6 / scale, 4 / scale]);
+  for (const a of arcs) {
+    const f = jumpFactor(a.s), g = P.grav / f, tAir = 2 * P.jump / g, vx = P.run * a.s;
+    for (const dir of (a.s ? [1, -1] : [1])) {
+      ctx.strokeStyle = a.color; ctx.beginPath();
+      for (let i = 0; i <= 40; i++) {
+        const t = tAir * i / 40, x = cx + dir * vx * t, y = by - (P.jump * t - g * t * t / 2);
+        i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+      }
+      ctx.stroke();
+    }
+    // peak marker
+    const peak = by - charCfg.jumpH * T * f;
+    ctx.strokeStyle = a.color; ctx.beginPath(); ctx.moveTo(cx - 10, peak); ctx.lineTo(cx + 10, peak); ctx.stroke();
+  }
+  ctx.setLineDash([]);
+}
+
+function render(t) {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  const sky = ctx.createLinearGradient(0, 0, 0, cv.height);
+  sky.addColorStop(0, '#6ec3f4'); sky.addColorStop(1, '#cdeefe');
+  ctx.fillStyle = sky; ctx.fillRect(0, 0, cv.width, cv.height);
+
+  ctx.setTransform(scale, 0, 0, scale, -cam.x * scale, -cam.y * scale);
+  // parallax hills
+  ctx.fillStyle = '#9fd8a0';
+  for (let i = -1; i < 12; i++) {
+    const hx = i * 400 + cam.x * 0.5 - (cam.x * 0.5 % 400);
+    ctx.beginPath(); ctx.ellipse(hx + 200, H*T, 260, 180, 0, Math.PI, 0); ctx.fill();
+  }
+
+  const g = mode === 'play' ? game.g : grid;
+  const tx0 = Math.max(0, Math.floor(cam.x / T)), tx1 = Math.min(W - 1, Math.ceil((cam.x + viewW()) / T));
+  const ty0 = Math.max(0, Math.floor(cam.y / T)), ty1 = Math.min(H - 1, Math.ceil((cam.y + viewH()) / T));
+  for (let y = ty0; y <= ty1; y++) for (let x = tx0; x <= tx1; x++) {
+    const c = g[y][x];
+    if (c !== '.') drawTile(c, x*T, y*T, t);
+  }
+
+  if (mode === 'edit') {
+    ctx.strokeStyle = 'rgba(0,0,0,.08)'; ctx.lineWidth = 1 / scale;
+    ctx.beginPath();
+    for (let x = tx0; x <= tx1 + 1; x++) { ctx.moveTo(x*T, 0); ctx.lineTo(x*T, H*T); }
+    for (let y = 0; y <= H; y++) { ctx.moveTo(tx0*T, y*T); ctx.lineTo((tx1+1)*T, y*T); }
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(0,0,0,.4)'; ctx.lineWidth = 2 / scale;
+    ctx.strokeRect(0, 0, W*T, H*T);
+    if (!charPanel.hidden) drawJumpArcs();
+    if (mouse.inside) {
+      const { tx, ty } = tileAtMouse();
+      if (tx >= 0 && ty >= 0 && tx < W && ty < H) {
+        ctx.globalAlpha = 0.5; if (tool !== '.') drawTile(tool, tx*T, ty*T, t); ctx.globalAlpha = 1;
+        ctx.strokeStyle = tool === '.' ? '#e33' : '#fff'; ctx.strokeRect(tx*T + 1, ty*T + 1, T - 2, T - 2);
+      }
+    }
+  } else {
+    for (const e of game.enemies) drawEnemy(e.x, e.y, e.w, e.h, e.dead);
+    drawPlayer(game.p.x, game.p.y, game.p.w, game.p.h, game.p.face);
+    if (game.won) {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(0, 0, cv.width, cv.height);
+      ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
+      ctx.font = 'bold 48px system-ui'; ctx.fillText('Level Complete!', cv.width/2, cv.height/2 - 10);
+      ctx.font = '20px system-ui';
+      ctx.fillText(`Coins ${game.coins}/${game.totalCoins} · Deaths ${game.deaths}`, cv.width/2, cv.height/2 + 30);
+      ctx.fillText('R: play again · Enter: back to editor', cv.width/2, cv.height/2 + 60);
+    }
+  }
+}
+
+// ---------- Main loop ----------
+let last = performance.now(), acc = 0;
+const STEP = 1 / 120;
+function frame(now) {
+  const dt = Math.min(0.1, (now - last) / 1000); last = now;
+  if (mode === 'edit') {
+    const pan = (keys.ArrowRight || keys.KeyD ? 1 : 0) - (keys.ArrowLeft || keys.KeyA || keys.KeyQ ? 1 : 0);
+    const panY = (keys.ArrowDown || keys.KeyS ? 1 : 0) - (keys.ArrowUp || keys.KeyW || keys.KeyZ ? 1 : 0);
+    if (pan || panY) { cam.x += pan * 700 * dt; cam.y += panY * 700 * dt; clampCam(); }
+  } else {
+    acc += dt;
+    while (acc >= STEP && mode === 'play') { update(STEP); acc -= STEP; }
+  }
+  render(now / 1000);
+  requestAnimationFrame(frame);
+}
+
+// ---------- Boot ----------
+try { const c = localStorage.getItem('platformer-maker-char'); if (c) setCharCfg(JSON.parse(c)); } catch {}
+refreshCharUI();
+try { const s = localStorage.getItem('platformer-maker-level'); grid = s ? deserialize(s) : defaultLevel(); }
+catch { grid = defaultLevel(); }
+syncSize(); setTool('g'); updateHelp(); resize(); cam.y = H * T; clampCam(); status('Editing');
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
