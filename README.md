@@ -2,7 +2,7 @@
 
 A tile-based 2D platformer editor that runs in a single HTML file. Build a level, set up your character, enemies and power-ups, then press **Play** to try it instantly.
 
-> The same guide is available inside the editor: click **❓ Help** in the menu bar or press **H** (or **F1**).
+> The same guide is available inside the editor: click **❓ Help** in the toolbar or press **H** (or **F1**).
 
 ---
 
@@ -10,22 +10,24 @@ A tile-based 2D platformer editor that runs in a single HTML file. Build a level
 
 1. [Getting started](#getting-started)
 2. [Screen layout](#screen-layout)
-3. [Menu bar & play controls](#menu-bar--play-controls)
+3. [Toolbar buttons](#toolbar-buttons)
 4. [Editor layout](#editor-layout)
 5. [Tile palette](#tile-palette)
 6. [Hidden items in Breakable blocks](#hidden-items-in-breakable-blocks)
 7. [Moving platforms](#moving-platforms)
 8. [Springs](#springs)
-9. [Character settings](#character-settings)
-10. [Power-ups](#power-ups)
-11. [Enemies](#enemies-1)
-12. [Game system (score & lives)](#game-system-score--lives)
-13. [Screen & level size](#screen--level-size)
-14. [Cheats](#cheats)
-15. [Controls](#controls)
-16. [Gameplay rules](#gameplay-rules)
-17. [Saving, loading & file format](#saving-loading--file-format)
-18. [Tips](#tips)
+9. [Bubble spawners](#bubble-spawners)
+10. [Goal pole](#goal-pole)
+11. [Character settings](#character-settings)
+12. [Power-ups](#power-ups)
+13. [Enemies](#enemies-1)
+14. [Game system (score & lives)](#game-system-score--lives)
+15. [Screen & level size](#screen--level-size)
+16. [Cheats](#cheats)
+17. [Controls](#controls)
+18. [Gameplay rules](#gameplay-rules)
+19. [Saving, loading & file format](#saving-loading--file-format)
+20. [Tips](#tips)
 
 ---
 
@@ -34,7 +36,7 @@ A tile-based 2D platformer editor that runs in a single HTML file. Build a level
 1. Open `index.html` in a modern browser (Chrome, Firefox, Edge, Safari). No install or server needed.
 2. On the title screen, click **▶ Start** (or press `Enter`, `Space` or `Esc`).
 3. A small example level loads the first time.
-4. Pick a tile from the palette at the bottom, paint with the **left mouse button**, erase with the **right mouse button**.
+4. Pick a tile from the **Level elements** bar (at the bottom by default), paint with the **left mouse button**, erase with the **right mouse button**.
 5. Make sure the level has a **Start** tile (and ideally a **Goal**), then press **▶ Play** or **Enter**.
 6. Press **Enter** or **Esc** to go back to the editor.
 
@@ -42,70 +44,60 @@ A tile-based 2D platformer editor that runs in a single HTML file. Build a level
 
 ## Screen layout
 
-| Area | Where | What it does |
+| Area | Default place | What it does |
 |---|---|---|
-| **Menu bar** | Top (movable) | File actions, settings panels and menus. The status text on the right shows messages, and score/HP/lives while playing. |
+| **Bars** | Top and bottom | Five toolbars (Play, Edit & files, Game design, Level elements, Layout & Help). Each can be docked on any edge of the screen, see [Editor layout](#editor-layout). The status text shows messages, and score/HP/lives while playing. |
 | **Canvas** | Middle | The level. A grid is shown in edit mode. |
-| **Tool palette** | Bottom (movable) | **▶ Play** / **❚❚ Pause** on the left, then the tile categories. Click a category to select its last-used tile; categories with a **▲** open a list of all their tiles. |
 | **Hint bar** | Bottom-left of the canvas | Short reminder of the keys for the current mode. |
-| **Side panels** | Left / right | Character, Power-ups and Enemies editors (right); Moving-platform and Spring settings (left, shown while that tool is selected). Sections inside panels can be collapsed; the editor remembers which are open. |
-
-Both bars can be moved to the top or bottom of the screen from the **🧩 Layout** menu (see [Editor layout](#editor-layout)).
+| **Side panels** | Left / right | Character, Power-ups and Enemies editors (right); settings for the selected tool (left): Moving platform, Spring, Flame jet, Bubbles or Goal. Sections inside panels and menus can be collapsed; the editor remembers which are open. |
 
 ---
 
-## Menu bar & play controls
+## Toolbar buttons
 
-**Play controls** (left end of the tool palette):
+| Button | Bar | Shortcut | Description |
+|---|---|---|---|
+| **▶ Play / ■ Stop** | Play | `Enter` | Switch between editing and playing. Play needs a Start tile. |
+| **❚❚ Pause / ▶ Resume** | Play | `P` | Only shown while playing. Freezes the game until you resume. The game also pauses by itself when the window loses focus. |
+| **↶ Undo** | Edit & files | `Ctrl+Z` | Undo the last paint stroke, clear, resize, load or import (up to 100 steps). |
+| **Clear** | Edit & files | — | Empty the whole level (asks for confirmation; can be undone). |
+| **Save** / **Load** | Edit & files | — | Save the level to the browser (localStorage) / load it back. |
+| **Export** / **Import** | Edit & files | — | Download the level as `level.json` / open a `.json` level file. |
+| **🏃 Character** | Game design | `C` | Open the Character panel (jump, speed, shots, health, perks). |
+| **⭐ Power-ups** | Game design | `U` | Open the Power-ups editor. |
+| **👾 Enemies** | Game design | `E` | Open the Enemies editor. |
+| **⚙ Game system** | Game design | — | Score, coins, lives and hazard settings. |
+| **🖥 Screen** | Game design | — | Screen resolution and level size. |
+| **🎮 Cheats** | Game design | `I` `T` `N` | Invincibility, endless time, no enemy AI. |
+| **🧩 Layout** | Layout & Help | — | Dock each bar on any edge of the screen. |
+| **❓ Help** | Layout & Help | `H` / `F1` | Open this guide in the game (pauses the game). |
 
-| Button | Shortcut | Description |
-|---|---|---|
-| **▶ Play / ■ Stop** | `Enter` | Switch between editing and playing. Play needs a Start tile. |
-| **❚❚ Pause / ▶ Resume** | `P` | Only shown while playing. Freezes the game until you resume. The game also pauses by itself when the window loses focus. |
-
-**Menu bar**:
-
-| Button | Shortcut | Description |
-|---|---|---|
-| **↶ Undo** | `Ctrl+Z` | Undo the last paint stroke, clear, resize, load or import (up to 100 steps). |
-| **Clear** | — | Empty the whole level (asks for confirmation; can be undone). |
-| **Save** | — | Save the level to the browser (localStorage). |
-| **Load** | — | Load the level saved in the browser. |
-| **Export** | — | Download the level as `level.json`. |
-| **Import** | — | Open a `.json` level file. |
-| **🏃 Character** | `C` | Open the Character panel (jump, speed, shots, health, perks). |
-| **⭐ Power-ups** | `U` | Open the Power-ups editor. |
-| **👾 Enemies** | `E` | Open the Enemies editor. |
-| **⚙ Game system** | — | Points per coin and coins needed for an extra life. |
-| **🖥 Screen** | — | Screen resolution and level size. |
-| **🎮 Cheats** | `I` `T` `N` | Invincibility, endless time, no enemy AI. |
-| **🧩 Layout** | — | Move the menu bar and tool palette to the top or bottom of the screen. |
-| **❓ Help** | `H` / `F1` | Open this guide in the game (pauses the game). |
-
-Only one dropdown menu is open at a time; click outside or press `Esc` to close it.
+The **Level elements** bar holds the tile categories (see [Tile palette](#tile-palette)). Only one dropdown menu is open at a time; click outside or press `Esc` to close it.
 
 ---
 
 ## Editor layout
 
-Open the **🧩 Layout** menu to arrange the screen.
+Open the **🧩 Layout** menu to arrange the screen. The tools are split into five bars, and each one can be docked on any edge: ⬆ top, ⬇ bottom, ⬅ left or ➡ right.
 
-| Option | Choices | Default | Description |
-|---|---|---|---|
-| **Menu bar** | ⬆ Top · ⬇ Bottom | Top | Where the bar with the file actions and menus sits. |
-| **Tool palette** | ⬆ Top · ⬇ Bottom | Bottom | Where the bar with Play/Pause and the tile categories sits. |
-| **⇅ Swap bars** | — | — | Exchanges the two bars' positions. |
-| **Reset** | — | — | Back to menu bar on top, tool palette at the bottom. |
+| Bar | Default | Contains |
+|---|---|---|
+| **▶ Play / Pause** | Bottom | Test the level, pause it. |
+| **↶ Edit & files** | Top | Undo, Clear, Save, Load, Export, Import. |
+| **🏃 Game design** | Top | Character, Power-ups, Enemies, Game system, Screen, Cheats. |
+| **🧱 Level elements** | Bottom | The tile categories (Terrain, Hazards…). |
+| **🧩 Layout & Help** | Top | The Layout menu, the Help button and the status text. |
 
-- When both bars are on the same side they stack, with the menu bar on the outside.
-- Dropdown menus and palette lists open toward the middle of the screen, so they are never cut off.
+- **⇅ Flip sides** moves every bar to the opposite edge (top ↔ bottom, left ↔ right). **Reset** restores the defaults.
+- Bars on the same edge sit side by side; on the left or right edge they stack vertically.
+- Dropdown menus and element lists open toward the play area, so they are never cut off.
 - The layout is saved in the browser.
 
 ---
 
 ## Tile palette
 
-Select a tile with its key or from the tool palette. **Middle-click** a tile in the level to pick it up as the current tool (this also copies a moving platform's or spring's settings).
+Select a tile with its key or from the **Level elements** bar: click a category to select its last-used tile; categories with a **▲** open a list of all their tiles. **Middle-click** a tile in the level to pick it up as the current tool (this also copies a moving platform's, spring's, flame jet's, bubble spawner's or goal's settings).
 
 ### Terrain
 
@@ -117,12 +109,34 @@ Select a tile with its key or from the tool palette. **Middle-click** a tile in 
 | **Platform** | `3` | One-way platform: jump up through it, land on top. |
 | **Falling** | `F` | One-way platform that shakes for 0.5 s after you land on it, then falls. Comes back on each new life. |
 | **Moving** | `M` | One-way platform that moves along a path. See [Moving platforms](#moving-platforms). |
+| **Power brick** | `X` | Solid block: hit it **from below** to release a random power-up (from your Power-ups list) on top of it. Gives a coin if there are no power-ups. Works once, then it is spent. |
+| **Coin brick** | `O` | Solid block: hit it **from below** to get a coin. Works once, then it is spent. |
+| **Spin brick** | `Y` | Solid block that only shatters when the character touches it **while doing a rotating jump** (any side). You spin straight through it. |
+
+Spent and broken bricks come back on each new life. If there is no room above a Power brick, its power-up is given to you straight away.
 
 ### Hazards
 
 | Tile | Key | Behaviour |
 |---|---|---|
 | **Spikes** | `4` | Touching them costs 1 HP. |
+| **Flame jet** | | Solid burner you can stand on. On a cycle it shoots a flame straight up (stopped by solid tiles); touching the flame costs 1 HP. It flickers just before firing. Each burner has its own settings, see [Flame jets](#flame-jets). |
+| **Lava** | | *Zone.* Touching it costs a whole life, like a pit (invincibility puts you back on the last solid ground). |
+| **Water** | | *Zone.* You swim: 60 % speed, slow sinking, press jump at any time to swim up. With your head at the surface, jump leaps out. Air jumps refill in water; gliding and the rotating jump stop. |
+| **Poison** | | *Zone.* Toxic gas you can move through, but it costs 1 HP every *Poison: seconds per HP* (**⚙ Game system › Hazards**, 0.2 – 10 s, default 1); the first hit comes after half that time. |
+
+Zones fill whole tiles: paint several side by side to make a pool or a cloud; the top row gets a surface.
+
+#### Flame jets
+
+When the **Flame jet** tool is selected, the **Flame jet** panel opens on the left. Its settings apply to the next burners you paint; paint over a burner to apply them, middle-click one to copy its settings. Every burner's reach is outlined in the editor and its flame plays live.
+
+| Setting | Range · default | Description |
+|---|---|---|
+| Flame height | 1 – 20 tiles · 3 | How high the flame reaches above the burner. |
+| Burn time | 0.2 – 10 s · 1.5 | How long the flame stays lit. |
+| Pause time | 0 – 10 s · 1.5 | Rest between two flames (0 = always lit). |
+| Delay | 0 – 10 s · 0 | Shifts the burner's cycle, so a row of jets can fire one after another. |
 
 ### Enemies
 
@@ -132,7 +146,11 @@ Every enemy type made in the [Enemies editor](#enemies-1) appears here. **✎ Cr
 
 | Tile | Key | Behaviour |
 |---|---|---|
-| **Coin** | `6` | Gives points; enough coins give an extra life (see [Game system](#game-system-score--lives)). |
+| **Coin** | `6` | Worth 1 coin by default. Gives points; enough coins give an extra life (see [Game system](#game-system-score--lives)). |
+| **Big coin** | | Worth 5 coins by default: counts that many towards the coin total, extra lives and score. |
+| **Mega coin** | | Worth 10 coins by default, with the same effect. |
+
+The value and size of each coin kind are set in **⚙ Game system › 🪙 Coins**. Bigger coins are also easier to grab.
 
 ### Power-ups
 
@@ -143,13 +161,14 @@ Every power-up you create in the Power-ups panel appears here. The last entry, *
 | Tile | Key | Behaviour |
 |---|---|---|
 | **Spring** | `7` | Launches the player. Each spring has its own direction, trajectory and strength. See [Springs](#springs). |
+| **Bubbles** | `G` | Solid block that keeps releasing soap bubbles. Touching a bubble pops it and bounces the character. See [Bubble spawners](#bubble-spawners). |
 
 ### Level
 
 | Tile | Key | Behaviour |
 |---|---|---|
 | **Start** | `8` | Where the player appears. Only one per level: placing a new one removes the old one. Required to play. |
-| **Goal** | `9` | Flag. Touching it completes the level. |
+| **Goal** | `9` | Goal pole: the tile is its base, the height is set per goal. Touching the pole completes the level; the higher you touch it, the more points. See [Goal pole](#goal-pole). |
 
 ### Edit
 
@@ -161,9 +180,9 @@ Every power-up you create in the Power-ups panel appears here. The last entry, *
 
 ## Hidden items in Breakable blocks
 
-Paint a **Coin** or a **power-up** onto an existing **Breakable** block to hide it inside. The block shows a hint of its content in the editor.
+Paint a coin (**Coin**, **Big coin** or **Mega coin**) or a **power-up** onto an existing **Breakable** block to hide it inside. The block shows a hint of its content in the editor.
 
-- When the player breaks the block from below, a hidden **coin** is collected immediately (it counts towards the level's coin total), and a hidden **power-up** appears in the block's place.
+- When the player breaks the block from below, a hidden **coin** is collected immediately at its full value (it counts towards the level's coin total), and a hidden **power-up** appears in the block's place.
 - Painting Breakable over the block again keeps its content; erasing the block removes it.
 - Hidden items come back with the block on each new life.
 
@@ -209,6 +228,37 @@ When the **Spring** tool is selected, the **Spring** panel opens on the left. It
 
 ---
 
+## Bubble spawners
+
+When the **Bubbles** tool is selected, the **Bubble spawner** panel opens on the left. Its settings apply to the next spawners you paint, and every spawner's bubble path is drawn in the editor.
+
+| Setting | Options / range | Default | Description |
+|---|---|---|---|
+| **Direction** | ↑ ↗ ↖ ↓ ↘ ↙ | ↑ | Where the bubbles travel (vertical or diagonal). `R` / `Shift+R` rotate it. |
+| **Spawn every** | 0.2 – 10 s | 1.5 | Time between two bubbles (lower = more bubbles). |
+| **Speed** | 0.5 – 15 tiles/s | 3 | How fast bubbles travel. |
+| **Distance** | 1 – 40 tiles | 8 | How far a bubble goes before it pops on its own. |
+
+- Touching a bubble pops it and bounces the character up, like a stomp; hold jump for a full jump.
+- Bubbles pass through the spawner itself but pop on any other solid tile.
+- **Paint over** a spawner to apply the current settings; **middle-click** one to copy its settings.
+
+---
+
+## Goal pole
+
+When the **Goal** tool is selected, the **Goal** panel opens on the left.
+
+| Setting | Range | Default | Description |
+|---|---|---|---|
+| **Pole height** | 1 – 20 tiles | 5 | Height of the pole; the tile you place is its base. |
+
+- Touching the pole anywhere completes the level.
+- The score depends on how high the character's feet are on the pole, from **Flag bottom points** to **Flag top points** (see [Game system](#game-system-score--lives)). Both values are shown next to the pole.
+- **Paint over** a goal to apply the current height; **middle-click** one to copy it. Goals from older levels are 1 tile high.
+
+---
+
 ## Character settings
 
 Open with **🏃 Character** or `C`. Changes apply immediately, even while playing. When the panel is open, dashed **jump arcs** are drawn from the Start tile so you can check what the player can reach. The panel has two collapsible sections.
@@ -234,6 +284,7 @@ Abilities the character always has. Each perk's setting appears once it is ticke
 |---|---|---|---|
 | **🧗 Wall jump** | Wall slide speed: 0.5 – 20 tiles/s (default 3) | off | Jump off walls while in the air; hold toward a wall to slide down it slowly. |
 | **🪂 Glide** | Glide fall speed: 0.5 – 8 tiles/s (default 2) | off | Hold jump while falling to float down slowly. |
+| **🌀 Rotating jump** | Spin speed: 0.5 – 6 turns/s (default 2) | off | Jumps spin the character until it lands. While spinning, touching an enemy from any side hits it (−1 HP) and bounces you off, and Spin bricks shatter. |
 
 **Reset defaults** restores the values above. The panel's info lines summarise air time, standing-jump size, shooting, health and perks.
 
@@ -241,7 +292,7 @@ Abilities the character always has. Each perk's setting appears once it is ticke
 
 ## Power-ups
 
-Open with **⭐ Power-ups** or `U`. Power-ups are made by you and saved with the level. The first time the editor runs you get six examples:
+Open with **⭐ Power-ups** or `U`. Power-ups are made by you and saved with the level. The first time the editor runs you get seven examples:
 
 | Preset | Effect |
 |---|---|
@@ -249,6 +300,7 @@ Open with **⭐ Power-ups** or `U`. Power-ups are made by you and saved with the
 | **Tiny** | Size 55 %, jump height 120 %, speed 115 % |
 | **Wings** | Double jump |
 | **Feather** | Glide |
+| **Twister** | Rotating jump (3 turns/s) |
 | **Climber** | Wall jump |
 | **Fire** | Throws bouncing projectiles |
 
@@ -275,10 +327,11 @@ Open with **⭐ Power-ups** or `U`. Power-ups are made by you and saved with the
 |---|---|---|
 | **🪽 Double jump** | Extra jumps in the air: 1 – 5 | Press jump again in mid-air. Refills on landing. |
 | **🪂 Glide** | Glide fall speed: 0.5 – 8 tiles/s | Hold jump while falling to float down slowly. |
+| **🌀 Rotating jump** | Spin speed: 0.5 – 6 turns/s | Jumps spin the character; while spinning, touching an enemy from any side hits it and bounces you off. |
 | **🧗 Wall jump** | Wall slide speed: 0.5 – 20 tiles/s | Jump off walls in mid-air; hold toward a wall to slide down it slowly. |
 | **🔥 Projectile throwing** | Projectiles on screen: 1 – 10 · Throw speed: 2 – 40 tiles/s · Bounce height: 0 – 4 tiles (0 = fly straight) | Throw with `X` / `J`. Replaces the character's normal shots while active. |
 
-When both the character and the active power-up have glide or wall jump, the power-up's setting is used.
+When both the character and the active power-up have glide, wall jump or rotating jump, the power-up's setting is used.
 
 ### Rules
 
@@ -298,6 +351,7 @@ Open with **👾 Enemies** or `E`. Enemy types are made by you and saved with th
 | **Brute** | Size 1.5 tiles, 3 HP, 500 pts. |
 | **Sentry** | Still, 2 HP. |
 | **Spiky** | Can't be stomped: shoot it. |
+| **Helmet** | Immune to the rotating jump, 2 HP. |
 | **Hoverer** | Flies back and forth horizontally (A ↔ B). |
 | **Swooper** | Flies back and forth diagonally. |
 | **Dart** | Flies left forever once on screen. |
@@ -320,6 +374,7 @@ Open with **👾 Enemies** or `E`. Enemy types are made by you and saved with th
 | **Health points** | 1 – 20 HP | 1 | Stomps or shots needed to defeat it (each one removes 1 HP). |
 | **Score when defeated** | 0 – 10000 pts | 200 | Points gained when it is defeated. |
 | **🥾 Can be stomped** | on / off | on | Off: landing on it hurts the player (it is drawn with spikes), so it must be shot. |
+| **🌀 Immune to rotating jump** | on / off | off | On: the character's rotating jump doesn't damage it, and spinning into it hurts the player (it is drawn with a metal helmet). Stomp it with a normal jump or shoot it. |
 
 ### 🚶 Movement
 
@@ -354,12 +409,18 @@ Enemies only fire while on screen. Their projectiles fly straight, stop at solid
 
 ## Game system (score & lives)
 
-Open the **⚙ Game system** menu.
+Open the **⚙ Game system** menu. Its four sections can be collapsed.
 
-| Setting | Range | Default | Description |
-|---|---|---|---|
-| **Points per coin** | 0 – 10000 | 100 | Score for each coin. |
-| **Coins for a life** | 0 – 999 | 100 | Collecting this many coins gives +1 life ("1UP"). 0 = never. |
+| Section | Setting | Range | Default | Description |
+|---|---|---|---|---|
+| 🏆 Score | **Points per coin** | 0 – 10000 | 100 | Score for each coin (a Big or Mega coin gives its value × this). |
+| 🏆 Score | **🚩 Flag top points** | 0 – 100000 | 5000 | Score for touching the goal pole at its very top. |
+| 🏆 Score | **🚩 Flag bottom points** | 0 – 100000 | 100 | Score for touching the goal pole at its base. |
+| 🏆 Score | **🚩 Flag score steps** | 0 – 20 | 0 | 0 = the flag score grows smoothly with height; 2 or more = the pole is split into that many score bands. |
+| 🪙 Coins › Values | **Coin / Big coin / Mega coin** | 1 – 100 | 1 / 5 / 10 | How many coins each kind is worth. |
+| 🪙 Coins › Sizes | **Big coin size % / Mega coin size %** | 50 – 250 | 100 / 100 | Size of the drawing and of the pickup area. |
+| ❤️ Lives | **Coins for a life** | 0 – 999 | 100 | Collecting this many coins gives +1 life ("1UP"). 0 = never. |
+| ⚠️ Hazards | **☠️ Poison: seconds per HP** | 0.2 – 10 | 1 | Time spent in a Poison zone for each HP lost (lower = deadlier). The first hit comes after half this time. |
 
 Points per enemy are set for each enemy type in the [Enemies editor](#enemies-1). Health points and starting lives are set in the [Character panel](#character-settings).
 
@@ -407,9 +468,9 @@ Open the **🎮 Cheats** menu or use the keys below (they work in both modes). T
 |---|---|
 | Paint | Left click / drag |
 | Erase | Right click / drag |
-| Pick tile (and moving-platform / spring settings) | Middle click |
-| Select tile | `1`–`9`, `0`, `B`, `F`, `M` |
-| Rotate spring (Spring tool selected) | `R` / `Shift+R` |
+| Pick tile (and its settings) | Middle click |
+| Select tile | `1`–`9`, `0`, `B`, `F`, `M`, `X`, `O`, `Y`, `G` |
+| Rotate spring / bubbles (that tool selected) | `R` / `Shift+R` |
 | Scroll horizontally | `←` `→` / `A` `D` (`Q` on AZERTY) or mouse wheel |
 | Scroll vertically | `↑` `↓` / `W` `S` (`Z` on AZERTY) or `Shift` + wheel |
 | Undo | `Ctrl+Z` |
@@ -427,6 +488,8 @@ Open the **🎮 Cheats** menu or use the keys below (they work in both modes). T
 | Jump (hold for higher) | `Space` / `W` / `↑` / `Z` |
 | Wall jump (with the perk/ability) | Jump while touching a wall in mid-air |
 | Glide (with the perk/ability) | Hold jump while falling |
+| Rotating jump (with the perk/ability) | Any jump spins you |
+| Swim (in water) | Press jump to swim up; jump at the surface to leap out |
 | Shoot / throw | `X` / `J` |
 | Pause / resume | `P` |
 | Restart the run | `R` |
@@ -439,14 +502,16 @@ Open the **🎮 Cheats** menu or use the keys below (they work in both modes). T
 ## Gameplay rules
 
 - **A run** starts when you press Play and ends at game over. Score and lives carry over between lives; each life restarts the level from the Start tile with full HP.
-- **Getting hit** (spikes, enemies, enemy projectiles) costs 1 HP, knocks you back and makes you invulnerable (blinking) for 1.2 s. At 0 HP you lose a life.
-- **Pits**: falling out of the bottom of the level always costs a whole life, whatever your HP.
+- **Getting hit** (spikes, flames, enemies, enemy projectiles) costs 1 HP, knocks you back and makes you invulnerable (blinking) for 1.2 s. At 0 HP you lose a life.
+- **Pits and lava**: falling out of the bottom of the level or touching lava always costs a whole life, whatever your HP.
 - **Stomping**: landing on an enemy removes 1 of its HP and bounces you up. Hold jump while stomping for a full-height bounce. Enemies that can't be stomped hurt you instead.
 - **Shots** fly straight, stop at solid tiles, remove 1 HP from the enemy they hit and disappear off screen.
 - **Jump feel**: releasing jump early cuts the jump short. A short grace period lets you jump just after walking off a ledge (or leaving a wall) or just before landing.
+- **Rotating jump**: every jump spins you until you land (gliding, wall-sliding, swimming or getting hit also stops it). While spinning, touching an enemy from any side — even one that can't be stomped — removes 1 of its HP and bounces you off, unless the enemy is immune.
 - **Wall jump** kicks you away from the wall in a full-size jump; you briefly can't steer back toward it.
+- **Bricks, coins and power-ups** come back on each new life.
 - **Level edges** act as walls on the left and right.
-- **Goal**: touching the flag completes the level. Press `R` to play again or `Enter` to edit.
+- **Goal**: touching the pole completes the level and gives flag points by height (shown on the end screen). Press `R` to play again or `Enter` to edit.
 - **Game over** when the last life is lost. Press `R` to try again.
 - **HUD** (top-left): hearts for HP, then score, coins collected / total, and lives.
 
@@ -454,11 +519,11 @@ Open the **🎮 Cheats** menu or use the keys below (they work in both modes). T
 
 ## Saving, loading & file format
 
-**What the browser remembers automatically**: character settings, game-system settings, power-ups, enemies, moving-platform and spring settings, screen size, editor layout, cheats and which panel sections are open.
+**What the browser remembers automatically**: character settings, game-system settings, power-ups, enemies, moving-platform, spring, flame-jet, bubble and goal settings, screen size, editor layout, cheats and which panel sections are open.
 
 **The level itself** is only stored when you click **Save** (browser) or **Export** (file). On start-up, the level saved in the browser is loaded.
 
-Saved and exported levels include the tiles, character settings, game-system settings, moving-platform and spring settings, hidden items, power-ups and enemies, so a level file is self-contained. Loading or importing a level replaces your current character, game-system, power-up and enemy settings with the level's. Older levels without enemy types still load: their `e` tiles become a Walker.
+Saved and exported levels include the tiles, character settings, game-system settings, moving-platform, spring, flame-jet, bubble-spawner and goal settings, hidden items, power-ups and enemies, so a level file is self-contained. Loading or importing a level replaces your current character, game-system, power-up and enemy settings with the level's. Older levels without enemy types still load: their `e` tiles become a Walker.
 
 ### `level.json`
 
@@ -468,15 +533,16 @@ Saved and exported levels include the tiles, character settings, game-system set
   "h": 18,
   "rows": ["....", "..."],
   "char": { "jumpH": 3.4, "jumpW": 4.8, "speed": 7.2, "impact": 0, "projSpeed": 14, "projMax": 3, "hp": 3, "lives": 3,
-            "wallJump": false, "wallSlide": 3, "glide": false, "glideFall": 2 },
-  "sys": { "coinPoints": 100, "coinsPerLife": 100 },
+            "wallJump": false, "wallSlide": 3, "glide": false, "glideFall": 2, "spinJump": false, "spinSpeed": 2 },
+  "sys": { "coinPoints": 100, "flagTop": 5000, "flagBottom": 100, "flagSteps": 0, "coinsPerLife": 100,
+           "coinVal": 1, "bigVal": 5, "megaVal": 10, "bigSize": 100, "megaSize": 100, "poisonRate": 1 },
   "meta": {
     "12,9": { "mode": "h", "dir": "r", "dist": 4, "speed": 2 },
     "20,15": { "h": 9, "w": 8, "rot": 0, "path": "arc", "dist": 6, "speed": 20 },
     "30,11": { "item": "c" }
   },
   "powerups": [ { "id": "A", "name": "Giant", "color": "#e94560", "size": 160, "speed": 90 } ],
-  "enemies": [ { "id": "e", "name": "Walker", "color": "#c94f6d", "size": 0.75, "hp": 1, "points": 200, "stompable": true,
+  "enemies": [ { "id": "e", "name": "Walker", "color": "#c94f6d", "size": 0.75, "hp": 1, "points": 200, "stompable": true, "spinImmune": false,
                  "mode": "walk", "dir": "l", "speed": 2, "dist": 4, "shoot": false, "shotDir": "face", "fireRate": 2, "shotSpeed": 6 } ]
 }
 ```
@@ -492,6 +558,11 @@ Each string in `rows` is one row of the level, top to bottom, one character per 
 | `p` | Platform | `P` | Start |
 | `v` | Falling | `f` | Goal |
 | `m` | Moving | `A`–`Z` (not `P`) | Power-up with that `id` |
+| `^` | Flame jet | `@` | Lava |
+| `~` | Water | `;` | Poison |
+| `!` | Power brick | `$` | Big coin |
+| `%` | Coin brick | `*` | Mega coin |
+| `&` | Spin brick | `+` | Bubble spawner |
 
 Enemy `id`s are taken from `eadhilnoqrtuwxyz0123456789`. Enemy `mode` is `still`, `walk`, `path` (A ↔ B) or `line` (endless); `shotDir` is `face`, `lr`, `up`, `down` or `ud`.
 
@@ -499,7 +570,10 @@ Enemy `id`s are taken from `eadhilnoqrtuwxyz0123456789`. Enemy `mode` is `still`
 
 - **Moving platform** (`m`): `mode` is `h`, `v`, `d` or `c`; `dir` is `r`, `l`, `u`, `d`, `ur`, `dr`, `dl`, `ul`, `cw` or `ccw`.
 - **Spring** (`j`): `rot` is 0–7 (45° steps clockwise from straight up); `path` is `arc` (uses `h`, `w`) or `line` (uses `dist`, `speed`).
-- **Breakable** (`k`): `item` is `c` (coin) or a power-up `id`.
+- **Breakable** (`k`): `item` is a coin kind (`c`, `$`, `*`) or a power-up `id`.
+- **Flame jet** (`^`): `h` (flame height, tiles), `on` / `off` (burn / pause time, s), `delay` (s).
+- **Bubble spawner** (`+`): `rot` is 0, 1, 7 (↑ ↗ ↖) or 3, 4, 5 (↘ ↓ ↙); `every` (s), `speed` (tiles/s), `dist` (tiles).
+- **Goal** (`f`): `h` is the pole height in tiles (1 if missing).
 
 ---
 
