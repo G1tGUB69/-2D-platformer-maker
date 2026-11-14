@@ -15,10 +15,6 @@
   #bar .sep { width:1px; height:26px; background:#444a66; margin:0 4px; }
   #play { background:#2f8f4e !important; font-weight:600; }
   #play.stop { background:#b23b3b !important; }
-  .group { display:flex; align-items:center; gap:4px; padding:3px 4px 3px 8px; background:#1f2232; border-radius:8px; }
-  .group.active { box-shadow:inset 0 0 0 1px #ffcc4d55; }
-  .glabel { font-size:10px; text-transform:uppercase; letter-spacing:.06em; opacity:.6; margin-right:2px; }
-  .sw { width:16px; height:16px; border-radius:3px; display:inline-block; }
   #status { margin-left:auto; opacity:.8; white-space:nowrap; }
   #wrap { position:absolute; top:50px; left:0; right:0; bottom:50px; display:flex; align-items:center; justify-content:center; background:#11131c; }
   .dd { position:relative; }
@@ -36,21 +32,63 @@
   .menu .row input { width:64px; text-align:center; background:var(--btn); color:var(--txt); border:2px solid transparent; border-radius:6px; padding:4px; font:inherit; }
   .menu .row input:focus { outline:none; border-color:var(--acc); }
   #bar .menu .row button { padding:4px 9px; }
+  .menu .row.field span { width:auto; flex:1; white-space:nowrap; }
+  .menu .row.field input { width:72px; }
+  #sysMenu { min-width:290px; }
   .menu .note { margin:6px 4px 0; font-size:11px; opacity:.55; line-height:1.4; }
-  #palette { position:absolute; left:0; right:0; bottom:0; display:flex; flex-wrap:wrap; gap:6px; align-items:center; justify-content:center; padding:8px 10px; background:var(--panel); }
+  .menu label.chk { display:flex; align-items:center; gap:8px; padding:5px 6px; border-radius:6px; cursor:pointer; }
+  .menu label.chk:hover { background:var(--btnh); }
+  .menu label.chk input { accent-color:var(--acc); width:16px; height:16px; margin:0; }
+  .menu label.chk small { margin-left:auto; opacity:.55; font-size:11px; }
+  #palette { position:absolute; left:0; right:0; bottom:0; z-index:6; display:flex; flex-wrap:wrap; gap:8px; align-items:flex-end; justify-content:center; padding:6px 10px; background:var(--panel); }
+  .cat { position:relative; }
+  #palette .catbtn { flex-direction:column; gap:2px; padding:4px 8px 3px; min-width:62px; font-size:11px; position:relative; }
+  #palette .catbtn canvas { width:32px; height:32px; }
+  #palette .catbtn .more { position:absolute; top:2px; right:4px; font-size:8px; font-style:normal; opacity:.55; }
+  .cat.on .catbtn { border-color:var(--acc); }
+  .flyout { position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%); display:none; flex-direction:column; gap:3px; min-width:160px; padding:6px; background:var(--panel); border:1px solid #444a66; border-radius:8px; box-shadow:0 -8px 24px #0008; }
+  .flyout h4 { margin:2px 4px 4px; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; opacity:.6; }
+  .cat.open .flyout { display:flex; }
+  #palette .flyout button { justify-content:flex-start; padding:4px 8px; font-size:13px; }
+  #palette .flyout button canvas { width:24px; height:24px; }
+  #palette .flyout kbd { margin-left:auto; font:11px system-ui; opacity:.55; background:#1f2232; border-radius:4px; padding:1px 5px; }
   canvas { display:block; image-rendering:pixelated; }
-  #charPanel { position:absolute; top:56px; right:10px; z-index:5; width:300px; background:var(--panel); border:1px solid #444a66; border-radius:8px; padding:12px 14px; box-shadow:0 8px 24px #0008; }
-  #charPanel h3 { margin:0 0 10px; font-size:13px; text-transform:uppercase; letter-spacing:.06em; opacity:.8; display:flex; justify-content:space-between; align-items:center; }
-  #charPanel h3 button { background:none; border:0; color:var(--txt); font-size:16px; cursor:pointer; opacity:.7; }
-  #charPanel .row { display:grid; grid-template-columns:1fr 64px; gap:4px 8px; align-items:center; margin-bottom:10px; }
-  #charPanel .row label { grid-column:1 / -1; font-size:12px; opacity:.85; }
-  #charPanel input[type=range] { width:100%; accent-color:var(--acc); }
-  #charPanel input[type=number] { width:64px; background:var(--btn); color:var(--txt); border:2px solid transparent; border-radius:6px; padding:4px; font:inherit; }
-  #charPanel input[type=number]:focus { outline:none; border-color:var(--acc); }
-  #charPanel .info { font-size:11px; opacity:.7; line-height:1.5; margin:4px 0 10px; }
-  #charPanel .foot { display:flex; justify-content:space-between; }
-  #charPanel .foot button { background:var(--btn); color:var(--txt); border:0; border-radius:6px; padding:5px 10px; cursor:pointer; font:inherit; }
-  #charPanel .foot button:hover { background:var(--btnh); }
+  .panel { position:absolute; top:56px; z-index:5; width:300px; background:var(--panel); border:1px solid #444a66; border-radius:8px; padding:12px 14px; box-shadow:0 8px 24px #0008; }
+  .panel h3 { margin:0 0 10px; font-size:13px; text-transform:uppercase; letter-spacing:.06em; opacity:.8; display:flex; justify-content:space-between; align-items:center; }
+  .panel h3 button { background:none; border:0; color:var(--txt); font-size:16px; cursor:pointer; opacity:.7; }
+  .panel .row { display:grid; grid-template-columns:1fr 64px; gap:4px 8px; align-items:center; margin-bottom:10px; }
+  .panel .row label { grid-column:1 / -1; font-size:12px; opacity:.85; }
+  .panel input[type=range] { width:100%; accent-color:var(--acc); }
+  .panel input[type=number] { width:64px; background:var(--btn); color:var(--txt); border:2px solid transparent; border-radius:6px; padding:4px; font:inherit; }
+  .panel input[type=number]:focus { outline:none; border-color:var(--acc); }
+  .panel .info { font-size:11px; opacity:.7; line-height:1.5; margin:4px 0 10px; }
+  .panel .foot { display:flex; justify-content:space-between; }
+  .panel .foot button { background:var(--btn); color:var(--txt); border:0; border-radius:6px; padding:5px 10px; cursor:pointer; font:inherit; }
+  .panel .foot button:hover { background:var(--btnh); }
+  #charPanel { right:10px; max-height:calc(100vh - 120px); overflow-y:auto; }
+  #charPanel h4.sub { margin:14px 0 8px; padding-top:10px; border-top:1px solid #444a66; font-size:11px; text-transform:uppercase; letter-spacing:.06em; opacity:.7; }
+  #movePanel { left:10px; width:280px; }
+  .panel .seg { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px; }
+  .panel .seg button { flex:1; background:var(--btn); color:var(--txt); border:2px solid transparent; border-radius:6px; padding:5px 6px; cursor:pointer; font:inherit; font-size:12px; white-space:nowrap; }
+  .panel .seg button:hover { background:var(--btnh); }
+  .panel .seg button.on { border-color:var(--acc); }
+  .panel .sub { font-size:12px; opacity:.85; margin-bottom:4px; }
+  #powerPanel { right:10px; width:320px; overflow-y:auto; }
+  #powerPanel h4.sub { margin:14px 0 8px; padding-top:10px; border-top:1px solid #444a66; font-size:11px; text-transform:uppercase; letter-spacing:.06em; opacity:.7; }
+  .plist { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px; }
+  .plist button { display:flex; align-items:center; gap:5px; background:var(--btn); color:var(--txt); border:2px solid transparent; border-radius:6px; padding:3px 7px 3px 4px; cursor:pointer; font:inherit; font-size:12px; }
+  .plist button:hover { background:var(--btnh); }
+  .plist button.on { border-color:var(--acc); }
+  .plist button canvas { width:20px; height:20px; }
+  .panel .line { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+  .panel input[type=text] { flex:1; min-width:0; background:var(--btn); color:var(--txt); border:2px solid transparent; border-radius:6px; padding:4px 6px; font:inherit; }
+  .panel input[type=text]:focus { outline:none; border-color:var(--acc); }
+  .panel input[type=color] { width:36px; height:30px; padding:0; border:0; background:none; cursor:pointer; }
+  .panel label.chk { display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer; margin:2px 0 6px; }
+  .panel label.chk input { accent-color:var(--acc); width:16px; height:16px; margin:0; }
+  .panel .ability { padding:6px 8px 1px; margin-bottom:8px; border-radius:6px; background:#1f2232; }
+  .panel .ability .row { margin-bottom:6px; }
+  .panel .ability.off .row { display:none; }
   #help { position:absolute; left:10px; bottom:10px; background:#0009; padding:8px 10px; border-radius:6px; font-size:12px; line-height:1.5; pointer-events:none; }
 </style>
 </head>
@@ -67,6 +105,17 @@
   <input id="file" type="file" accept=".json,application/json" hidden>
   <span class="sep"></span>
   <button id="charBtn" title="Character settings (C)">🏃 Character</button>
+  <button id="powerBtn" title="Create and edit power-ups (U)">⭐ Power-ups</button>
+  <div class="dd">
+    <button id="sysBtn" aria-haspopup="true" aria-expanded="false">⚙ Game system <span class="caret">▼</span></button>
+    <div class="menu" id="sysMenu" role="menu">
+      <h4>Score</h4>
+      <div id="sysScore"></div>
+      <h4>Lives</h4>
+      <div id="sysLives"></div>
+      <div class="note" id="sysNote"></div>
+    </div>
+  </div>
   <span class="sep"></span>
   <div class="dd">
     <button id="screenBtn" aria-haspopup="true" aria-expanded="false">🖥 <span id="screenLbl">Screen</span> <span class="caret">▼</span></button>
@@ -92,6 +141,14 @@
       <div class="note">Width grows on the right, height grows at the top.</div>
     </div>
   </div>
+  <div class="dd">
+    <button id="cheatBtn" aria-haspopup="true" aria-expanded="false">🎮 Cheats <span class="caret">▼</span></button>
+    <div class="menu" id="cheatMenu" role="menu">
+      <h4>Cheats</h4>
+      <label class="chk"><input type="checkbox" data-cheat="invincible"> 🛡 Invincibility <small>I</small></label>
+      <div class="note">Spikes and enemies can't hurt you; falling into a pit puts you back on the last solid ground.</div>
+    </div>
+  </div>
   <span id="status"></span>
 </div>
 <div id="wrap">
@@ -99,11 +156,33 @@
   <div id="help"></div>
 </div>
 <div id="palette"></div>
-<div id="charPanel" hidden>
+<div id="charPanel" class="panel" hidden>
   <h3>Character <button id="charClose" title="Close">✕</button></h3>
   <div id="charRows"></div>
   <div class="info" id="charInfo"></div>
   <div class="foot"><button id="charReset">Reset defaults</button><span style="font-size:11px;opacity:.6;align-self:center">Arcs shown on Start tile</span></div>
+</div>
+
+<div id="movePanel" class="panel" hidden>
+  <h3>Moving platform</h3>
+  <div class="sub">Path</div>
+  <div class="seg" id="moveMode"></div>
+  <div class="sub">Direction</div>
+  <div class="seg" id="moveDir"></div>
+  <div id="moveRows"></div>
+  <div class="info">The tile you place is the start (A). Paint over a placed platform to apply these settings, middle-click one to copy its settings. Neighbouring tiles with the same settings move together.</div>
+</div>
+
+<div id="powerPanel" class="panel" hidden>
+  <h3>Power-ups <button id="powerClose" title="Close">✕</button></h3>
+  <div class="plist" id="powerList"></div>
+  <div id="powerEdit">
+    <div class="line"><input type="text" id="pwName" maxlength="16" placeholder="Name"><input type="color" id="pwColor" title="Colour"></div>
+    <div id="pwRows"></div>
+    <div class="info" id="pwInfo"></div>
+    <div class="foot"><button id="pwDup">Duplicate</button><button id="pwDel">🗑 Delete</button></div>
+  </div>
+  <div class="info" id="pwEmpty">No power-ups yet. Click ＋ New to create one.</div>
 </div>
 
 <script>
@@ -118,6 +197,7 @@ const CATEGORIES = [
   { id:'hazard',  name:'Hazards' },
   { id:'enemy',   name:'Enemies' },
   { id:'item',    name:'Items' },
+  { id:'power',   name:'Power-ups' },   // items come from powerDefs (user-made)
   { id:'gadget',  name:'Gadgets' },
   { id:'level',   name:'Level' },
   { id:'edit',    name:'Edit' },
@@ -125,7 +205,10 @@ const CATEGORIES = [
 const TOOLS = [
   { id:'g', name:'Ground',   cat:'terrain', color:'#6b4a2b', key:'1' },
   { id:'b', name:'Brick',    cat:'terrain', color:'#b5562f', key:'2' },
+  { id:'k', name:'Breakable', cat:'terrain', color:'#e0a060', key:'b' },
   { id:'p', name:'Platform', cat:'terrain', color:'#8fa3b8', key:'3' },
+  { id:'v', name:'Falling',  cat:'terrain', color:'#c98f4a', key:'f' },
+  { id:'m', name:'Moving',   cat:'terrain', color:'#9b7bd6', key:'m' },
   { id:'s', name:'Spikes',   cat:'hazard',  color:'#d8dde6', key:'4' },
   { id:'e', name:'Enemy',    cat:'enemy',   color:'#c94f6d', key:'5' },
   { id:'c', name:'Coin',     cat:'item',    color:'#ffcc4d', key:'6' },
@@ -143,20 +226,42 @@ const CHAR_FIELDS = [
   { k:'jumpW',  name:'Jump width',  unit:'tiles',   min:1,   max:30,  step:0.1, tip:'Horizontal distance from take-off to landing (same level) at top speed' },
   { k:'speed',  name:'Speed',       unit:'tiles/s', min:1,   max:30,  step:0.1, tip:'Top running speed' },
   { k:'impact', name:'Speed impact on jump', unit:'%', min:0, max:100, step:1, tip:'How much a jump shrinks when not running: 0% = same jump at any speed, 100% = standing jump is tiny' },
+  { k:'projSpeed', name:'Projectile speed', unit:'tiles/s', min:2, max:60, step:0.5, section:'Projectile', tip:'How fast shots fly (X or J to shoot)' },
+  { k:'projMax',   name:'Projectiles on screen', unit:'max', min:0, max:10, step:1, tip:'How many shots can be on screen at the same time (0 = shooting disabled)' },
+  { k:'hp',    name:'Health points', unit:'HP',    min:1, max:10, step:1, section:'Health', tip:'Hits from spikes or enemies the character can take before losing a life' },
+  { k:'lives', name:'Lives',         unit:'start', min:1, max:99, step:1, tip:'Lives at the start of a run; when the last one is lost it is game over' },
 ];
-const CHAR_DEFAULTS = { jumpH:3.4, jumpW:4.8, speed:7.2, impact:0 };
+const CHAR_DEFAULTS = { jumpH:3.4, jumpW:4.8, speed:7.2, impact:0, projSpeed:14, projMax:3, hp:3, lives:3 };
 let charCfg = { ...CHAR_DEFAULTS };
 function setCharCfg(c) {
   for (const f of CHAR_FIELDS) {
     const v = +c[f.k];
-    if (c[f.k] !== undefined && c[f.k] !== '' && Number.isFinite(v)) charCfg[f.k] = Math.max(f.min, Math.min(f.max, v));
+    if (c[f.k] !== undefined && c[f.k] !== '' && Number.isFinite(v)) charCfg[f.k] = Math.max(f.min, Math.min(f.max, f.step === 1 ? Math.round(v) : v));
   }
   if (typeof refreshCharUI === 'function') refreshCharUI();
 }
+// ---------- Game system config (score & lives rules) ----------
+const SYS_FIELDS = [
+  { k:'coinPoints',   name:'Points per coin',  box:'sysScore', min:0, max:10000, step:10, tip:'Score gained for each coin collected' },
+  { k:'enemyPoints',  name:'Points per enemy', box:'sysScore', min:0, max:10000, step:10, tip:'Score gained for each enemy defeated (stomp, shot or invincible)' },
+  { k:'coinsPerLife', name:'Coins for a life', box:'sysLives', min:0, max:999,   step:1,  tip:'Collecting this many coins gives an extra life (0 = never)' },
+];
+const SYS_DEFAULTS = { coinPoints:100, enemyPoints:200, coinsPerLife:100 };
+let sysCfg = { ...SYS_DEFAULTS };
+function setSysCfg(c) {
+  for (const f of SYS_FIELDS) {
+    const v = Math.round(+c[f.k]);
+    if (c[f.k] !== undefined && c[f.k] !== '' && Number.isFinite(v)) sysCfg[f.k] = Math.max(f.min, Math.min(f.max, v));
+  }
+  if (typeof refreshSysUI === 'function') refreshSysUI();
+}
+function saveSysCfg() { try { localStorage.setItem('platformer-maker-sys', JSON.stringify(sysCfg)); } catch {} }
+
 // Derive physics constants (world px / s) from the tile-based config.
-function charPhys() {
-  const run = charCfg.speed * T, h = charCfg.jumpH * T;
-  const tUp = (charCfg.jumpW * T / run) / 2;      // time to apex
+// m: optional power-up whose speed / jumpH / jumpW (in %) scale the character's settings.
+function charPhys(m = {}) {
+  const run = charCfg.speed * (m.speed ?? 100) / 100 * T, h = charCfg.jumpH * (m.jumpH ?? 100) / 100 * T;
+  const tUp = (charCfg.jumpW * (m.jumpW ?? 100) / 100 * T / run) / 2;      // time to apex
   const grav = 2 * h / (tUp * tUp), jump = 2 * h / tUp + grav / 240;   // + half a 120 Hz step of gravity: integration loss
   return {
     run, grav, jump,
@@ -168,11 +273,115 @@ function charPhys() {
 // Jump size factor for a given speed fraction s (0..1). Applied to height and air time.
 function jumpFactor(s) { return Math.max(0.15, 1 - charCfg.impact / 100 * (1 - Math.min(1, s))); }
 
-const SOLID = new Set(['g','b']);
-const ONEWAY = new Set(['p','j']);
+// ---------- Moving platforms ----------
+// Each 'm' tile has settings in `meta` ("x,y" -> cfg). The platform moves along a path
+// that starts at the placed tile: back and forth from A to B, or around a circle.
+const MOVE_MODES = {
+  h: { name:'↔ Horizontal', dirs:[['r','→ Right'], ['l','← Left']] },
+  v: { name:'↕ Vertical',   dirs:[['u','↑ Up'], ['d','↓ Down']] },
+  d: { name:'⤢ Diagonal',   dirs:[['ur','↗'], ['dr','↘'], ['dl','↙'], ['ul','↖']] },
+  c: { name:'⟳ Circle',     dirs:[['cw','↻ Clockwise'], ['ccw','↺ Anticlockwise']] },
+};
+const MOVE_FIELDS = [
+  { k:'dist',  name:'Distance', unit:'tiles',   min:1,   max:20, step:0.5 },
+  { k:'speed', name:'Speed',    unit:'tiles/s', min:0.5, max:15, step:0.5 },
+];
+const MOVE_DEFAULTS = { mode:'h', dir:'r', dist:4, speed:2 };
+const DIR_VEC = { r:[1,0], l:[-1,0], u:[0,-1], d:[0,1], ur:[1,-1], dr:[1,1], dl:[-1,1], ul:[-1,-1] };
+let moveCfg = { ...MOVE_DEFAULTS };
+let meta = {};
+// Offset (world px) of a moving platform from its start position at time t.
+function moverOffset(c, t) {
+  const L = c.dist * T, v = c.speed * T;
+  if (c.mode === 'c') {   // circle: starts at the top, centre is `dist` tiles below
+    const a = (c.dir === 'ccw' ? -1 : 1) * v / L * t;
+    return [L * Math.sin(a), L - L * Math.cos(a)];
+  }
+  const [dx, dy] = DIR_VEC[c.dir] || [1, 0];
+  let u = (v * t / (L * Math.hypot(dx, dy))) % 2; if (u > 1) u = 2 - u;   // ping-pong A -> B -> A
+  return [dx * L * u, dy * L * u];
+}
+// Time at which the preview ghost is drawn: point B, or a quarter turn for circles.
+function moverPreviewTime(c) {
+  const L = c.dist * T, v = c.speed * T;
+  if (c.mode === 'c') return Math.PI / 2 * L / v;
+  const [dx, dy] = DIR_VEC[c.dir] || [1, 0];
+  return L * Math.hypot(dx, dy) / v;
+}
+
+// ---------- Power-ups ----------
+// Power-ups are made in the Power-ups panel and saved with the level. Each one gets its own
+// tile id (an upper-case letter other than P). Picking one up replaces the current power-up.
+const POWER_IDS = 'ABCDEFGHIJKLMNOQRSTUVWXYZ';
+const POWER_FIELDS = [
+  { k:'duration', name:'Duration', unit:'s · 0 = until you die', min:0, max:120, step:1 },
+  { k:'size',  name:'Character size', unit:'%', min:30, max:300, step:5, section:'Size & movement' },
+  { k:'jumpH', name:'Jump height', unit:'%', min:25, max:300, step:5 },
+  { k:'jumpW', name:'Jump width',  unit:'%', min:25, max:300, step:5 },
+  { k:'speed', name:'Speed',       unit:'%', min:25, max:300, step:5 },
+];
+// Abilities: an on/off switch, each with its own settings.
+const POWER_ABILITIES = [
+  { k:'doubleJump', name:'🪽 Double jump', tip:'Press jump again in mid-air', fields:[
+    { k:'airJumps', name:'Extra jumps in the air', unit:'jumps', min:1, max:5, step:1 } ] },
+  { k:'glide', name:'🪂 Glide', tip:'Hold jump while falling to float down slowly', fields:[
+    { k:'glideFall', name:'Glide fall speed', unit:'tiles/s', min:0.5, max:8, step:0.5 } ] },
+  { k:'projectile', name:'🔥 Projectile throwing', tip:'Throw projectiles with X or J (replaces the character\'s normal shots while active)', fields:[
+    { k:'projMax',    name:'Projectiles on screen', unit:'max', min:1, max:10, step:1 },
+    { k:'projSpeed',  name:'Throw speed', unit:'tiles/s', min:2, max:40, step:0.5 },
+    { k:'projBounce', name:'Bounce height', unit:'tiles · 0 = fly straight', min:0, max:4, step:0.25 } ] },
+];
+const POWER_DEFAULTS = { name:'Power-up', color:'#ff6b9a', duration:0, size:100, jumpH:100, jumpW:100, speed:100,
+  doubleJump:false, airJumps:1, glide:false, glideFall:2, projectile:false, projMax:2, projSpeed:12, projBounce:1 };
+const POWER_PRESETS = [   // starter set, created the first time the editor runs
+  { name:'Giant',   color:'#e94560', size:160, speed:90 },
+  { name:'Tiny',    color:'#4fc3f7', size:55, jumpH:120, speed:115 },
+  { name:'Wings',   color:'#b388ff', doubleJump:true },
+  { name:'Feather', color:'#f0f0f0', glide:true },
+  { name:'Fire',    color:'#ff8c1a', projectile:true },
+];
+let powerDefs = [];
+function powerById(id) { return powerDefs.find(d => d.id === id); }
+function normPower(d, id) {
+  const o = { ...POWER_DEFAULTS, id };
+  o.name = String(d.name ?? o.name).slice(0, 16);
+  if (/^#[0-9a-f]{6}$/i.test(d.color)) o.color = d.color;
+  for (const f of [...POWER_FIELDS, ...POWER_ABILITIES.flatMap(a => a.fields)]) {
+    const v = +d[f.k];
+    if (d[f.k] !== undefined && d[f.k] !== '' && Number.isFinite(v)) o[f.k] = Math.max(f.min, Math.min(f.max, v));
+  }
+  for (const a of POWER_ABILITIES) o[a.k] = !!(d[a.k] ?? o[a.k]);
+  return o;
+}
+function freePowerId(used) { return [...POWER_IDS].find(c => !used.has(c)); }
+function setPowerDefs(list) {
+  list = Array.isArray(list) ? list.filter(d => d && typeof d === 'object') : [];
+  const used = new Set();
+  const keep = list.map(d => typeof d.id === 'string' && d.id.length === 1 && POWER_IDS.includes(d.id) && !used.has(d.id) && !!used.add(d.id));
+  powerDefs = [];
+  list.forEach((d, i) => {
+    const id = keep[i] ? d.id : freePowerId(used);
+    if (id) { used.add(id); powerDefs.push(normPower(d, id)); }
+  });
+}
+function powerLetter(d) { return ([...d.name.trim()][0] || '?').toUpperCase(); }
+function describePower(d) {
+  const out = [], pct = (k, label) => d[k] !== 100 && out.push(`${label} ×${(d[k] / 100).toFixed(2).replace(/\.?0+$/, '')}`);
+  pct('size', 'size'); pct('jumpH', 'jump height'); pct('jumpW', 'jump width'); pct('speed', 'speed');
+  if (d.doubleJump) out.push(d.airJumps > 1 ? `${d.airJumps} air jumps` : 'double jump');
+  if (d.glide) out.push('glide');
+  if (d.projectile) out.push(d.projBounce ? 'bouncing projectiles' : 'projectiles');
+  return (out.length ? out.join(' · ') : 'No effect yet') + '<br>' + (d.duration ? `Lasts ${d.duration} s` : 'Lasts until you die') + ' · picking up another power-up replaces it';
+}
+
+const SOLID = new Set(['g','b','k']);
+const BREAKABLE = new Set(['k']);   // solid tiles the player smashes by hitting them from below
+const ONEWAY = new Set(['p','j','v']);
+const FALL_DELAY = 0.5;   // seconds a falling platform shakes before dropping
 
 // ---------- State ----------
-const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+const cv = document.getElementById('c');
+let ctx = cv.getContext('2d');   // swapped temporarily to draw palette icons
 let grid, tool = 'g', mode = 'edit';
 let cam = { x:0, y:0 }, scale = 1;
 let mouse = { x:0, y:0, down:0, inside:false };
@@ -193,7 +402,12 @@ function defaultLevel() {
   return g;
 }
 function cloneGrid(g) { return g.map(r => r.slice()); }
-function serialize() { return JSON.stringify({ w:W, h:H, rows: grid.map(r => r.join('')), char: charCfg }); }
+function liveMeta() {   // only keep settings of tiles that are still moving platforms
+  const m = {};
+  for (const k in meta) { const [x, y] = k.split(',').map(Number); if (grid[y]?.[x] === 'm') m[k] = meta[k]; }
+  return m;
+}
+function serialize() { return JSON.stringify({ w:W, h:H, rows: grid.map(r => r.join('')), char: charCfg, sys: sysCfg, meta: liveMeta(), powerups: powerDefs }); }
 function deserialize(s) {
   const d = JSON.parse(s);
   const h = Math.max(MIN_H, Math.min(MAX_H, d.h || d.rows.length));
@@ -201,7 +415,9 @@ function deserialize(s) {
   const g = Array.from({ length:h }, () => Array(w).fill('.'));
   d.rows.forEach((row, y) => { if (y < h) [...row].forEach((ch, x) => { if (x < w) g[y][x] = ch; }); });
   if (d.char) setCharCfg(d.char);
-  return g;
+  if (d.sys) { setSysCfg(d.sys); saveSysCfg(); }
+  if (Array.isArray(d.powerups)) { setPowerDefs(d.powerups); powerDefsChanged(); }
+  return { g, m: d.meta && typeof d.meta === 'object' ? d.meta : {} };
 }
 // Make the global W/H match the current grid and refresh the view.
 function syncSize() {
@@ -223,52 +439,125 @@ function setLevelSize(w, h) {
     const ny = y + dy; if (ny < 0 || ny >= h) continue;
     for (let x = 0; x < Math.min(w, W); x++) g[ny][x] = grid[y][x];
   }
+  const m = {};
+  for (const k in meta) {
+    const [x, y] = k.split(',').map(Number);
+    if (x < w && y + dy >= 0 && y + dy < h) m[x + ',' + (y + dy)] = meta[k];
+  }
+  meta = m;
   cam.y += dy * T;   // keep the same area in view
   grid = g; syncSize(); status(`Level size ${w} × ${h}`);
 }
 
 // ---------- UI ----------
-const toolsEl = document.getElementById('palette');
-CATEGORIES.forEach(cat => {
-  const items = TOOLS.filter(t => t.cat === cat.id);
-  if (!items.length) return;
-  const grp = document.createElement('span');
-  grp.className = 'group';
-  grp.dataset.cat = cat.id;
-  grp.innerHTML = `<span class="glabel">${cat.name}</span>`;
-  items.forEach(t => {
-    const b = document.createElement('button');
-    b.dataset.tool = t.id;
-    b.title = `${t.name} (${t.key})`;
-    b.innerHTML = `<span class="sw" style="background:${t.color};${t.id==='.'?'border:1px dashed #aaa':''}"></span>${t.name}`;
-    b.onclick = () => setTool(t.id);
-    grp.appendChild(b);
+// Bottom palette: one icon per category; clicking it opens a vertical list of its elements.
+const paletteEl = document.getElementById('palette');
+const catLast = {};   // last element picked in each category (shown as the category icon)
+function drawIcon(canvas, id) {
+  const c = canvas.getContext('2d'), n = canvas.width;
+  c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, n, n);
+  c.fillStyle = '#9fd4f5'; c.beginPath(); c.roundRect(0, 0, n, n, n / 6); c.fill();
+  const k = n * 0.8 / T; c.setTransform(k, 0, 0, k, n * 0.1, n * 0.1);
+  const main = ctx; ctx = c;
+  try { id === '.' ? drawEraser() : id ? drawTile(id, 0, 0, 0) : drawPowerItem({ color:'#ffcc4d', name:'+' }, 0, 0, 0); } finally { ctx = main; }
+}
+function esc(s) { return String(s).replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`); }
+function drawEraser() {
+  ctx.save(); ctx.translate(16, 16); ctx.rotate(-0.6);
+  ctx.fillStyle = '#f28ca0'; ctx.fillRect(-13, -7, 13, 14);
+  ctx.fillStyle = '#eef0f5'; ctx.fillRect(0, -7, 13, 14);
+  ctx.strokeStyle = '#333'; ctx.lineWidth = 1.5; ctx.strokeRect(-13, -7, 26, 14);
+  ctx.restore();
+}
+function closeCats(except) { paletteEl.querySelectorAll('.cat.open').forEach(c => c !== except && c.classList.remove('open')); }
+function paletteItems(catId) {
+  return catId === 'power' ? powerDefs.map(d => ({ id:d.id, name:d.name, cat:'power' })) : TOOLS.filter(t => t.cat === catId);
+}
+function toolCat(id) { return powerById(id) ? 'power' : TOOLS.find(t => t.id === id)?.cat; }
+// (Re)build the palette; called at boot and whenever the power-up list changes.
+function buildPalette() {
+  closeCats(); paletteEl.innerHTML = '';
+  CATEGORIES.forEach(cat => {
+    const items = paletteItems(cat.id), isPower = cat.id === 'power';
+    if (!items.length && !isPower) return;
+    if (!items.some(t => t.id === catLast[cat.id])) catLast[cat.id] = items[0]?.id;
+    const box = document.createElement('div');
+    box.className = 'cat'; box.dataset.cat = cat.id;
+    const fly = document.createElement('div');
+    fly.className = 'flyout';
+    fly.innerHTML = `<h4>${cat.name}</h4>`;
+    const label = t => t.key ? `${t.name} (${t.key.toUpperCase()})` : t.name;
+    items.forEach(t => {
+      const b = document.createElement('button');
+      b.dataset.tool = t.id; b.title = label(t);
+      b.innerHTML = `<canvas width="48" height="48"></canvas><span>${esc(t.name)}</span>${t.key ? `<kbd>${t.key.toUpperCase()}</kbd>` : ''}`;
+      drawIcon(b.querySelector('canvas'), t.id);
+      b.onclick = () => { setTool(t.id); closeCats(); b.blur(); };
+      fly.appendChild(b);
+    });
+    if (isPower) {   // power-ups are user-made: the list ends with a shortcut to the editor
+      const b = document.createElement('button');
+      b.innerHTML = `<span>✎ Create / edit…</span><kbd>U</kbd>`;
+      b.onclick = () => { togglePowerPanel(true); closeCats(); b.blur(); };
+      fly.appendChild(b);
+    }
+    const multi = items.length > 1 || isPower;
+    const btn = document.createElement('button');
+    btn.className = 'catbtn';
+    btn.title = cat.name + ': ' + (items.length ? items.map(label).join(', ') : 'none yet — click to create one');
+    btn.innerHTML = `<canvas width="64" height="64"></canvas><span>${cat.name}</span>${multi ? '<i class="more">▲</i>' : ''}`;
+    drawIcon(btn.querySelector('canvas'), catLast[cat.id]);
+    btn.onclick = () => {
+      if (isPower && !items.length) { togglePowerPanel(true); closeCats(); btn.blur(); return; }
+      setTool(catLast[cat.id]);
+      if (multi) { closeCats(box); box.classList.toggle('open'); } else closeCats();
+      btn.blur();
+    };
+    box.append(fly, btn);
+    paletteEl.appendChild(box);
   });
-  toolsEl.appendChild(grp);
-});
+  if (!toolCat(tool)) tool = 'g';   // the selected power-up was deleted
+  markTool();
+}
+document.addEventListener('mousedown', e => { if (!e.target.closest('.cat')) closeCats(); });
 function setTool(id) {
   tool = id;
-  document.querySelectorAll('[data-tool]').forEach(b => b.classList.toggle('on', b.dataset.tool === id));
-  const cat = TOOLS.find(t => t.id === id)?.cat;
-  document.querySelectorAll('.group').forEach(g => g.classList.toggle('active', g.dataset.cat === cat));
+  if (typeof updateMovePanel === 'function') updateMovePanel();
+  if (powerById(id) && pwSel !== id) { pwSel = id; if (!powerPanel.hidden) refreshPowerUI(); }
+  markTool();
+}
+// Highlight the selected tool and show it as its category's icon.
+function markTool() {
+  const cat = toolCat(tool);
+  if (cat) {
+    catLast[cat] = tool;
+    const icon = paletteEl.querySelector(`.cat[data-cat="${cat}"] .catbtn canvas`);
+    if (icon) drawIcon(icon, tool);
+  }
+  document.querySelectorAll('#palette [data-tool]').forEach(b => b.classList.toggle('on', b.dataset.tool === tool));
+  paletteEl.querySelectorAll('.cat').forEach(c => c.classList.toggle('on', c.dataset.cat === cat));
 }
 function status(msg) { document.getElementById('status').textContent = msg; }
 function updateHelp() {
   document.getElementById('help').innerHTML = mode === 'edit'
-    ? 'Left click: paint · Right click: erase · 1–0: tools · C: character<br>Arrows/WASD or wheel (Shift+wheel: vertical): scroll · Enter: play'
-    : '←/→ or A/D: move · Space/W/↑: jump · R: restart · Enter/Esc: back to editor';
+    ? 'Left click: paint · Right click: erase · Middle click: pick · 1–0, B, F, M: tools · C: character · U: power-ups · I: invincibility<br>Arrows/WASD or wheel (Shift+wheel: vertical): scroll · Enter: play'
+    : '←/→ or A/D: move · Space/W/↑: jump · X/J: shoot · R: restart run · I: invincibility · Enter/Esc: back to editor';
 }
 
 // Character panel
 const charPanel = document.getElementById('charPanel'), charInputs = {};
 CHAR_FIELDS.forEach(f => {
+  if (f.section) {
+    const h = document.createElement('h4'); h.className = 'sub'; h.textContent = f.section;
+    document.getElementById('charRows').appendChild(h);
+  }
   const row = document.createElement('div'); row.className = 'row'; row.title = f.tip;
   row.innerHTML = `<label>${f.name} <span style="opacity:.6">(${f.unit})</span></label>
     <input type="range" min="${f.min}" max="${f.max}" step="${f.step}"><input type="number" min="${f.min}" max="${f.max}" step="${f.step}">`;
   const [range, num] = row.querySelectorAll('input');
   const onInput = e => {
     setCharCfg({ [f.k]: e.target.value }); saveCharCfg();
-    if (game?.p) game.phys = charPhys();   // apply live while playing
+    if (game?.p) { applyPowerEffects(game); game.p.hp = Math.min(game.p.hp, charCfg.hp); }   // apply live while playing (keeps power-up modifiers)
   };
   range.oninput = onInput;
   num.onchange = e => { onInput(e); num.value = charCfg[f.k]; };
@@ -284,13 +573,155 @@ function refreshCharUI() {
   const P = charPhys(), f0 = jumpFactor(0), air = 2 * P.jump / P.grav;
   document.getElementById('charInfo').innerHTML =
     `Full-speed jump: ${charCfg.jumpH.toFixed(1)} high × ${charCfg.jumpW.toFixed(1)} long, ${air.toFixed(2)} s in the air<br>` +
-    (charCfg.impact > 0 ? `Standing jump: ${(charCfg.jumpH * f0).toFixed(1)} tiles high, ${(air * f0).toFixed(2)} s in the air` : 'Jump height is the same at any speed');
+    (charCfg.impact > 0 ? `Standing jump: ${(charCfg.jumpH * f0).toFixed(1)} tiles high, ${(air * f0).toFixed(2)} s in the air` : 'Jump height is the same at any speed') +
+    `<br>${charCfg.projMax ? `Shoot with X or J · up to ${charCfg.projMax} shot${charCfg.projMax > 1 ? 's' : ''} at once` : 'Shooting disabled'}` +
+    `<br>${charCfg.hp} HP per life (${charCfg.hp > 1 ? `${charCfg.hp} hits` : 'one hit'} to lose a life; pits always cost a life) · starts with ${charCfg.lives} li${charCfg.lives > 1 ? 'ves' : 'fe'}`;
 }
+// Moving platform panel
+const movePanel = document.getElementById('movePanel'), moveInputs = {};
+for (const [k, m] of Object.entries(MOVE_MODES)) {
+  const b = document.createElement('button'); b.dataset.mode = k; b.textContent = m.name;
+  b.onclick = () => {
+    moveCfg.mode = k;
+    if (!m.dirs.some(d => d[0] === moveCfg.dir)) moveCfg.dir = m.dirs[0][0];
+    refreshMoveUI(); b.blur();
+  };
+  document.getElementById('moveMode').appendChild(b);
+}
+MOVE_FIELDS.forEach(f => {
+  const row = document.createElement('div'); row.className = 'row';
+  row.innerHTML = `<label><span>${f.name}</span> <span style="opacity:.6">(${f.unit})</span></label>
+    <input type="range" min="${f.min}" max="${f.max}" step="${f.step}"><input type="number" min="${f.min}" max="${f.max}" step="${f.step}">`;
+  const [range, num] = row.querySelectorAll('input');
+  const set = v => { v = +v; if (Number.isFinite(v)) moveCfg[f.k] = Math.max(f.min, Math.min(f.max, v)); refreshMoveUI(); };
+  range.oninput = e => set(e.target.value);
+  num.onchange = e => set(e.target.value);
+  moveInputs[f.k] = { range, num, label: row.querySelector('label span') };
+  document.getElementById('moveRows').appendChild(row);
+});
+function refreshMoveUI() {
+  document.querySelectorAll('#moveMode button').forEach(b => b.classList.toggle('on', b.dataset.mode === moveCfg.mode));
+  const dirEl = document.getElementById('moveDir'); dirEl.innerHTML = '';
+  for (const [d, label] of MOVE_MODES[moveCfg.mode].dirs) {
+    const b = document.createElement('button'); b.textContent = label; b.classList.toggle('on', d === moveCfg.dir);
+    b.onclick = () => { moveCfg.dir = d; refreshMoveUI(); };
+    dirEl.appendChild(b);
+  }
+  for (const f of MOVE_FIELDS) {
+    const { range, num } = moveInputs[f.k];
+    range.value = moveCfg[f.k];
+    if (document.activeElement !== num) num.value = moveCfg[f.k];
+  }
+  moveInputs.dist.label.textContent = moveCfg.mode === 'c' ? 'Radius' : 'Distance';
+  try { localStorage.setItem('platformer-maker-move', JSON.stringify(moveCfg)); } catch {}
+}
+function updateMovePanel() { movePanel.hidden = tool !== 'm' || mode !== 'edit'; }
+
 function saveCharCfg() { try { localStorage.setItem('platformer-maker-char', JSON.stringify(charCfg)); } catch {} }
 function toggleCharPanel(show = charPanel.hidden) {
+  if (show) togglePowerPanel(false);   // both panels sit on the right
   charPanel.hidden = !show;
   document.getElementById('charBtn').classList.toggle('on', show);
 }
+
+// Power-up panel: list of power-ups + editor for the selected one.
+const powerPanel = document.getElementById('powerPanel'), pwInputs = {}, pwRows = document.getElementById('pwRows');
+let pwSel = null;   // id of the power-up being edited
+function subHead(parent, text) { const h = document.createElement('h4'); h.className = 'sub'; h.textContent = text; parent.appendChild(h); }
+function addPowerRow(parent, f) {
+  const row = document.createElement('div'); row.className = 'row';
+  row.innerHTML = `<label>${f.name} <span style="opacity:.6">(${f.unit})</span></label>
+    <input type="range" min="${f.min}" max="${f.max}" step="${f.step}"><input type="number" min="${f.min}" max="${f.max}" step="${f.step}">`;
+  const [range, num] = row.querySelectorAll('input');
+  range.oninput = e => editPower({ [f.k]: e.target.value });
+  num.onchange = e => { editPower({ [f.k]: e.target.value }); num.value = powerById(pwSel)?.[f.k] ?? ''; };
+  pwInputs[f.k] = { range, num };
+  parent.appendChild(row);
+}
+POWER_FIELDS.forEach(f => { if (f.section) subHead(pwRows, f.section); addPowerRow(pwRows, f); });
+subHead(pwRows, 'Abilities');
+POWER_ABILITIES.forEach(a => {
+  const box = document.createElement('div'); box.className = 'ability'; box.title = a.tip;
+  box.innerHTML = `<label class="chk"><input type="checkbox"> ${a.name}</label>`;
+  const chk = box.querySelector('input');
+  chk.onchange = () => { editPower({ [a.k]: chk.checked }); chk.blur(); };
+  pwInputs[a.k] = { chk, box };
+  a.fields.forEach(f => addPowerRow(box, f));
+  pwRows.appendChild(box);
+});
+const pwName = document.getElementById('pwName'), pwColor = document.getElementById('pwColor');
+pwName.oninput = () => editPower({ name: pwName.value });
+pwColor.oninput = () => editPower({ color: pwColor.value });
+function editPower(patch) {
+  const i = powerDefs.findIndex(d => d.id === pwSel); if (i < 0) return;
+  powerDefs[i] = normPower({ ...powerDefs[i], ...patch }, pwSel);
+  savePowerDefs(); refreshPowerUI();
+  if ('name' in patch || 'color' in patch) buildPalette();
+  if (game?.p) applyPowerEffects(game);   // live while playing
+}
+function refreshPowerUI() {
+  const list = document.getElementById('powerList'); list.innerHTML = '';
+  for (const d of powerDefs) {
+    const b = document.createElement('button'); b.classList.toggle('on', d.id === pwSel);
+    b.title = 'Edit and select for painting';
+    b.innerHTML = `<canvas width="40" height="40"></canvas><span>${esc(d.name || '(unnamed)')}</span>`;
+    drawIcon(b.querySelector('canvas'), d.id);
+    b.onclick = () => { setTool(d.id); pwSel = d.id; refreshPowerUI(); b.blur(); };
+    list.appendChild(b);
+  }
+  if (powerDefs.length < POWER_IDS.length) {
+    const b = document.createElement('button'); b.textContent = '＋ New'; b.title = 'Create a new power-up';
+    b.onclick = () => { newPower(); b.blur(); };
+    list.appendChild(b);
+  }
+  const d = powerById(pwSel);
+  document.getElementById('powerEdit').hidden = !d;
+  document.getElementById('pwEmpty').hidden = !!d || powerDefs.length > 0;
+  if (!d) return;
+  if (document.activeElement !== pwName) pwName.value = d.name;
+  pwColor.value = d.color;
+  for (const f of [...POWER_FIELDS, ...POWER_ABILITIES.flatMap(a => a.fields)]) {
+    const { range, num } = pwInputs[f.k];
+    range.value = d[f.k];
+    if (document.activeElement !== num) num.value = d[f.k];
+  }
+  for (const a of POWER_ABILITIES) { pwInputs[a.k].chk.checked = d[a.k]; pwInputs[a.k].box.classList.toggle('off', !d[a.k]); }
+  document.getElementById('pwInfo').innerHTML = describePower(d);
+}
+function newPower(base = {}) {
+  const id = freePowerId(new Set(powerDefs.map(d => d.id)));
+  if (!id) return status('Maximum number of power-ups reached');
+  const hue = Math.floor(Math.random() * 360);
+  const color = '#' + [0, 8, 4].map(n => { const k = (n + hue / 30) % 12, v = 0.62 - 0.38 * Math.max(-1, Math.min(k - 3, 9 - k, 1)); return Math.round(v * 255).toString(16).padStart(2, '0'); }).join('');
+  powerDefs.push(normPower({ name: 'Power-up ' + (powerDefs.length + 1), color, ...base }, id));
+  pwSel = id; powerDefsChanged(); setTool(id);
+  status(`Created ${powerById(id).name} — paint it into the level`);
+}
+function deletePower() {
+  const d = powerById(pwSel); if (!d) return;
+  let n = 0; for (const row of grid) for (const c of row) if (c === d.id) n++;
+  if (!confirm(n ? `Delete "${d.name}" and the ${n} placed in the level?` : `Delete "${d.name}"?`)) return;
+  if (n) { pushUndo(); for (const row of grid) for (let x = 0; x < row.length; x++) if (row[x] === d.id) row[x] = '.'; }
+  const i = powerDefs.indexOf(d); powerDefs.splice(i, 1);
+  pwSel = powerDefs[Math.min(i, powerDefs.length - 1)]?.id ?? null;
+  powerDefsChanged(); status(`Deleted ${d.name}`);
+}
+function savePowerDefs() { try { localStorage.setItem('platformer-maker-powerups', JSON.stringify(powerDefs)); } catch {} }
+function powerDefsChanged() {
+  if (!powerById(pwSel)) pwSel = powerDefs[0]?.id ?? null;
+  savePowerDefs(); buildPalette(); refreshPowerUI();
+  if (game?.p) applyPowerEffects(game);
+}
+function togglePowerPanel(show = powerPanel.hidden) {
+  if (show) { charPanel.hidden = true; document.getElementById('charBtn').classList.remove('on'); }
+  powerPanel.hidden = !show;
+  document.getElementById('powerBtn').classList.toggle('on', show);
+  if (show) { if (powerById(tool)) pwSel = tool; refreshPowerUI(); }
+}
+document.getElementById('powerBtn').onclick = () => togglePowerPanel();
+document.getElementById('powerClose').onclick = () => togglePowerPanel(false);
+document.getElementById('pwDup').onclick = () => { const d = powerById(pwSel); if (d) newPower({ ...d, name: (d.name + ' 2').slice(0, 16) }); };
+document.getElementById('pwDel').onclick = deletePower;
 document.getElementById('charBtn').onclick = () => toggleCharPanel();
 document.getElementById('charClose').onclick = () => toggleCharPanel(false);
 document.getElementById('charReset').onclick = () => { setCharCfg(CHAR_DEFAULTS); saveCharCfg(); status('Character reset'); };
@@ -299,7 +730,7 @@ document.getElementById('play').onclick = toggleMode;
 document.getElementById('undo').onclick = undo;
 document.getElementById('clear').onclick = () => {
   if (!confirm('Clear the whole level?')) return;
-  pushUndo(); grid = emptyGrid(); status('Cleared');
+  pushUndo(); grid = emptyGrid(); meta = {}; status('Cleared');
 };
 document.getElementById('save').onclick = () => {
   try { localStorage.setItem('platformer-maker-level', serialize()); status('Saved to browser'); }
@@ -309,7 +740,7 @@ document.getElementById('load').onclick = () => {
   try {
     const s = localStorage.getItem('platformer-maker-level');
     if (!s) return status('Nothing saved yet');
-    pushUndo(); grid = deserialize(s); syncSize(); status('Loaded');
+    pushUndo(); ({ g: grid, m: meta } = deserialize(s)); syncSize(); status('Loaded');
   } catch { status('Load failed'); }
 };
 document.getElementById('export').onclick = () => {
@@ -321,13 +752,13 @@ document.getElementById('export').onclick = () => {
 document.getElementById('import').onclick = () => document.getElementById('file').click();
 document.getElementById('file').onchange = async e => {
   const f = e.target.files[0]; if (!f) return;
-  try { const g = deserialize(await f.text()); pushUndo(); grid = g; syncSize(); status('Imported ' + f.name); }
+  try { const d = deserialize(await f.text()); pushUndo(); grid = d.g; meta = d.m; syncSize(); status('Imported ' + f.name); }
   catch { status('Invalid level file'); }
   e.target.value = '';
 };
 
-function pushUndo() { undoStack.push(cloneGrid(grid)); if (undoStack.length > 100) undoStack.shift(); }
-function undo() { if (mode === 'edit' && undoStack.length) { grid = undoStack.pop(); syncSize(); status('Undo'); } }
+function pushUndo() { undoStack.push({ g: cloneGrid(grid), m: { ...meta } }); if (undoStack.length > 100) undoStack.shift(); }
+function undo() { if (mode === 'edit' && undoStack.length) { ({ g: grid, m: meta } = undoStack.pop()); syncSize(); status('Undo'); } }
 
 // Screen size: 'fit' fills the available area; 'WxH' renders at that resolution,
 // shown letterboxed and scaled down if it doesn't fit the window.
@@ -357,13 +788,65 @@ screenOpts.addEventListener('click', e => {
   updateScreenUI(); resize(); b.blur();
   status('Screen: ' + (screenSize === 'fit' ? 'fit window' : screenSize.replace('x', ' × ')));
 });
-function setMenu(open) {
-  screenMenu.classList.toggle('open', open);
-  screenBtn.classList.toggle('on', open);
-  screenBtn.setAttribute('aria-expanded', open);
+// Toolbar dropdowns: each .dd holds a toggle button and a .menu; only one is open at a time.
+const DROPDOWNS = [...document.querySelectorAll('.dd')].map(dd => ({ dd, btn: dd.querySelector(':scope > button'), menu: dd.querySelector('.menu') }));
+function setMenu(open, which = null) {
+  for (const d of DROPDOWNS) {
+    const o = open && d === which;
+    d.menu.classList.toggle('open', o);
+    d.btn.setAttribute('aria-expanded', o);
+  }
+  updateMenuButtons();
 }
-screenBtn.onclick = e => { e.stopPropagation(); setMenu(!screenMenu.classList.contains('open')); screenBtn.blur(); };
+function anyMenuOpen() { return DROPDOWNS.some(d => d.menu.classList.contains('open')); }
+function updateMenuButtons() {   // highlighted while open; Cheats also stays highlighted while any cheat is on
+  for (const d of DROPDOWNS)
+    d.btn.classList.toggle('on', d.menu.classList.contains('open') || (d.btn.id === 'cheatBtn' && anyCheat()));
+}
+DROPDOWNS.forEach(d => d.btn.onclick = e => {
+  e.stopPropagation(); setMenu(!d.menu.classList.contains('open'), d); d.btn.blur();
+});
 document.addEventListener('mousedown', e => { if (!e.target.closest('.dd')) setMenu(false); });
+
+// ---------- Game system menu ----------
+const sysInputs = {};
+SYS_FIELDS.forEach(f => {
+  const row = document.createElement('div'); row.className = 'row field'; row.title = f.tip;
+  row.innerHTML = `<span>${f.name}</span><button data-d="-1">−</button>
+    <input type="number" min="${f.min}" max="${f.max}" step="${f.step}"><button data-d="1">+</button>`;
+  const num = row.querySelector('input');
+  const set = v => { setSysCfg({ [f.k]: v }); saveSysCfg(); };
+  num.onchange = () => { set(num.value); num.value = sysCfg[f.k]; };
+  row.querySelectorAll('button').forEach(b => b.onclick = () => { set(sysCfg[f.k] + b.dataset.d * f.step); b.blur(); });
+  sysInputs[f.k] = num;
+  document.getElementById(f.box).appendChild(row);
+});
+function refreshSysUI() {
+  for (const f of SYS_FIELDS) if (document.activeElement !== sysInputs[f.k]) sysInputs[f.k].value = sysCfg[f.k];
+  const n = sysCfg.coinsPerLife;
+  document.getElementById('sysNote').textContent =
+    `1 coin = ${sysCfg.coinPoints} pts · 1 enemy = ${sysCfg.enemyPoints} pts · ` +
+    (n ? `every ${n} coin${n > 1 ? 's' : ''} = +1 life` : 'coins never give lives') +
+    '. Health points and starting lives are set in the Character panel.';
+}
+
+// ---------- Cheats ----------
+const cheats = { invincible: false };
+try { Object.assign(cheats, JSON.parse(localStorage.getItem('platformer-maker-cheats') || '{}')); } catch {}
+const CHEAT_NAMES = { invincible: 'Invincibility' };
+function anyCheat() { return Object.values(cheats).some(Boolean); }
+function setCheat(id, on) {
+  cheats[id] = on;
+  try { localStorage.setItem('platformer-maker-cheats', JSON.stringify(cheats)); } catch {}
+  updateCheatUI();
+  if (mode === 'play') playStatus(); else status(`${CHEAT_NAMES[id]} ${on ? 'ON' : 'OFF'}`);
+}
+function updateCheatUI() {
+  document.querySelectorAll('[data-cheat]').forEach(i => i.checked = !!cheats[i.dataset.cheat]);
+  updateMenuButtons();
+}
+document.querySelectorAll('[data-cheat]').forEach(i => i.onchange = () => { setCheat(i.dataset.cheat, i.checked); i.blur(); });
+updateCheatUI();
 screenMenu.querySelectorAll('[data-step]').forEach(b => b.onclick = () => {
   const d = +b.dataset.d;
   setLevelSize(W + (b.dataset.step === 'w' ? d : 0), H + (b.dataset.step === 'h' ? d : 0));
@@ -374,7 +857,7 @@ updateScreenUI();
 function resize() {
   const wrap = document.getElementById('wrap');
   wrap.style.top = document.getElementById('bar').offsetHeight + 'px';
-  document.getElementById('charPanel').style.top = document.getElementById('bar').offsetHeight + 6 + 'px';
+  for (const el of document.querySelectorAll('.panel')) el.style.top = document.getElementById('bar').offsetHeight + 6 + 'px';
   wrap.style.bottom = document.getElementById('palette').offsetHeight + 'px';
   const aw = wrap.clientWidth, ah = wrap.clientHeight;
   if (screenSize === 'fit') {
@@ -413,10 +896,19 @@ function paint() {
   const id = mouse.down === 2 ? '.' : tool;
   if (id === 'P') for (const row of grid) for (let x = 0; x < W; x++) if (row[x] === 'P') row[x] = '.';
   grid[ty][tx] = id;
+  if (id === 'm') meta[tx + ',' + ty] = { ...moveCfg }; else delete meta[tx + ',' + ty];
 }
 cv.addEventListener('contextmenu', e => e.preventDefault());
 cv.addEventListener('mousedown', e => {
   if (mode !== 'edit') return;
+  if (e.button === 1) {   // middle click: pick the tile under the mouse (and a moving platform's settings)
+    e.preventDefault();
+    const { tx, ty } = tileAtMouse(), c = grid[ty]?.[tx];
+    if (c === undefined) return;
+    setTool(c);
+    if (c === 'm') { moveCfg = { ...MOVE_DEFAULTS, ...meta[tx + ',' + ty] }; refreshMoveUI(); }
+    return;
+  }
   mouse.down = e.button === 2 ? 2 : (e.button === 0 ? 1 : 0);
   if (mouse.down) { pushUndo(); paint(); }
 });
@@ -436,17 +928,21 @@ cv.addEventListener('wheel', e => {
 }, { passive:false });
 
 window.addEventListener('keydown', e => {
-  if (e.code === 'Escape' && screenMenu.classList.contains('open')) { setMenu(false); return; }
-  if (e.target.tagName === 'INPUT') { if (e.code === 'Enter') e.target.blur(); return; }
+  if (e.code === 'Escape' && anyMenuOpen()) { setMenu(false); return; }
+  if (e.code === 'Escape' && paletteEl.querySelector('.cat.open')) { closeCats(); return; }
+  if (e.target.tagName === 'INPUT' && e.target.type !== 'checkbox') { if (e.code === 'Enter') e.target.blur(); return; }
+  if (e.code === 'KeyI' && !e.ctrlKey && !e.metaKey && !e.altKey) { setCheat('invincible', !cheats.invincible); return; }
   if (!e.ctrlKey && !e.metaKey) keys[e.code] = true;   // Ctrl+Z etc. must not pan
   if (e.code === 'Enter' || (e.code === 'Escape' && mode === 'play')) { toggleMode(); e.preventDefault(); return; }
   if (mode === 'edit') {
     if ((e.ctrlKey || e.metaKey) && e.code === 'KeyZ') { undo(); e.preventDefault(); return; }
     if (e.code === 'KeyC' && !e.ctrlKey && !e.metaKey) { toggleCharPanel(); return; }
+    if (e.code === 'KeyU' && !e.ctrlKey && !e.metaKey) { togglePowerPanel(); return; }
     const t = TOOLS.find(t => t.key === e.key); if (t) setTool(t.id);
   } else {
     if (['Space','ArrowUp','KeyW','KeyZ'].includes(e.code)) { game.jumpBuffer = 0.12; e.preventDefault(); }
-    if (e.code === 'KeyR') startGame();
+    if ((e.code === 'KeyX' || e.code === 'KeyJ') && !e.repeat) shoot();
+    if (e.code === 'KeyR') newRun();
     if (e.code.startsWith('Arrow') || e.code === 'Space') e.preventDefault();
   }
 });
@@ -458,33 +954,52 @@ function toggleMode() {
     let found = false;
     for (const row of grid) if (row.includes('P')) found = true;
     if (!found) return status('Place a Start tile first (8)');
-    mode = 'play'; game = { deaths: 0 }; startGame();
+    mode = 'play'; newRun();
   } else {
     mode = 'edit'; game = null; status('Editing');
   }
   const b = document.getElementById('play');
   b.textContent = mode === 'edit' ? '▶ Play' : '■ Stop';
   b.classList.toggle('stop', mode === 'play');
-  updateHelp();
+  updateHelp(); updateMovePanel();
 }
 
+// A run lasts from pressing Play until game over: score and lives carry over between lives,
+// while each life restarts the level from the Start tile with full health.
+function newRun() {
+  game = { deaths: 0, score: 0, lives: charCfg.lives, coinBank: 0, over: false };
+  startGame();
+}
 function startGame() {
-  const g = cloneGrid(grid), enemies = [];
+  const g = cloneGrid(grid), enemies = [], movers = [];
   let sx = 0, sy = 0, coins = 0;
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
     const c = g[y][x];
     if (c === 'P') { sx = x; sy = y; g[y][x] = '.'; }
     else if (c === 'e') { enemies.push({ x:x*T+4, y:y*T+8, w:24, h:24, vx:-60, vy:0, dead:0 }); g[y][x] = '.'; }
     else if (c === 'c') coins++;
+    else if (c === 'm') {
+      const cfg = { ...MOVE_DEFAULTS, ...meta[x + ',' + y] };
+      movers.push({ sx: x*T, sy: y*T, x: x*T, y: y*T, px: x*T, py: y*T, cfg });
+      g[y][x] = '.';
+    }
   }
   Object.assign(game, {
-    g, enemies, totalCoins: coins, coins: 0, won: false, t: 0,
-    p: { x: sx*T+5, y: sy*T+4, w:22, h:28, vx:0, vy:0, onGround:false, coyote:0, face:1, grav:0 },
+    g, enemies, movers, totalCoins: coins, coins: 0, won: false, t: 0,
+    p: { x: sx*T+5, y: sy*T+4, w:22, h:28, vx:0, vy:0, onGround:false, coyote:0, face:1, grav:0, ride:null, safe:{ x: sx*T+5, y: sy*T+4 }, hp: charCfg.hp, hurt: 0 },
+    pops: [],
     phys: charPhys(),
-    jumpBuffer: 0, jumpHeld: false,
+    jumpBuffer: 0, jumpHeld: false, debris: [], shaking: new Map(), falling: [], shots: [],
   });
+  // Power-up state: lost on each new life (the pick-ups respawn with the level)
+  Object.assign(game, { power: null, fx: [] });
+  Object.assign(game.p, { scale: 1, targetScale: 1, airJumps: 0, gliding: false });
   cam.x = game.p.x - viewW() / 2; cam.y = game.p.y - viewH() / 2; clampCam();
-  status(`Coins 0/${coins} · Deaths ${game.deaths}`);
+  playStatus();
+}
+function playStatus() {
+  const G = game, s = `Score ${G.score} · Coins ${G.coins}/${G.totalCoins} · HP ${G.p.hp}/${charCfg.hp} · Lives ${G.lives}` + powerStatus(G) + (cheats.invincible ? ' · 🛡 Invincible' : '');
+  status(G.won ? 'Level complete! ' + s : G.over ? 'Game over! ' + s : s);
 }
 
 function tileAt(g, tx, ty) {
@@ -496,7 +1011,7 @@ function overlaps(a, bx, by, bw, bh) { return a.x < bx+bw && a.x+a.w > bx && a.y
 
 // Move a body with axis-separated tile collision. Returns flags.
 function moveBody(b, g, dt, useOneWay) {
-  const res = { hitWall:false, landed:false, landedOn:null, hitCeil:false };
+  const res = { hitWall:false, landed:false, landedOn:null, hitCeil:false, ceilTiles:[] };
   // X
   b.x += b.vx * dt;
   let y0 = Math.floor(b.y / T), y1 = Math.floor((b.y + b.h - 0.01) / T);
@@ -522,7 +1037,9 @@ function moveBody(b, g, dt, useOneWay) {
     }
   } else if (b.vy < 0) {
     const ty = Math.floor(b.y / T);
-    for (let tx = x0; tx <= x1; tx++) if (SOLID.has(tileAt(g, tx, ty))) { b.y = (ty+1)*T; b.vy = 0; res.hitCeil = true; break; }
+    for (let tx = x0; tx <= x1; tx++) if (SOLID.has(tileAt(g, tx, ty))) {
+      b.y = (ty+1)*T; b.vy = 0; res.hitCeil = true; res.ceilTiles.push([tx, ty]);
+    }
   }
   return res;
 }
@@ -536,16 +1053,189 @@ function doJump(p, P, v0) {
   p.vy = -v0; p.grav = P.grav / f;
 }
 
-function die() { game.deaths++; startGame(); }
+// Smash a breakable tile into 4 falling chunks.
+function breakTile(G, tx, ty) {
+  G.g[ty][tx] = '.';
+  for (let i = 0; i < 4; i++) {
+    const sx = i % 2, sy = i >> 1;
+    G.debris.push({ x: tx*T + 4 + sx*16, y: ty*T + 4 + sy*16, vx: (sx ? 1 : -1) * (90 + Math.random()*60), vy: -380 + sy*140 - Math.random()*80, r: 0, vr: (sx ? 1 : -1) * 10 });
+  }
+}
+function updateDebris(G, dt) {
+  for (const d of G.debris) { d.vy += PHYS.grav * dt; d.x += d.vx * dt; d.y += d.vy * dt; d.r += d.vr * dt; }
+  G.debris = G.debris.filter(d => d.y < H * T + 64);
+}
+
+// Shaking platforms drop after FALL_DELAY; they come back when the level restarts.
+function updateFalling(G, dt) {
+  for (const [k, t] of G.shaking) {
+    if (t + dt < FALL_DELAY) { G.shaking.set(k, t + dt); continue; }
+    const [tx, ty] = k.split(',').map(Number);
+    G.shaking.delete(k); G.g[ty][tx] = '.';
+    G.falling.push({ x: tx*T, y: ty*T, vy: 0 });
+  }
+  for (const f of G.falling) { f.vy = Math.min(f.vy + PHYS.grav * dt, PHYS.maxFall); f.y += f.vy * dt; }
+  G.falling = G.falling.filter(f => f.y < H * T + 64);
+}
+
+// ---------- Projectiles ----------
+const SHOT = 10;   // projectile size (px)
+// A power-up with projectile throwing replaces the character's own shots while it is active.
+function shoot() {
+  const G = game, p = G?.p;
+  if (!p || G.won || G.over) return;
+  const pw = activePower(G), thrown = pw?.projectile;
+  if (G.shots.length >= (thrown ? pw.projMax : charCfg.projMax)) return;
+  G.shots.push({
+    x: p.face > 0 ? p.x + p.w : p.x - SHOT, y: p.y + p.h * 0.4 - SHOT / 2,
+    vx: p.face * (thrown ? pw.projSpeed : charCfg.projSpeed) * T, vy: 0, t: 0,
+    bounce: thrown ? pw.projBounce : 0, color: thrown ? pw.color : null,
+  });
+}
+// Shots fly straight (or bounce along the floor when thrown by a power-up), stop at walls,
+// defeat enemies and vanish once off screen.
+function updateShots(G, dt) {
+  const vx0 = cam.x - SHOT, vx1 = cam.x + viewW(), vy0 = cam.y - SHOT, vy1 = cam.y + viewH();
+  G.shots = G.shots.filter(s => {
+    s.t += dt;
+    if (s.bounce) s.vy = Math.min(s.vy + PHYS.grav * dt, PHYS.maxFall);
+    const steps = Math.max(1, Math.ceil(Math.max(Math.abs(s.vx), Math.abs(s.vy)) * dt / (T / 2)));   // sub-step so fast shots can't tunnel
+    for (let i = 0; i < steps; i++) {
+      s.x += s.vx * dt / steps;
+      if (s.bounce) {
+        const prevBottom = s.y + SHOT;
+        s.y += s.vy * dt / steps;
+        const cx = Math.floor((s.x + SHOT / 2) / T);
+        if (s.vy > 0) {
+          const ty = Math.floor((s.y + SHOT) / T), c = tileAt(G.g, cx, ty);
+          if (SOLID.has(c) || (ONEWAY.has(c) && prevBottom <= ty * T + 0.5)) {
+            s.y = ty * T - SHOT; s.vy = -Math.sqrt(2 * PHYS.grav * s.bounce * T);
+          }
+        } else if (SOLID.has(tileAt(G.g, cx, Math.floor(s.y / T)))) {
+          s.y = Math.floor(s.y / T) * T + T; s.vy = 0;
+        }
+      }
+      const tx = Math.floor((s.x + SHOT / 2) / T), ty = Math.floor((s.y + SHOT / 2) / T);
+      if (SOLID.has(tileAt(G.g, tx, ty))) return false;
+      for (const e of G.enemies) if (!e.dead && overlaps(e, s.x, s.y, SHOT, SHOT)) { killEnemy(G, e); return false; }
+    }
+    return s.x > vx0 && s.x < vx1 && s.y > vy0 && s.y < vy1;
+  });
+}
+
+// ---------- Score, health & lives ----------
+const HURT_TIME = 1.2;   // seconds of blinking invulnerability after taking a hit
+function addPop(G, x, y, text, color = '#fff') { G.pops.push({ x, y, text, color, t: 0 }); }
+function addScore(G, pts, x, y) { if (pts > 0) { G.score += pts; addPop(G, x, y, '+' + pts); } }
+function collectCoin(G, x, y) {
+  G.coins++;
+  addScore(G, sysCfg.coinPoints, x, y);
+  if (sysCfg.coinsPerLife > 0 && ++G.coinBank >= sysCfg.coinsPerLife) {
+    G.coinBank -= sysCfg.coinsPerLife; G.lives++;
+    addPop(G, x, y - 18, '1UP', '#7dff9a');
+  }
+}
+function killEnemy(G, e) {
+  if (e.dead) return;
+  e.dead = 0.001;
+  addScore(G, sysCfg.enemyPoints, e.x + e.w / 2, e.y);
+}
+// Take one hit from something centred at fromX. Returns true if the hit cost a life
+// (the level was restarted or the game is over), so the caller must stop updating.
+function hurt(G, fromX) {
+  const p = G.p;
+  if (cheats.invincible || p.hurt > 0) return false;
+  if (--p.hp <= 0) { loseLife(); return true; }
+  p.hurt = HURT_TIME;
+  const away = Math.sign(p.x + p.w / 2 - fromX) || -p.face;   // knock back away from the source
+  p.vx = away * G.phys.run * 0.6; p.vy = -G.phys.jump * 0.55; p.grav = 0;
+  p.onGround = false; p.ride = null; G.jumpHeld = false;
+  return false;
+}
+function loseLife() {
+  const G = game;
+  G.deaths++; G.lives--;
+  if (G.lives > 0) return startGame();
+  G.lives = 0; G.p.hp = 0; G.over = true; G.shots = [];
+  playStatus();
+}
+// Invincibility: falling out of the level returns the player to the last solid ground they stood on.
+function rescue(p) { Object.assign(p, { x: p.safe.x, y: p.safe.y, vx: 0, vy: 0, grav: 0, coyote: 0 }); }
+
+// ---------- Power-ups in play ----------
+const BASE_W = 22, BASE_H = 28;   // player hitbox at 100% size
+function activePower(G) { return G?.power ? powerById(G.power.id) : null; }
+function powerStatus(G) {
+  const pw = activePower(G);
+  return pw ? ` · ⭐ ${pw.name}${pw.duration ? ' ' + Math.ceil(G.power.t) + 's' : ''}` : '';
+}
+// Recompute everything that depends on the current power-up (also used for live edits).
+function applyPowerEffects(G) {
+  const pw = activePower(G);
+  G.phys = charPhys(pw || {});
+  G.p.targetScale = pw ? pw.size / 100 : 1;
+  if (!pw?.doubleJump) G.p.airJumps = 0;
+}
+function givePower(G, id, x, y) {
+  const pw = powerById(id);
+  G.power = { id, t: pw.duration };
+  applyPowerEffects(G);
+  G.p.airJumps = pw.doubleJump ? pw.airJumps : 0;
+  G.fx.push({ x, y, t: 0, color: pw.color, big: true });
+  if (G.pops) addPop(G, x, y - 10, pw.name || 'Power-up', pw.color);
+}
+// Count down a timed power-up; drop it if it ran out or was deleted in the editor.
+function tickPower(G, dt) {
+  if (!G.power) return;
+  const pw = activePower(G);
+  if (pw && (!pw.duration || (G.power.t -= dt) > 0)) return;
+  G.power = null; applyPowerEffects(G);
+}
+function boxFree(g, x, y, w, h) {
+  for (let ty = Math.floor(y / T); ty <= Math.floor((y + h - 0.01) / T); ty++)
+    for (let tx = Math.floor(x / T); tx <= Math.floor((x + w - 0.01) / T); tx++)
+      if (SOLID.has(tileAt(g, tx, ty))) return false;
+  return true;
+}
+// Grow / shrink smoothly towards targetScale, feet planted. Growing waits until there is room.
+function resizePlayer(G, dt) {
+  const p = G.p, d = p.targetScale - p.scale;
+  if (Math.abs(d) < 1e-4) return;
+  const s = p.scale + Math.sign(d) * Math.min(Math.abs(d), dt * 3);
+  const w = BASE_W * s, h = BASE_H * s, nx = p.x + p.w / 2 - w / 2, ny = p.y + p.h - h;
+  for (const dx of [0, -4, 4, -8, 8, -12, 12, -16, 16])
+    if (s < p.scale || boxFree(G.g, nx + dx, ny, w, h)) { Object.assign(p, { x: nx + dx, y: ny, w, h, scale: s }); return; }
+}
+function updateFx(G, dt) {
+  for (const f of G.fx) f.t += dt;
+  G.fx = G.fx.filter(f => f.t < 0.5);
+}
 
 function update(dt) {
   const G = game, p = G.p, C = G.phys;
   G.t += dt;
-  if (G.won) return;
+  for (const q of G.pops) { q.t += dt; q.y -= 40 * dt; }   // floating score text
+  G.pops = G.pops.filter(q => q.t < 0.9);
+  if (G.won || G.over) return;
+  if (p.hurt > 0) p.hurt -= dt;
+  tickPower(G, dt); resizePlayer(G, dt); updateFx(G, dt);
+  const pw = activePower(G);
+
+  // Moving platforms: advance, then carry whoever rides them
+  for (const m of G.movers) {
+    const [ox, oy] = moverOffset(m.cfg, G.t);
+    m.px = m.x; m.py = m.y; m.x = m.sx + ox; m.y = m.sy + oy;
+  }
+  if (p.ride) {
+    const m = p.ride, vx = p.vx, vy = p.vy;
+    p.vx = (m.x - m.px) / dt; p.vy = (m.y - m.py) / dt;
+    moveBody(p, G.g, dt, false);   // walls/floors still block the carried player
+    p.vx = vx; p.vy = vy;
+  }
 
   // Horizontal input
   const dir = (keys.ArrowRight || keys.KeyD ? 1 : 0) - (keys.ArrowLeft || keys.KeyA || keys.KeyQ ? 1 : 0);
-  if (dir) {
+  if (dir && !(p.hurt > HURT_TIME - 0.25)) {   // no control for a moment while knocked back
     p.face = dir;
     p.vx += dir * (p.onGround ? C.accel : C.airAccel) * dt;
     p.vx = Math.max(-C.run, Math.min(C.run, p.vx));
@@ -559,18 +1249,44 @@ function update(dt) {
   G.jumpBuffer -= dt; p.coyote -= dt;
   if (G.jumpBuffer > 0 && p.coyote > 0) {
     doJump(p, C, C.jump); G.jumpBuffer = 0; p.coyote = 0; G.jumpHeld = true;
+  } else if (pw?.doubleJump && p.airJumps > 0 && G.jumpBuffer > 0.12 - 2 * dt) {
+    // Air jump: only on a fresh press, so a press just before landing stays a buffered ground jump
+    doJump(p, C, C.jump); G.jumpBuffer = 0; p.airJumps--; G.jumpHeld = true;
+    G.fx.push({ x: p.x + p.w / 2, y: p.y + p.h, t: 0, color: pw.color });
   }
   if (G.jumpHeld && !held && p.vy < 0) { p.vy *= 0.45; G.jumpHeld = false; }
   if (p.vy >= 0) G.jumpHeld = false;
 
   p.vy = Math.min(p.vy + (p.grav || C.grav) * dt, C.maxFall);
+  // Glide: holding jump while falling caps the fall speed
+  p.gliding = !!(pw?.glide && held && !p.onGround && p.vy > pw.glideFall * T);
+  if (p.gliding) p.vy = pw.glideFall * T;
+  const prevBottom = p.y + p.h;
   const r = moveBody(p, G.g, dt, true);
   p.onGround = r.landed;
+  // Land on moving platforms (one-way, like Platform tiles)
+  p.ride = null;
+  if (p.vy >= 0) for (const m of G.movers) {
+    if (p.x < m.x + T && p.x + p.w > m.x && prevBottom <= Math.max(m.y, m.py) + 0.5 && p.y + p.h >= m.y) {
+      p.y = m.y - p.h; p.vy = 0; p.onGround = true; p.coyote = 0.1; p.grav = 0; p.ride = m;
+      break;
+    }
+  }
+  if (r.hitCeil) for (const [tx, ty] of r.ceilTiles) if (BREAKABLE.has(tileAt(G.g, tx, ty))) breakTile(G, tx, ty);
+  if (r.landed) {   // standing on a falling platform starts its countdown
+    const fy = Math.round((p.y + p.h) / T);
+    for (let tx = Math.floor(p.x / T); tx <= Math.floor((p.x + p.w - 0.01) / T); tx++)
+      if (tileAt(G.g, tx, fy) === 'v' && !G.shaking.has(tx + ',' + fy)) G.shaking.set(tx + ',' + fy, 0);
+  }
+  updateFalling(G, dt);
+  updateDebris(G, dt);
   if (r.landed) {
     p.grav = 0;
+    if (r.landedOn !== 'v') p.safe = { x: p.x, y: p.y };   // falling platforms aren't a safe spot to return to
     if (r.landedOn === 'j') { p.vy = -C.spring; p.onGround = false; G.jumpHeld = false; }
     else p.coyote = 0.1;
   }
+  if (p.onGround || r.landedOn === 'j') p.airJumps = pw?.doubleJump ? pw.airJumps : 0;   // air jumps refill on landing
 
   // Tile interactions
   const x0 = Math.floor(p.x / T), x1 = Math.floor((p.x + p.w - 0.01) / T);
@@ -578,14 +1294,16 @@ function update(dt) {
   for (let ty = y0; ty <= y1; ty++) for (let tx = x0; tx <= x1; tx++) {
     const c = tileAt(G.g, tx, ty);
     if (c === 'c' && overlaps(p, tx*T+8, ty*T+8, 16, 16)) {
-      G.g[ty][tx] = '.'; G.coins++;
+      G.g[ty][tx] = '.'; collectCoin(G, tx*T + 16, ty*T + 8);
+    } else if (powerById(c) && overlaps(p, tx*T+5, ty*T+5, 22, 22)) {
+      G.g[ty][tx] = '.'; givePower(G, c, tx*T + 16, ty*T + 16);
     } else if (c === 's' && overlaps(p, tx*T+4, ty*T+14, 24, 18)) {
-      return die();
+      if (hurt(G, tx*T + 16)) return;
     } else if (c === 'f' && overlaps(p, tx*T+10, ty*T, 12, T)) {
       G.won = true;
     }
   }
-  if (p.y > H * T + 64) return die();
+  if (p.y > H * T + 64) { if (cheats.invincible) rescue(p); else return loseLife(); }   // pits cost a whole life
 
   // Enemies
   for (const e of G.enemies) {
@@ -602,10 +1320,12 @@ function update(dt) {
     if (e.y > H * T + 64) e.dead = 99;
     if (overlaps(p, e.x, e.y, e.w, e.h)) {
       if (p.vy > 0 && p.y + p.h - e.y < 16) {
-        e.dead = 0.001; if (held) doJump(p, C, C.jump); else { p.vy = -C.stomp; p.grav = 0; } G.jumpHeld = held;
-      } else return die();
+        killEnemy(G, e); if (held) doJump(p, C, C.jump); else { p.vy = -C.stomp; p.grav = 0; } G.jumpHeld = held;
+      } else if (cheats.invincible) killEnemy(G, e);   // invincible: plough straight through enemies
+      else if (hurt(G, e.x + e.w / 2)) return;
     }
   }
+  updateShots(G, dt);
   G.enemies = G.enemies.filter(e => !e.dead || e.dead < 0.4);
 
   // Camera
@@ -615,7 +1335,7 @@ function update(dt) {
   cam.y += (targetY - cam.y) * Math.min(1, dt * 5);
   clampCam();
 
-  status(G.won ? `Level complete! Coins ${G.coins}/${G.totalCoins} · Deaths ${G.deaths}` : `Coins ${G.coins}/${G.totalCoins} · Deaths ${G.deaths}`);
+  playStatus();
 }
 
 // ---------- Rendering ----------
@@ -631,6 +1351,26 @@ function drawTile(c, x, y, t) {
       ctx.fillStyle = '#7a3519';
       ctx.fillRect(x, y+15, T, 2); ctx.fillRect(x, y+31, T, 1);
       ctx.fillRect(x+15, y, 2, 15); ctx.fillRect(x+7, y+17, 2, 15); ctx.fillRect(x+23, y+17, 2, 15);
+      break;
+    case 'v':
+      ctx.fillStyle = '#c98f4a'; ctx.fillRect(x, y, T, 10);
+      ctx.fillStyle = '#8a5a2b'; ctx.fillRect(x, y+10, T, 3);
+      ctx.fillRect(x+7, y+2, 2, 6); ctx.fillRect(x+15, y+2, 2, 6); ctx.fillRect(x+23, y+2, 2, 6);
+      ctx.fillStyle = '#8a5a2b'; ctx.beginPath(); ctx.moveTo(x+10, y+13); ctx.lineTo(x+16, y+19); ctx.lineTo(x+22, y+13); ctx.fill();
+      break;
+    case 'm':
+      ctx.fillStyle = '#9b7bd6'; ctx.fillRect(x, y, T, 10);
+      ctx.fillStyle = '#6a4fa8'; ctx.fillRect(x, y+10, T, 3);
+      ctx.fillStyle = '#e8e0ff'; ctx.fillRect(x+5, y+4, 3, 3); ctx.fillRect(x+T-8, y+4, 3, 3);
+      break;
+    case 'k':
+      ctx.fillStyle = '#e0a060'; ctx.fillRect(x, y, T, T);
+      ctx.fillStyle = '#f3c48a'; ctx.fillRect(x, y, T, 3); ctx.fillRect(x, y, 3, T);
+      ctx.fillStyle = '#9a5a26'; ctx.fillRect(x, y+T-3, T, 3); ctx.fillRect(x+T-3, y, 3, T);
+      ctx.strokeStyle = '#7a4318'; ctx.lineWidth = 2; ctx.beginPath();   // cracks
+      ctx.moveTo(x+8, y+6); ctx.lineTo(x+14, y+14); ctx.lineTo(x+11, y+20); ctx.lineTo(x+17, y+27);
+      ctx.moveTo(x+14, y+14); ctx.lineTo(x+24, y+11);
+      ctx.stroke();
       break;
     case 'p':
       ctx.fillStyle = '#8fa3b8'; ctx.fillRect(x, y, T, 8);
@@ -681,6 +1421,18 @@ function drawEnemy(x, y, w, h, squash) {
   ctx.fillStyle = '#111'; ctx.fillRect(x+6, y+9, 3, 3); ctx.fillRect(x+15, y+9, 3, 3);
 }
 
+// Editor preview of a moving platform's path, with a ghost at B (or a quarter turn along the circle).
+function drawMoverPath(tx, ty, c) {
+  const L = c.dist * T, cx = tx*T + T/2, cy = ty*T + 5;
+  const [ox, oy] = moverOffset(c, moverPreviewTime(c));
+  ctx.strokeStyle = '#6a4fa8'; ctx.lineWidth = 2 / scale; ctx.setLineDash([6 / scale, 4 / scale]);
+  ctx.beginPath();
+  if (c.mode === 'c') ctx.arc(cx, cy + L, L, 0, Math.PI * 2);
+  else { ctx.moveTo(cx, cy); ctx.lineTo(cx + ox, cy + oy); }
+  ctx.stroke(); ctx.setLineDash([]);
+  ctx.globalAlpha = 0.35; drawTile('m', tx*T + ox, ty*T + oy, 0); ctx.globalAlpha = 1;
+}
+
 // Preview the jump trajectory (player feet) from the Start tile, both directions.
 function drawJumpArcs() {
   let sx = -1, sy = -1;
@@ -726,7 +1478,9 @@ function render(t) {
   const ty0 = Math.max(0, Math.floor(cam.y / T)), ty1 = Math.min(H - 1, Math.ceil((cam.y + viewH()) / T));
   for (let y = ty0; y <= ty1; y++) for (let x = tx0; x <= tx1; x++) {
     const c = g[y][x];
-    if (c !== '.') drawTile(c, x*T, y*T, t);
+    if (c === '.') continue;
+    const sh = mode === 'play' && c === 'v' && game.shaking.has(x + ',' + y);
+    drawTile(c, x*T + (sh ? Math.sin(t * 60) * 2 : 0), y*T, t);
   }
 
   if (mode === 'edit') {
@@ -738,26 +1492,87 @@ function render(t) {
     ctx.strokeStyle = 'rgba(0,0,0,.4)'; ctx.lineWidth = 2 / scale;
     ctx.strokeRect(0, 0, W*T, H*T);
     if (!charPanel.hidden) drawJumpArcs();
+    for (const k in meta) {
+      const [x, y] = k.split(',').map(Number);
+      if (grid[y]?.[x] === 'm') drawMoverPath(x, y, meta[k]);
+    }
     if (mouse.inside) {
       const { tx, ty } = tileAtMouse();
       if (tx >= 0 && ty >= 0 && tx < W && ty < H) {
         ctx.globalAlpha = 0.5; if (tool !== '.') drawTile(tool, tx*T, ty*T, t); ctx.globalAlpha = 1;
+        if (tool === 'm') drawMoverPath(tx, ty, moveCfg);
         ctx.strokeStyle = tool === '.' ? '#e33' : '#fff'; ctx.strokeRect(tx*T + 1, ty*T + 1, T - 2, T - 2);
       }
     }
   } else {
+    for (const f of game.falling) drawTile('v', f.x, f.y, t);
+    for (const m of game.movers) drawTile('m', m.x, m.y, t);
+    for (const d of game.debris) {
+      ctx.save(); ctx.translate(d.x + 6, d.y + 6); ctx.rotate(d.r);
+      ctx.fillStyle = '#e0a060'; ctx.fillRect(-6, -6, 12, 12);
+      ctx.fillStyle = '#9a5a26'; ctx.fillRect(-6, 3, 12, 3);
+      ctx.restore();
+    }
     for (const e of game.enemies) drawEnemy(e.x, e.y, e.w, e.h, e.dead);
-    drawPlayer(game.p.x, game.p.y, game.p.w, game.p.h, game.p.face);
-    if (game.won) {
+    for (const s of game.shots) {
+      const cx = s.x + SHOT / 2, cy = s.y + SHOT / 2;
+      ctx.fillStyle = 'rgba(255,140,40,.35)';
+      ctx.beginPath(); ctx.ellipse(cx - Math.sign(s.vx) * 5, cy, 10, 6, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#ffb347'; ctx.beginPath(); ctx.arc(cx, cy, SHOT / 2, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fff6c8'; ctx.beginPath(); ctx.arc(cx, cy, SHOT / 4 + Math.sin(s.t * 40), 0, Math.PI * 2); ctx.fill();
+    }
+    if (!(game.p.hurt > 0 && Math.floor(t * 16) % 2) && !game.over)   // blink while invulnerable after a hit
+      drawPlayer(game.p.x, game.p.y, game.p.w, game.p.h, game.p.face);
+    ctx.font = 'bold 14px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+    for (const q of game.pops) {
+      ctx.globalAlpha = Math.max(0, 1 - q.t / 0.9);
+      ctx.fillStyle = '#0008'; ctx.fillText(q.text, q.x + 1, q.y + 1);
+      ctx.fillStyle = q.color; ctx.fillText(q.text, q.x, q.y);
+    }
+    ctx.globalAlpha = 1;
+    if (cheats.invincible) {   // pulsing golden aura
+      ctx.strokeStyle = `rgba(255,204,77,${0.55 + 0.35 * Math.sin(t * 10)})`; ctx.lineWidth = 3;
+      ctx.strokeRect(game.p.x - 3, game.p.y - 3, game.p.w + 6, game.p.h + 6);
+    }
+    drawHUD();
+    if (game.won || game.over) {
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(0, 0, cv.width, cv.height);
-      ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
-      ctx.font = 'bold 48px system-ui'; ctx.fillText('Level Complete!', cv.width/2, cv.height/2 - 10);
+      ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+      ctx.font = 'bold 48px system-ui'; ctx.fillText(game.won ? 'Level Complete!' : 'Game Over', cv.width/2, cv.height/2 - 10);
       ctx.font = '20px system-ui';
-      ctx.fillText(`Coins ${game.coins}/${game.totalCoins} · Deaths ${game.deaths}`, cv.width/2, cv.height/2 + 30);
-      ctx.fillText('R: play again · Enter: back to editor', cv.width/2, cv.height/2 + 60);
+      ctx.fillText(`Score ${game.score} · Coins ${game.coins}/${game.totalCoins} · Deaths ${game.deaths}`, cv.width/2, cv.height/2 + 30);
+      ctx.fillText(`R: ${game.won ? 'play again' : 'try again'} · Enter: back to editor`, cv.width/2, cv.height/2 + 60);
     }
   }
+}
+
+// In-game HUD (screen space, top-left): hearts for health, then score, coins and lives.
+function drawHeart(x, y, s, full) {   // (x, y) = top centre
+  ctx.beginPath();
+  ctx.moveTo(x, y + s * 0.3);
+  ctx.bezierCurveTo(x, y, x - s / 2, y, x - s / 2, y + s * 0.3);
+  ctx.bezierCurveTo(x - s / 2, y + s * 0.6, x, y + s * 0.8, x, y + s);
+  ctx.bezierCurveTo(x, y + s * 0.8, x + s / 2, y + s * 0.6, x + s / 2, y + s * 0.3);
+  ctx.bezierCurveTo(x + s / 2, y, x, y, x, y + s * 0.3);
+  ctx.fillStyle = full ? '#ff4d6d' : 'rgba(255,255,255,.2)'; ctx.fill();
+}
+function drawHUD() {
+  const G = game, k = Math.max(0.75, Math.min(1.5, cv.height / 576));
+  ctx.setTransform(k, 0, 0, k, 0, 0);
+  ctx.font = 'bold 16px system-ui'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  const score = 'SCORE ' + G.score, coins = `${G.coins}/${G.totalCoins}`, lives = '× ' + G.lives;
+  const textW = ctx.measureText(score).width + 18 + ctx.measureText(coins).width + 32 + ctx.measureText(lives).width + 16;
+  const w = Math.max(charCfg.hp * 22, textW) + 20;
+  ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.beginPath(); ctx.roundRect(10, 10, w, 60, 8); ctx.fill();
+  for (let i = 0; i < charCfg.hp; i++) drawHeart(31 + i * 22, 18, 18, i < G.p.hp);
+  let x = 20; const y = 54;
+  ctx.fillStyle = '#fff'; ctx.fillText(score, x, y); x += ctx.measureText(score).width + 18;
+  ctx.fillStyle = '#ffcc4d'; ctx.beginPath(); ctx.ellipse(x + 5, y, 5, 7, 0, 0, Math.PI * 2); ctx.fill(); x += 14;
+  ctx.fillStyle = '#fff'; ctx.fillText(coins, x, y); x += ctx.measureText(coins).width + 18;
+  ctx.fillStyle = '#4da3ff'; ctx.fillRect(x, y - 8, 11, 15); ctx.fillStyle = '#fff'; ctx.fillRect(x + 6, y - 5, 3, 4); x += 16;
+  ctx.fillStyle = '#fff'; ctx.fillText(lives, x, y);
+  ctx.textBaseline = 'alphabetic';
 }
 
 // ---------- Main loop ----------
@@ -780,7 +1595,11 @@ function frame(now) {
 // ---------- Boot ----------
 try { const c = localStorage.getItem('platformer-maker-char'); if (c) setCharCfg(JSON.parse(c)); } catch {}
 refreshCharUI();
-try { const s = localStorage.getItem('platformer-maker-level'); grid = s ? deserialize(s) : defaultLevel(); }
+try { const c = localStorage.getItem('platformer-maker-sys'); if (c) setSysCfg(JSON.parse(c)); } catch {}
+refreshSysUI();
+try { const m = JSON.parse(localStorage.getItem('platformer-maker-move')); if (m && MOVE_MODES[m.mode]) moveCfg = { ...MOVE_DEFAULTS, ...m }; } catch {}
+refreshMoveUI();
+try { const s = localStorage.getItem('platformer-maker-level'); if (s) ({ g: grid, m: meta } = deserialize(s)); else grid = defaultLevel(); }
 catch { grid = defaultLevel(); }
 syncSize(); setTool('g'); updateHelp(); resize(); cam.y = H * T; clampCam(); status('Editing');
 requestAnimationFrame(frame);
