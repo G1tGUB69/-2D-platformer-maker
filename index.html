@@ -11,15 +11,30 @@
          --line:#5d4479; --inset:#2f1f42; }
   * { box-sizing: border-box; }
   html, body { margin:0; height:100%; background:var(--bg); color:var(--txt); font:14px system-ui, sans-serif; overflow:hidden; }
-  #bar { display:flex; flex-wrap:wrap; gap:6px; align-items:center; padding:8px 10px; background:var(--panel); }
-  #bar button, #palette button { background:var(--btn); color:var(--txt); border:2px solid transparent; border-radius:6px; padding:6px 10px; cursor:pointer; font:inherit; display:flex; align-items:center; gap:6px; }
-  #bar button:hover, #palette button:hover { background:var(--btnh); }
-  #bar button.on, #palette button.on { border-color:var(--acc); }
-  #bar .sep { width:1px; height:26px; background:var(--line); margin:0 4px; }
+  /* Docks: one per screen edge; toolbar groups are moved into them by applyLayout(). */
+  .dock { position:absolute; z-index:7; display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding:6px 10px; background:var(--panel); }
+  .dock[hidden] { display:none; }
+  .dock:has(.menu.open), .dock:has(.cat.open) { z-index:9; }   /* open menus draw over the other docks */
+  #dockTop { top:0; left:0; right:0; }
+  #dockBottom { bottom:0; left:0; right:0; }
+  #dockLeft { left:0; top:var(--dockT, 0px); bottom:var(--dockB, 0px); }
+  #dockRight { right:0; top:var(--dockT, 0px); bottom:var(--dockB, 0px); }
+  .dock.v { flex-direction:column; flex-wrap:nowrap; align-items:stretch; gap:8px; padding:8px 6px; }
+  .dock.v .bgroup { flex-direction:column; flex-wrap:nowrap; align-items:stretch; }
+  .dock.v .bgroup > button, .dock.v .bgroup > .dd > button { justify-content:flex-start; width:100%; }
+  .dock.v .sep { width:auto; height:1px; margin:2px 0; }
+  .dock button { background:var(--btn); color:var(--txt); border:2px solid transparent; border-radius:6px; padding:6px 10px; cursor:pointer; font:inherit; display:flex; align-items:center; gap:6px; }
+  .dock button:hover { background:var(--btnh); }
+  .dock button.on { border-color:var(--acc); }
+  .dock .sep { width:1px; height:26px; background:var(--line); margin:0 4px; }
   #play { background:var(--gs-blue) !important; color:#fff !important; font-weight:700; }
   #play.stop { background:var(--gs-pink) !important; }
+  .bgroup { display:flex; flex-wrap:wrap; gap:6px; align-items:center; padding:4px; background:var(--inset); border-radius:8px; }
+  .dock .bgroup .sep { height:22px; margin:0 2px; }
+  #grpAside .menu { left:auto; right:0; }   /* right-edge group: open menus leftward so they stay on screen */
   #status { margin-left:auto; opacity:.8; white-space:nowrap; }
-  #wrap { position:absolute; top:50px; left:0; right:0; bottom:50px; display:flex; align-items:center; justify-content:center; background:#1d1229; }
+  .dock.v #status { margin:auto 0 0; white-space:normal; font-size:12px; max-width:170px; }
+  #wrap { position:absolute; top:var(--dockT, 0px); left:var(--dockL, 0px); right:var(--dockR, 0px); bottom:var(--dockB, 0px); display:flex; align-items:center; justify-content:center; background:#1d1229; }
   .dd { position:relative; }
   .dd .caret { font-size:10px; opacity:.7; }
   .menu { position:absolute; top:calc(100% + 6px); left:0; z-index:10; min-width:240px; background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:8px; box-shadow:0 8px 24px #0008; display:none; }
@@ -27,14 +42,14 @@
   .menu h4 { margin:8px 4px 4px; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; opacity:.6; }
   .menu h4:first-child { margin-top:2px; }
   .menu .opts { display:grid; grid-template-columns:1fr 1fr; gap:4px; }
-  #bar .menu button { padding:5px 8px; justify-content:space-between; font-size:13px; }
-  #bar .menu button small { opacity:.55; font-size:11px; }
+  .dock .menu button { padding:5px 8px; justify-content:space-between; font-size:13px; }
+  .dock .menu button small { opacity:.55; font-size:11px; }
   .menu hr { border:0; border-top:1px solid var(--line); margin:10px 0 6px; }
   .menu .row { display:flex; align-items:center; gap:6px; margin:4px; }
   .menu .row span { width:52px; opacity:.85; }
   .menu .row input { width:64px; text-align:center; background:var(--btn); color:var(--txt); border:2px solid transparent; border-radius:6px; padding:4px; font:inherit; }
   .menu .row input:focus { outline:none; border-color:var(--acc); }
-  #bar .menu .row button { padding:4px 9px; }
+  .dock .menu .row button { padding:4px 9px; }
   .menu .row.field span { width:auto; flex:1; white-space:nowrap; }
   .menu .row.field input { width:72px; }
   #sysMenu { min-width:290px; }
@@ -43,20 +58,35 @@
   .menu label.chk:hover { background:var(--btnh); }
   .menu label.chk input { accent-color:var(--acc); width:16px; height:16px; margin:0; }
   .menu label.chk small { margin-left:auto; opacity:.55; font-size:11px; }
-  #palette { position:absolute; left:0; right:0; bottom:0; z-index:6; display:flex; flex-wrap:wrap; gap:8px; align-items:flex-end; justify-content:center; padding:6px 10px; background:var(--panel); }
+  #runCtl { flex-wrap:nowrap; align-self:stretch; }
+  #runCtl button { min-width:96px; justify-content:center; font-size:15px; }
+  #cats { flex:1; display:flex; flex-wrap:wrap; gap:8px; align-items:flex-end; justify-content:center; }
   .cat { position:relative; }
-  #palette .catbtn { flex-direction:column; gap:2px; padding:4px 8px 3px; min-width:62px; font-size:11px; position:relative; }
-  #palette .catbtn canvas { width:32px; height:32px; }
-  #palette .catbtn .more { position:absolute; top:2px; right:4px; font-size:8px; font-style:normal; opacity:.55; }
+  #cats .catbtn { flex-direction:column; gap:2px; padding:4px 8px 3px; min-width:62px; font-size:11px; position:relative; }
+  #cats .catbtn canvas { width:32px; height:32px; }
+  #cats .catbtn .more { position:absolute; top:2px; right:4px; font-size:8px; font-style:normal; opacity:.55; }
   .cat.on .catbtn { border-color:var(--acc); }
   .flyout { position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%); display:none; flex-direction:column; gap:3px; min-width:160px; padding:6px; background:var(--panel); border:1px solid var(--line); border-radius:8px; box-shadow:0 -8px 24px #0008; }
   .flyout h4 { margin:2px 4px 4px; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; opacity:.6; }
   .cat.open .flyout { display:flex; }
-  #palette .flyout button { justify-content:flex-start; padding:4px 8px; font-size:13px; }
-  #palette .flyout button canvas { width:24px; height:24px; }
-  #palette .flyout kbd { margin-left:auto; font:11px system-ui; opacity:.55; background:var(--inset); border-radius:4px; padding:1px 5px; }
+  .dock.v #cats { flex:0 0 auto; display:grid; grid-template-columns:repeat(2, auto); gap:6px; justify-content:center; }
+  .dock.v #runCtl button { min-width:0; }
+  /* Menus and lists open toward the play area */
+  #dockBottom .menu { top:auto; bottom:calc(100% + 6px); box-shadow:0 -8px 24px #0008; }
+  #dockTop .flyout { bottom:auto; top:calc(100% + 8px); box-shadow:0 8px 24px #0008; }
+  #dockLeft .menu, #dockLeft .flyout { top:0; bottom:auto; left:calc(100% + 8px); right:auto; transform:none; }
+  #dockRight .menu, #dockRight .flyout { top:0; bottom:auto; right:calc(100% + 8px); left:auto; transform:none; }
+  #dockTop .catbtn .more { transform:rotate(180deg); }
+  #dockLeft .catbtn .more { transform:rotate(90deg); }
+  #dockRight .catbtn .more { transform:rotate(-90deg); }
+  .layrow { display:flex; align-items:center; gap:3px; margin:3px 4px; }
+  .layrow span { flex:1; font-size:13px; white-space:nowrap; padding-right:8px; }
+  .dock .menu .layrow button { padding:3px 7px; }
+  #cats .flyout button { justify-content:flex-start; padding:4px 8px; font-size:13px; }
+  #cats .flyout button canvas { width:24px; height:24px; }
+  #cats .flyout kbd { margin-left:auto; font:11px system-ui; opacity:.55; background:var(--inset); border-radius:4px; padding:1px 5px; }
   canvas { display:block; image-rendering:pixelated; }
-  .panel { position:absolute; top:56px; z-index:5; width:300px; background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:12px 14px; box-shadow:0 8px 24px #0008; }
+  .panel { position:absolute; top:calc(var(--dockT, 0px) + 6px); z-index:5; width:300px; background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:12px 14px; box-shadow:0 8px 24px #0008; }
   .panel h3 { margin:0 0 10px; font-size:13px; text-transform:uppercase; letter-spacing:.06em; opacity:.8; display:flex; justify-content:space-between; align-items:center; }
   .panel h3 button { background:none; border:0; color:var(--txt); font-size:16px; cursor:pointer; opacity:.7; }
   .panel .row { display:grid; grid-template-columns:1fr 64px; gap:4px 8px; align-items:center; margin-bottom:10px; }
@@ -68,7 +98,7 @@
   .panel .foot { display:flex; justify-content:space-between; }
   .panel .foot button { background:var(--btn); color:var(--txt); border:0; border-radius:6px; padding:5px 10px; cursor:pointer; font:inherit; }
   .panel .foot button:hover { background:var(--btnh); }
-  #charPanel { right:10px; max-height:calc(100vh - 120px); overflow-y:auto; }
+  #charPanel { right:calc(var(--dockR, 0px) + 10px); max-height:calc(100vh - var(--dockT, 0px) - var(--dockB, 0px) - 12px); overflow-y:auto; }
   .panel details.cat { margin:0 -4px 8px; border:1px solid var(--line); border-radius:8px; background:#36254b; }
   .panel details.cat > summary { list-style:none; cursor:pointer; padding:8px 10px; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; display:flex; align-items:center; gap:8px; border-radius:8px; user-select:none; }
   .panel details.cat > summary::-webkit-details-marker { display:none; }
@@ -86,13 +116,13 @@
   .panel details.cat > .body { padding:2px 10px 6px; }
   .panel details.cat .body > h4.sub:first-child, .panel details.cat .body > .sub:first-child { margin-top:4px; padding-top:0; border-top:0; }
   #charPanel h4.sub { margin:14px 0 8px; padding-top:10px; border-top:1px solid var(--line); font-size:11px; text-transform:uppercase; letter-spacing:.06em; opacity:.7; }
-  #movePanel, #springPanel { left:10px; width:280px; }
+  #movePanel, #springPanel { left:calc(var(--dockL, 0px) + 10px); width:280px; }
   .panel .seg { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px; }
   .panel .seg button { flex:1; background:var(--btn); color:var(--txt); border:2px solid transparent; border-radius:6px; padding:5px 6px; cursor:pointer; font:inherit; font-size:12px; white-space:nowrap; }
   .panel .seg button:hover { background:var(--btnh); }
   .panel .seg button.on { border-color:var(--acc); }
   .panel .sub { font-size:12px; opacity:.85; margin-bottom:4px; }
-  #powerPanel, #enemyPanel { right:10px; width:320px; max-height:calc(100vh - 120px); overflow-y:auto; }
+  #powerPanel, #enemyPanel { right:calc(var(--dockR, 0px) + 10px); width:320px; max-height:calc(100vh - var(--dockT, 0px) - var(--dockB, 0px) - 12px); overflow-y:auto; }
   #powerPanel h4.sub, #enemyPanel h4.sub { margin:14px 0 8px; padding-top:10px; border-top:1px solid var(--line); font-size:11px; text-transform:uppercase; letter-spacing:.06em; opacity:.7; }
   .plist { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px; }
   .plist button { display:flex; align-items:center; gap:5px; background:var(--btn); color:var(--txt); border:2px solid transparent; border-radius:6px; padding:3px 7px 3px 4px; cursor:pointer; font:inherit; font-size:12px; }
@@ -171,77 +201,99 @@
   <button id="titleStart">▶ Start</button>
   <div class="hint">Press Enter, Space or click to start</div>
 </div>
-<div id="bar">
-  <button id="play" title="Play / Stop (Enter)">▶ Play</button>
-  <button id="pause" title="Pause / Resume (P)" hidden>❚❚ Pause</button>
-  <span class="sep"></span>
-  <button id="undo" title="Ctrl+Z">↶ Undo</button>
-  <button id="clear">Clear</button>
-  <button id="save">Save</button>
-  <button id="load">Load</button>
-  <button id="export">Export</button>
-  <button id="import">Import</button>
-  <input id="file" type="file" accept=".json,application/json" hidden>
-  <span class="sep"></span>
-  <button id="charBtn" title="Character settings (C)">🏃 Character</button>
-  <button id="powerBtn" title="Create and edit power-ups (U)">⭐ Power-ups</button>
-  <button id="enemyBtn" title="Create and edit enemies (E)">👾 Enemies</button>
-  <div class="dd">
-    <button id="sysBtn" aria-haspopup="true" aria-expanded="false">⚙ Game system <span class="caret">▼</span></button>
-    <div class="menu" id="sysMenu" role="menu">
-      <h4>Score</h4>
-      <div id="sysScore"></div>
-      <h4>Lives</h4>
-      <div id="sysLives"></div>
-      <div class="note" id="sysNote"></div>
+<div class="dock" id="dockTop">
+  <div class="bgroup" id="grpEdit" aria-label="Level editing and files">
+    <button id="undo" title="Ctrl+Z">↶ Undo</button>
+    <button id="clear">Clear</button>
+    <button id="save">Save</button>
+    <button id="load">Load</button>
+    <button id="export">Export</button>
+    <button id="import">Import</button>
+    <input id="file" type="file" accept=".json,application/json" hidden>
+  </div>
+  <div class="bgroup" id="grpGame" aria-label="Game design">
+    <button id="charBtn" title="Character settings (C)">🏃 Character</button>
+    <button id="powerBtn" title="Create and edit power-ups (U)">⭐ Power-ups</button>
+    <button id="enemyBtn" title="Create and edit enemies (E)">👾 Enemies</button>
+    <div class="dd">
+      <button id="sysBtn" aria-haspopup="true" aria-expanded="false">⚙ Game system <span class="caret">▼</span></button>
+      <div class="menu" id="sysMenu" role="menu">
+        <h4>Score</h4>
+        <div id="sysScore"></div>
+        <h4>Lives</h4>
+        <div id="sysLives"></div>
+        <div class="note" id="sysNote"></div>
+      </div>
+    </div>
+    <span class="sep"></span>
+    <div class="dd">
+      <button id="screenBtn" aria-haspopup="true" aria-expanded="false">🖥 <span id="screenLbl">Screen</span> <span class="caret">▼</span></button>
+      <div class="menu" id="screenMenu" role="menu">
+        <h4>Screen size</h4>
+        <div class="opts" id="screenOpts">
+          <button data-size="fit" style="grid-column:1/-1">Fit window <small>auto</small></button>
+        </div>
+        <hr>
+        <h4>Level size (tiles)</h4>
+        <div class="row" title="Adds/removes columns on the right">
+          <span>Width</span>
+          <button data-step="w" data-d="-10">−</button>
+          <input id="lvlw" type="number" min="20" max="1000" step="1">
+          <button data-step="w" data-d="10">+</button>
+        </div>
+        <div class="row" title="Adds/removes rows at the top">
+          <span>Height</span>
+          <button data-step="h" data-d="-1">−</button>
+          <input id="lvlh" type="number" min="8" max="200" step="1">
+          <button data-step="h" data-d="1">+</button>
+        </div>
+        <div class="note">Width grows on the right, height grows at the top.</div>
+      </div>
+    </div>
+    <div class="dd">
+      <button id="cheatBtn" aria-haspopup="true" aria-expanded="false">🎮 Cheats <span class="caret">▼</span></button>
+      <div class="menu" id="cheatMenu" role="menu">
+        <h4>Cheats</h4>
+        <label class="chk"><input type="checkbox" data-cheat="invincible"> 🛡 Invincibility <small>I</small></label>
+        <label class="chk"><input type="checkbox" data-cheat="endlessTime"> ⏳ Endless time <small>T</small></label>
+        <label class="chk"><input type="checkbox" data-cheat="noAI"> 🧊 No enemy AI <small>N</small></label>
+        <div class="note">Invincibility: spikes and enemies can't hurt you; falling into a pit puts you back on the last solid ground.<br>
+          Endless time: timed power-ups never run out.<br>
+          No enemy AI: enemies stand still and don't shoot (you can still stomp them, and touching them still hurts).</div>
+      </div>
     </div>
   </div>
-  <span class="sep"></span>
-  <div class="dd">
-    <button id="screenBtn" aria-haspopup="true" aria-expanded="false">🖥 <span id="screenLbl">Screen</span> <span class="caret">▼</span></button>
-    <div class="menu" id="screenMenu" role="menu">
-      <h4>Screen size</h4>
-      <div class="opts" id="screenOpts">
-        <button data-size="fit" style="grid-column:1/-1">Fit window <small>auto</small></button>
-      </div>
-      <hr>
-      <h4>Level size (tiles)</h4>
-      <div class="row" title="Adds/removes columns on the right">
-        <span>Width</span>
-        <button data-step="w" data-d="-10">−</button>
-        <input id="lvlw" type="number" min="20" max="1000" step="1">
-        <button data-step="w" data-d="10">+</button>
-      </div>
-      <div class="row" title="Adds/removes rows at the top">
-        <span>Height</span>
-        <button data-step="h" data-d="-1">−</button>
-        <input id="lvlh" type="number" min="8" max="200" step="1">
-        <button data-step="h" data-d="1">+</button>
-      </div>
-      <div class="note">Width grows on the right, height grows at the top.</div>
-    </div>
-  </div>
-  <div class="dd">
-    <button id="cheatBtn" aria-haspopup="true" aria-expanded="false">🎮 Cheats <span class="caret">▼</span></button>
-    <div class="menu" id="cheatMenu" role="menu">
-      <h4>Cheats</h4>
-      <label class="chk"><input type="checkbox" data-cheat="invincible"> 🛡 Invincibility <small>I</small></label>
-      <label class="chk"><input type="checkbox" data-cheat="endlessTime"> ⏳ Endless time <small>T</small></label>
-      <label class="chk"><input type="checkbox" data-cheat="noAI"> 🧊 No enemy AI <small>N</small></label>
-      <div class="note">Invincibility: spikes and enemies can't hurt you; falling into a pit puts you back on the last solid ground.<br>
-        Endless time: timed power-ups never run out.<br>
-        No enemy AI: enemies stand still and don't shoot (you can still stomp them, and touching them still hurts).</div>
-    </div>
-  </div>
-  <span class="sep"></span>
-  <button id="guideBtn" title="How to use the editor (H / F1)">❓ Help</button>
   <span id="status"></span>
+  <div class="bgroup aside" id="grpAside">
+    <div class="dd">
+      <button id="layoutBtn" aria-haspopup="true" aria-expanded="false" title="Customize the editor layout">🧩 Layout <span class="caret">▼</span></button>
+      <div class="menu" id="layoutMenu" role="menu">
+        <h4>Bar positions</h4>
+        <div id="layRows"></div>
+        <hr>
+        <div class="opts">
+          <button id="laySwap" title="Top ↔ bottom, left ↔ right">⇅ Flip sides</button>
+          <button id="layReset">Reset</button>
+        </div>
+        <div class="note">Put each bar on any edge of the screen. Bars on the same edge sit side by side.</div>
+      </div>
+    </div>
+    <button id="guideBtn" title="How to use the editor (H / F1)">❓ Help</button>
+  </div>
 </div>
 <div id="wrap">
   <canvas id="c"></canvas>
   <div id="help"></div>
 </div>
-<div id="palette"></div>
+<div class="dock" id="dockBottom">
+  <div id="runCtl" class="bgroup" aria-label="Test the level">
+    <button id="play" title="Play / Stop (Enter)">▶ Play</button>
+    <button id="pause" title="Pause / Resume (P)" hidden>❚❚ Pause</button>
+  </div>
+  <div id="cats"></div>
+</div>
+<div class="dock v" id="dockLeft" hidden></div>
+<div class="dock v" id="dockRight" hidden></div>
 <div id="charPanel" class="panel" hidden>
   <h3>Character <button id="charClose" title="Close">✕</button></h3>
   <details class="cat" id="charMetrics" open>
@@ -339,7 +391,7 @@
         <section data-title="Getting started">
           <h3>Getting started</h3>
           <ul>
-            <li>Pick a tile from the palette at the bottom, paint with the <b>left mouse button</b>, erase with the <b>right mouse button</b>.</li>
+            <li>Pick a tile from the tool palette, paint with the <b>left mouse button</b>, erase with the <b>right mouse button</b>.</li>
             <li>Make sure the level has a <b>Start</b> tile (and ideally a <b>Goal</b>), then press <b>▶ Play</b> or <kbd>Enter</kbd>.</li>
             <li>Press <kbd>Enter</kbd> or <kbd>Esc</kbd> to go back to the editor.</li>
             <li>Click <b>Save</b> (browser) or <b>Export</b> (file) to keep your level.</li>
@@ -347,20 +399,26 @@
           <h4>Screen layout</h4>
           <table>
             <tr><th>Area</th><th>What it does</th></tr>
-            <tr><td>Toolbar (top)</td><td>Play/Stop, file actions, settings panels and menus. The status text on the right shows messages, and score/HP/lives while playing.</td></tr>
+            <tr><td>Menu bar <small>(top)</small></td><td>File actions, settings panels and menus. The status text on the right shows messages, and score/HP/lives while playing.</td></tr>
             <tr><td>Canvas (middle)</td><td>The level. A grid is shown in edit mode.</td></tr>
-            <tr><td>Palette (bottom)</td><td>Tile categories. Click a category to select its last-used tile; categories with a <b>▲</b> open a list of all their tiles.</td></tr>
+            <tr><td>Tool palette <small>(bottom)</small></td><td><b>▶ Play</b> / <b>❚❚ Pause</b> on the left, then the tile categories. Click a category to select its last-used tile; categories with a <b>▲</b> open a list of all their tiles.</td></tr>
             <tr><td>Hint bar</td><td>Short reminder of the keys for the current mode (bottom-left of the canvas).</td></tr>
-            <tr><td>Side panels</td><td>Character, Power-ups and Moving-platform settings.</td></tr>
+            <tr><td>Side panels</td><td>Character, Power-ups and Enemies editors (right); Moving-platform and Spring settings (left, while that tool is selected). Sections inside panels can be collapsed.</td></tr>
           </table>
+          <p>Both bars can be moved to the top or bottom of the screen from the <b>🧩 Layout</b> menu.</p>
         </section>
 
-        <section data-title="Toolbar">
-          <h3>Toolbar</h3>
+        <section data-title="Menu bar & play">
+          <h3>Menu bar &amp; play controls</h3>
+          <h4>Play controls (left end of the tool palette)</h4>
           <table>
             <tr><th>Button</th><th>Key</th><th>Description</th></tr>
             <tr><td>▶ Play / ■ Stop</td><td><kbd>Enter</kbd></td><td>Switch between editing and playing. Play needs a Start tile.</td></tr>
             <tr><td>❚❚ Pause / ▶ Resume</td><td><kbd>P</kbd></td><td>Only shown while playing. Freezes the game until you resume. The game also pauses by itself when the window loses focus.</td></tr>
+          </table>
+          <h4>Menu bar</h4>
+          <table>
+            <tr><th>Button</th><th>Key</th><th>Description</th></tr>
             <tr><td>↶ Undo</td><td><kbd>Ctrl+Z</kbd></td><td>Undo the last paint stroke, clear, resize, load or import (up to 100 steps).</td></tr>
             <tr><td>Clear</td><td></td><td>Empty the whole level (asks first; can be undone).</td></tr>
             <tr><td>Save / Load</td><td></td><td>Save the level to the browser / load it back.</td></tr>
@@ -370,17 +428,64 @@
             <tr><td>👾 Enemies</td><td><kbd>E</kbd></td><td>Create and edit enemy types.</td></tr>
             <tr><td>⚙ Game system</td><td></td><td>Points per coin and coins needed for an extra life.</td></tr>
             <tr><td>🖥 Screen</td><td></td><td>Screen resolution and level size.</td></tr>
-            <tr><td>🎮 Cheats</td><td><kbd>I</kbd></td><td>Toggle invincibility.</td></tr>
+            <tr><td>🎮 Cheats</td><td><kbd>I</kbd> <kbd>T</kbd> <kbd>N</kbd></td><td>Invincibility, endless time, no enemy AI.</td></tr>
+            <tr><td>🧩 Layout</td><td></td><td>Move the menu bar and tool palette to the top or bottom of the screen.</td></tr>
+            <tr><td>🧩 Layout</td><td></td><td>Put the menu bar and the tool palette (Play + categories) at the top or bottom of the screen, or swap them. Remembered in this browser.</td></tr>
             <tr><td>❓ Help</td><td><kbd>H</kbd> <kbd>F1</kbd></td><td>This guide.</td></tr>
           </table>
           <p>Only one dropdown menu is open at a time; click outside or press <kbd>Esc</kbd> to close it.</p>
         </section>
 
+        <section data-title="Editor layout">
+          <h3>Editor layout</h3>
+          <p>Open the <b>🧩 Layout</b> menu to arrange the screen. The tools are split into five bars, and each one can be docked on any edge: ⬆ top, ⬇ bottom, ⬅ left or ➡ right.</p>
+          <table>
+            <tr><th>Bar</th><th>Default</th><th>Contains</th></tr>
+            <tr><td>▶ Play / Pause</td><td>Bottom</td><td>Test the level, pause it.</td></tr>
+            <tr><td>↶ Edit &amp; files</td><td>Top</td><td>Undo, Clear, Save, Load, Export, Import.</td></tr>
+            <tr><td>🏃 Game design</td><td>Top</td><td>Character, Power-ups, Enemies, Game system, Screen, Cheats.</td></tr>
+            <tr><td>🧱 Level elements</td><td>Bottom</td><td>The tile categories (Terrain, Hazards…).</td></tr>
+            <tr><td>🧩 Layout &amp; Help</td><td>Top</td><td>This menu, the Help button and the status text.</td></tr>
+          </table>
+          <ul>
+            <li><b>⇅ Flip sides</b> moves every bar to the opposite edge (top ↔ bottom, left ↔ right). <b>Reset</b> restores the defaults.</li>
+            <li>Bars on the same edge sit side by side. On the left or right edge they stack vertically.</li>
+            <li>Dropdown menus and element lists open toward the play area, so they are never cut off.</li>
+            <li>The layout is saved in the browser.</li>
+          </ul>
+        </section>
+
         <section data-title="Tiles">
           <h3>Tile palette</h3>
-          <p>Select a tile with its key or from the palette. <b>Middle-click</b> a tile in the level to pick it up as the current tool.</p>
+          <p>Select a tile with its key or from the palette. <b>Middle-click</b> a tile in the level to pick it up as the current tool (this also copies a moving platform's or spring's settings).</p>
           <table data-gen="tiles"></table>
-          <p><b>One-way</b> tiles (Platform, Falling, Moving, Spring) can be jumped through from below and landed on from above. The left and right edges of the level act as walls.</p>
+          <p><b>One-way</b> tiles (Platform, Falling, Moving, upward Spring) can be jumped through from below and landed on from above. The left and right edges of the level act as walls.</p>
+          <h4>Hidden items in Breakable blocks</h4>
+          <ul>
+            <li>Paint a <b>Coin</b> or a <b>power-up</b> onto an existing <b>Breakable</b> block to hide it inside. The block shows a hint of its content in the editor.</li>
+            <li>Breaking the block from below collects a hidden coin at once (it counts towards the coin total); a hidden power-up appears in the block's place.</li>
+            <li>Painting Breakable over the block keeps its content; erasing the block removes it. Hidden items come back on each new life.</li>
+          </ul>
+        </section>
+
+        <section data-title="Springs">
+          <h3>Springs</h3>
+          <p>When the <b>Spring</b> tool (<kbd>7</kbd>) is selected, the <b>Spring</b> panel opens on the left. Its settings apply to the next springs you paint, and every spring's trajectory is drawn in the editor.</p>
+          <table>
+            <tr><th>Setting</th><th>Options / range</th><th>Description</th></tr>
+            <tr><td>Direction</td><td>↑ ↗ → ↘ ↓ ↙ ← ↖</td><td>Where it launches the player (45° steps). <kbd>R</kbd> / <kbd>Shift+R</kbd> rotate it.</td></tr>
+            <tr><td>Trajectory</td><td>⌒ Arc · ➝ Straight</td><td>Arc: launched with gravity, like a big jump. Straight: flies in a line without gravity.</td></tr>
+            <tr><td>Height <small>(arc)</small></td><td>1 – 40 tiles · 9</td><td>Peak height of an upward bounce above the spring.</td></tr>
+            <tr><td>Width <small>(arc)</small></td><td>1 – 40 tiles · 8</td><td>Horizontal distance from take-off to landing at top speed.</td></tr>
+            <tr><td>Distance <small>(straight)</small></td><td>1 – 40 tiles · 6</td><td>How far the straight launch goes before gravity takes over.</td></tr>
+            <tr><td>Speed <small>(straight)</small></td><td>2 – 60 tiles/s · 20</td><td>Speed of the straight launch.</td></tr>
+          </table>
+          <ul>
+            <li>An <b>upward arc</b> spring is landed on to bounce. It keeps your running speed, and releasing jump doesn't cut the bounce short.</li>
+            <li>A <b>rotated</b> spring launches you as soon as you touch it, along its arrow.</li>
+            <li>A <b>straight</b> launch gives no control for its duration, then you fall normally. It stops early if you hit a wall.</li>
+            <li><b>Paint over</b> a spring to apply the current settings; <b>middle-click</b> one to copy its settings.</li>
+          </ul>
         </section>
 
         <section data-title="Moving platforms">
@@ -415,11 +520,11 @@
 
         <section data-title="Power-ups">
           <h3>Power-ups</h3>
-          <p>Open with <b>⭐ Power-ups</b> or <kbd>U</kbd>. Power-ups are made by you and saved with the level. Five examples are created the first time: <b>Giant</b>, <b>Tiny</b>, <b>Wings</b> (double jump), <b>Feather</b> (glide) and <b>Fire</b> (bouncing projectiles).</p>
+          <p>Open with <b>⭐ Power-ups</b> or <kbd>U</kbd>. Power-ups are made by you and saved with the level. Six examples are created the first time: <b>Giant</b>, <b>Tiny</b>, <b>Wings</b> (double jump), <b>Feather</b> (glide), <b>Climber</b> (wall jump) and <b>Fire</b> (bouncing projectiles).</p>
           <h4>Managing power-ups</h4>
           <ul>
             <li>Click a power-up in the list to edit it <b>and</b> select it for painting.</li>
-            <li><b>＋ New</b> creates one (up to 25). <b>Duplicate</b> copies the selected one. <b>🗑 Delete</b> removes it and every copy placed in the level.</li>
+            <li><b>＋ New</b> creates one (up to 25). <b>Duplicate</b> copies the selected one. <b>🗑 Delete</b> removes it and every copy placed in the level (including copies hidden in Breakable blocks).</li>
             <li><b>Name</b> (16 characters max): its first letter is drawn on the pick-up orb. <b>Colour</b>: used for the orb, the player's headband and effects.</li>
           </ul>
           <h4>Settings</h4>
@@ -432,6 +537,7 @@
             <li>Power-ups are <b>lost when you lose a life</b>; pick-ups come back with the level.</li>
             <li>A timed power-up's headband blinks during its last 2 seconds.</li>
             <li>Editing a power-up while playing updates it live.</li>
+            <li>When both the character's perks and the power-up have glide or wall jump, the power-up's setting is used.</li>
           </ul>
         </section>
 
@@ -492,7 +598,7 @@
             <tr><th>Cheat</th><th>Key</th><th>Effect</th></tr>
             <tr><td>🛡 Invincibility</td><td><kbd>I</kbd></td><td>Spikes and enemies can't hurt you (touching an enemy defeats it), and falling into a pit puts you back on the last solid ground. A golden outline shows it is on.</td></tr>
             <tr><td>⏳ Endless time</td><td><kbd>T</kbd></td><td>Timed power-ups never run out.</td></tr>
-            <tr><td>🧊 No enemy AI</td><td><kbd>N</kbd></td><td>Enemies stand still. You can still stomp them, and touching them still hurts.</td></tr>
+            <tr><td>🧊 No enemy AI</td><td><kbd>N</kbd></td><td>Enemies stand still and don't shoot. You can still stomp them, and touching them still hurts.</td></tr>
           </table>
         </section>
 
@@ -502,12 +608,13 @@
           <table>
             <tr><th>Action</th><th>Input</th></tr>
             <tr><td>Paint / Erase</td><td>Left click / Right click (drag to paint several)</td></tr>
-            <tr><td>Pick tile</td><td>Middle click (also copies moving-platform settings)</td></tr>
+            <tr><td>Pick tile</td><td>Middle click (also copies moving-platform / spring settings)</td></tr>
             <tr><td>Select tile</td><td><kbd>1</kbd>–<kbd>9</kbd> <kbd>0</kbd> <kbd>B</kbd> <kbd>F</kbd> <kbd>M</kbd></td></tr>
+            <tr><td>Rotate spring</td><td><kbd>R</kbd> / <kbd>Shift+R</kbd> (Spring tool selected)</td></tr>
             <tr><td>Scroll</td><td>Arrows / <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> (<kbd>Z</kbd><kbd>Q</kbd> on AZERTY) · wheel · <kbd>Shift</kbd>+wheel: vertical</td></tr>
             <tr><td>Undo</td><td><kbd>Ctrl+Z</kbd></td></tr>
             <tr><td>Panels</td><td><kbd>C</kbd> Character · <kbd>U</kbd> Power-ups · <kbd>E</kbd> Enemies</td></tr>
-            <tr><td>Invincibility</td><td><kbd>I</kbd></td></tr>
+            <tr><td>Cheats</td><td><kbd>I</kbd> invincibility · <kbd>T</kbd> endless time · <kbd>N</kbd> no enemy AI</td></tr>
             <tr><td>Help</td><td><kbd>H</kbd> / <kbd>F1</kbd></td></tr>
             <tr><td>Play</td><td><kbd>Enter</kbd></td></tr>
             <tr><td>Close menu / list / help</td><td><kbd>Esc</kbd></td></tr>
@@ -517,10 +624,12 @@
             <tr><th>Action</th><th>Input</th></tr>
             <tr><td>Move</td><td><kbd>←</kbd> <kbd>→</kbd> / <kbd>A</kbd> <kbd>D</kbd> (<kbd>Q</kbd> on AZERTY)</td></tr>
             <tr><td>Jump (hold for higher)</td><td><kbd>Space</kbd> / <kbd>W</kbd> / <kbd>↑</kbd> / <kbd>Z</kbd></td></tr>
+            <tr><td>Wall jump <small>(perk / ability)</small></td><td>Jump while touching a wall in mid-air</td></tr>
+            <tr><td>Glide <small>(perk / ability)</small></td><td>Hold jump while falling</td></tr>
             <tr><td>Shoot / throw</td><td><kbd>X</kbd> / <kbd>J</kbd></td></tr>
             <tr><td>Pause / resume</td><td><kbd>P</kbd></td></tr>
             <tr><td>Restart the run</td><td><kbd>R</kbd></td></tr>
-            <tr><td>Invincibility</td><td><kbd>I</kbd></td></tr>
+            <tr><td>Cheats</td><td><kbd>I</kbd> / <kbd>T</kbd> / <kbd>N</kbd></td></tr>
             <tr><td>Help (pauses)</td><td><kbd>H</kbd> / <kbd>F1</kbd></td></tr>
             <tr><td>Back to editor</td><td><kbd>Enter</kbd> / <kbd>Esc</kbd></td></tr>
           </table>
@@ -534,7 +643,8 @@
             <li><b>Pits</b>: falling out of the level always costs a whole life, whatever your HP.</li>
             <li><b>Stomping</b> an enemy removes 1 of its HP and bounces you up; hold jump for a full-height bounce. Enemies that can't be stomped hurt you instead.</li>
             <li><b>Shots</b> fly straight, stop at solid tiles, remove 1 HP from the enemy they hit and disappear off screen. <b>Enemy projectiles</b> cost you 1 HP.</li>
-            <li><b>Jump feel</b>: releasing jump early cuts the jump short. A short grace period lets you jump just after leaving a ledge or just before landing.</li>
+            <li><b>Jump feel</b>: releasing jump early cuts the jump short. A short grace period lets you jump just after leaving a ledge (or a wall) or just before landing.</li>
+            <li><b>Wall jump</b> kicks you away from the wall in a full-size jump; you briefly can't steer back toward it.</li>
             <li><b>Breakable</b> blocks and <b>Falling</b> platforms come back on each new life.</li>
             <li><b>Goal</b>: touching the flag completes the level. <kbd>R</kbd> plays again, <kbd>Enter</kbd> goes back to editing.</li>
             <li><b>HUD</b> (top-left): hearts for HP, then score, coins collected / total, and lives.</li>
@@ -544,9 +654,9 @@
         <section data-title="Saving & files">
           <h3>Saving, loading &amp; files</h3>
           <ul>
-            <li>The browser remembers automatically: character, game-system, power-up and moving-platform settings, screen size and cheats.</li>
+            <li>The browser remembers automatically: character, game-system, power-up, enemy, moving-platform and spring settings, screen size, editor layout, cheats and which panel sections are open.</li>
             <li>The <b>level itself</b> is only stored when you click <b>Save</b> (browser) or <b>Export</b> (file). The level saved in the browser loads on start-up.</li>
-            <li>Saved and exported levels include tiles, character, game system, moving platforms and power-ups, so a level file is self-contained. Loading or importing a level replaces your current settings with the level's.</li>
+            <li>Saved and exported levels include tiles, character, game system, moving platforms, springs, hidden items, power-ups and enemies, so a level file is self-contained. Loading or importing a level replaces your current settings with the level's. Older levels without enemy types still load: their enemies become a Walker.</li>
             <li><b>Export</b> often: browser storage can be cleared.</li>
           </ul>
           <p>The full file format is described in <code>README.md</code>.</p>
@@ -940,7 +1050,7 @@ function setLevelSize(w, h) {
 
 // ---------- UI ----------
 // Bottom palette: one icon per category; clicking it opens a vertical list of its elements.
-const paletteEl = document.getElementById('palette');
+const paletteEl = document.getElementById('cats');   // category icons (the 'Level elements' bar)
 const catLast = {};   // last element picked in each category (shown as the category icon)
 function drawIcon(canvas, id) {
   const c = canvas.getContext('2d'), n = canvas.width;
@@ -1034,7 +1144,7 @@ function markTool() {
     const icon = paletteEl.querySelector(`.cat[data-cat="${cat}"] .catbtn canvas`);
     if (icon) drawIcon(icon, tool);
   }
-  document.querySelectorAll('#palette [data-tool]').forEach(b => b.classList.toggle('on', b.dataset.tool === tool));
+  document.querySelectorAll('#cats [data-tool]').forEach(b => b.classList.toggle('on', b.dataset.tool === tool));
   paletteEl.querySelectorAll('.cat').forEach(c => c.classList.toggle('on', c.dataset.cat === cat));
 }
 function status(msg) { document.getElementById('status').textContent = msg; }
@@ -1497,6 +1607,68 @@ screenOpts.addEventListener('click', e => {
   updateScreenUI(); resize(); b.blur();
   status('Screen: ' + (screenSize === 'fit' ? 'fit window' : screenSize.replace('x', ' × ')));
 });
+// ---------- Editor layout ----------
+// Each toolbar group is a bar that can be docked on any screen edge. Saved per browser.
+const LAYOUT_GROUPS = [   // also the order of bars inside a dock
+  { k:'run',   el:'runCtl',   name:'▶ Play / Pause' },
+  { k:'edit',  el:'grpEdit',  name:'↶ Edit & files' },
+  { k:'game',  el:'grpGame',  name:'🏃 Game design' },
+  { k:'cats',  el:'cats',     name:'🧱 Level elements' },
+  { k:'aside', el:'grpAside', name:'🧩 Layout & Help' },
+];
+const SIDES = { top:'⬆', bottom:'⬇', left:'⬅', right:'➡' };
+const DOCKS = { top:'dockTop', bottom:'dockBottom', left:'dockLeft', right:'dockRight' };
+const FLIP = { top:'bottom', bottom:'top', left:'right', right:'left' };
+const LAYOUT_DEFAULTS = { run:'bottom', edit:'top', game:'top', cats:'bottom', aside:'top' };
+var layout = { ...LAYOUT_DEFAULTS }, layoutReady = false, dockedLayout = '';
+try {
+  const l = JSON.parse(localStorage.getItem('platformer-maker-layout')) || {};
+  if (l.bar) l.edit = l.game = l.aside = l.bar;   // older two-bar format
+  if (l.palette) l.run = l.cats = l.palette;
+  for (const k in LAYOUT_DEFAULTS) if (SIDES[l[k]]) layout[k] = l[k];
+} catch {}
+LAYOUT_GROUPS.forEach(g => {
+  const row = document.createElement('div'); row.className = 'layrow';
+  row.innerHTML = `<span>${g.name}</span>` +
+    Object.entries(SIDES).map(([side, icon]) => `<button data-lay="${g.k}" data-side="${side}" title="${side[0].toUpperCase() + side.slice(1)}">${icon}</button>`).join('');
+  document.getElementById('layRows').appendChild(row);
+});
+function setLayout(l) {
+  layout = { ...layout, ...l };
+  try { localStorage.setItem('platformer-maker-layout', JSON.stringify(layout)); } catch {}
+  updateLayoutUI(); resize();
+}
+function updateLayoutUI() {
+  document.querySelectorAll('#layoutMenu [data-lay]').forEach(b => b.classList.toggle('on', layout[b.dataset.lay] === b.dataset.side));
+}
+// Move each bar into its dock, then publish the dock sizes as CSS variables
+// (--dockT/B/L/R) that the play area and side panels are positioned with.
+function applyLayout() {
+  if (!layoutReady) return;
+  const key = JSON.stringify(layout);
+  if (key !== dockedLayout) {
+    dockedLayout = key;
+    for (const g of LAYOUT_GROUPS) {
+      const dock = document.getElementById(DOCKS[layout[g.k]]);
+      if (g.k === 'aside') dock.appendChild(document.getElementById('status'));   // status sits just before Layout & Help
+      dock.appendChild(document.getElementById(g.el));
+    }
+    for (const id of Object.values(DOCKS)) { const d = document.getElementById(id); d.hidden = !d.children.length; }
+  }
+  const root = document.documentElement.style, size = (id, dim) => document.getElementById(id)[dim];
+  root.setProperty('--dockT', size('dockTop', 'offsetHeight') + 'px');
+  root.setProperty('--dockB', size('dockBottom', 'offsetHeight') + 'px');
+  root.setProperty('--dockL', size('dockLeft', 'offsetWidth') + 'px');   // side docks sit between top and bottom, so measure them last
+  root.setProperty('--dockR', size('dockRight', 'offsetWidth') + 'px');
+}
+document.querySelectorAll('#layoutMenu [data-lay]').forEach(b => b.onclick = () => { setLayout({ [b.dataset.lay]: b.dataset.side }); b.blur(); });
+document.getElementById('laySwap').onclick = e => {
+  setLayout(Object.fromEntries(Object.entries(layout).map(([k, v]) => [k, FLIP[v]]))); e.currentTarget.blur();
+};
+document.getElementById('layReset').onclick = e => { setLayout(LAYOUT_DEFAULTS); e.currentTarget.blur(); };
+layoutReady = true;
+updateLayoutUI();
+
 // Toolbar dropdowns: each .dd holds a toggle button and a .menu; only one is open at a time.
 const DROPDOWNS = [...document.querySelectorAll('.dd')].map(dd => ({ dd, btn: dd.querySelector(':scope > button'), menu: dd.querySelector('.menu') }));
 function setMenu(open, which = null) {
@@ -1564,10 +1736,8 @@ screenMenu.querySelectorAll('[data-step]').forEach(b => b.onclick = () => {
 updateScreenUI();
 
 function resize() {
+  applyLayout();
   const wrap = document.getElementById('wrap');
-  wrap.style.top = document.getElementById('bar').offsetHeight + 'px';
-  for (const el of document.querySelectorAll('.panel')) el.style.top = document.getElementById('bar').offsetHeight + 6 + 'px';
-  wrap.style.bottom = document.getElementById('palette').offsetHeight + 'px';
   const aw = wrap.clientWidth, ah = wrap.clientHeight;
   if (screenSize === 'fit') {
     cv.width = aw; cv.height = ah;
@@ -1653,13 +1823,13 @@ const guideEl = document.getElementById('guide'), guideBody = document.getElemen
 const TILE_DOCS = {
   g: 'Solid block with a grass top.',
   b: 'Solid block (looks different from Ground, behaves the same).',
-  k: 'Solid block that shatters when the player hits it <b>from below</b>.',
   p: 'One-way platform: jump up through it, land on top.',
   v: 'One-way platform that shakes for 0.5 s after you land on it, then falls.',
   m: 'One-way platform that moves along a path (see <i>Moving platforms</i>).',
   s: 'Touching them costs 1 HP.',
   c: 'Gives points; enough coins give an extra life (see <i>Game system</i>).',
-  j: 'Bounces the player very high (about 2.7× a normal jump).',
+  j: 'Launches the player. Each spring has its own direction, trajectory and strength (see <i>Springs</i>).',
+  k: 'Solid block that shatters when the player hits it <b>from below</b>. Can hide a coin or power-up (see below).',
   P: 'Where the player appears. Only one per level: placing a new one removes the old one. Required to play.',
   f: 'Flag. Touching it completes the level.',
   '.': 'Removes tiles (same as right-click).',
