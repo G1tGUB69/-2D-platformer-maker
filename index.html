@@ -5,28 +5,31 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>2D Platformer Maker</title>
 <style>
-  :root { --bg:#1b1d2a; --panel:#262a3b; --btn:#353a52; --btnh:#454b69; --acc:#ffcc4d; --txt:#e8eaf3; }
+  :root { --bg:#2a1b3a; --panel:#3f2a56; --btn:#54396f; --btnh:#6b4a8c; --acc:#f0963c; --txt:#f6f0fb;
+         /* game-sup.fr brand colours */
+         --gs-purple:#3f2a56; --gs-purple-dk:#41294a; --gs-orange:#f0963c; --gs-blue:#179fdb; --gs-blue2:#1ba5d8; --gs-cyan:#41ebdf; --gs-pink:#ff2c55;
+         --line:#5d4479; --inset:#2f1f42; }
   * { box-sizing: border-box; }
   html, body { margin:0; height:100%; background:var(--bg); color:var(--txt); font:14px system-ui, sans-serif; overflow:hidden; }
   #bar { display:flex; flex-wrap:wrap; gap:6px; align-items:center; padding:8px 10px; background:var(--panel); }
   #bar button, #palette button { background:var(--btn); color:var(--txt); border:2px solid transparent; border-radius:6px; padding:6px 10px; cursor:pointer; font:inherit; display:flex; align-items:center; gap:6px; }
   #bar button:hover, #palette button:hover { background:var(--btnh); }
   #bar button.on, #palette button.on { border-color:var(--acc); }
-  #bar .sep { width:1px; height:26px; background:#444a66; margin:0 4px; }
-  #play { background:#2f8f4e !important; font-weight:600; }
-  #play.stop { background:#b23b3b !important; }
+  #bar .sep { width:1px; height:26px; background:var(--line); margin:0 4px; }
+  #play { background:var(--gs-blue) !important; color:#fff !important; font-weight:700; }
+  #play.stop { background:var(--gs-pink) !important; }
   #status { margin-left:auto; opacity:.8; white-space:nowrap; }
-  #wrap { position:absolute; top:50px; left:0; right:0; bottom:50px; display:flex; align-items:center; justify-content:center; background:#11131c; }
+  #wrap { position:absolute; top:50px; left:0; right:0; bottom:50px; display:flex; align-items:center; justify-content:center; background:#1d1229; }
   .dd { position:relative; }
   .dd .caret { font-size:10px; opacity:.7; }
-  .menu { position:absolute; top:calc(100% + 6px); left:0; z-index:10; min-width:240px; background:var(--panel); border:1px solid #444a66; border-radius:8px; padding:8px; box-shadow:0 8px 24px #0008; display:none; }
+  .menu { position:absolute; top:calc(100% + 6px); left:0; z-index:10; min-width:240px; background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:8px; box-shadow:0 8px 24px #0008; display:none; }
   .menu.open { display:block; }
   .menu h4 { margin:8px 4px 4px; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; opacity:.6; }
   .menu h4:first-child { margin-top:2px; }
   .menu .opts { display:grid; grid-template-columns:1fr 1fr; gap:4px; }
   #bar .menu button { padding:5px 8px; justify-content:space-between; font-size:13px; }
   #bar .menu button small { opacity:.55; font-size:11px; }
-  .menu hr { border:0; border-top:1px solid #444a66; margin:10px 0 6px; }
+  .menu hr { border:0; border-top:1px solid var(--line); margin:10px 0 6px; }
   .menu .row { display:flex; align-items:center; gap:6px; margin:4px; }
   .menu .row span { width:52px; opacity:.85; }
   .menu .row input { width:64px; text-align:center; background:var(--btn); color:var(--txt); border:2px solid transparent; border-radius:6px; padding:4px; font:inherit; }
@@ -46,14 +49,14 @@
   #palette .catbtn canvas { width:32px; height:32px; }
   #palette .catbtn .more { position:absolute; top:2px; right:4px; font-size:8px; font-style:normal; opacity:.55; }
   .cat.on .catbtn { border-color:var(--acc); }
-  .flyout { position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%); display:none; flex-direction:column; gap:3px; min-width:160px; padding:6px; background:var(--panel); border:1px solid #444a66; border-radius:8px; box-shadow:0 -8px 24px #0008; }
+  .flyout { position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%); display:none; flex-direction:column; gap:3px; min-width:160px; padding:6px; background:var(--panel); border:1px solid var(--line); border-radius:8px; box-shadow:0 -8px 24px #0008; }
   .flyout h4 { margin:2px 4px 4px; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; opacity:.6; }
   .cat.open .flyout { display:flex; }
   #palette .flyout button { justify-content:flex-start; padding:4px 8px; font-size:13px; }
   #palette .flyout button canvas { width:24px; height:24px; }
-  #palette .flyout kbd { margin-left:auto; font:11px system-ui; opacity:.55; background:#1f2232; border-radius:4px; padding:1px 5px; }
+  #palette .flyout kbd { margin-left:auto; font:11px system-ui; opacity:.55; background:var(--inset); border-radius:4px; padding:1px 5px; }
   canvas { display:block; image-rendering:pixelated; }
-  .panel { position:absolute; top:56px; z-index:5; width:300px; background:var(--panel); border:1px solid #444a66; border-radius:8px; padding:12px 14px; box-shadow:0 8px 24px #0008; }
+  .panel { position:absolute; top:56px; z-index:5; width:300px; background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:12px 14px; box-shadow:0 8px 24px #0008; }
   .panel h3 { margin:0 0 10px; font-size:13px; text-transform:uppercase; letter-spacing:.06em; opacity:.8; display:flex; justify-content:space-between; align-items:center; }
   .panel h3 button { background:none; border:0; color:var(--txt); font-size:16px; cursor:pointer; opacity:.7; }
   .panel .row { display:grid; grid-template-columns:1fr 64px; gap:4px 8px; align-items:center; margin-bottom:10px; }
@@ -66,14 +69,14 @@
   .panel .foot button { background:var(--btn); color:var(--txt); border:0; border-radius:6px; padding:5px 10px; cursor:pointer; font:inherit; }
   .panel .foot button:hover { background:var(--btnh); }
   #charPanel { right:10px; max-height:calc(100vh - 120px); overflow-y:auto; }
-  .panel details.cat { margin:0 -4px 8px; border:1px solid #444a66; border-radius:8px; background:#22263a; }
+  .panel details.cat { margin:0 -4px 8px; border:1px solid var(--line); border-radius:8px; background:#36254b; }
   .panel details.cat > summary { list-style:none; cursor:pointer; padding:8px 10px; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; display:flex; align-items:center; gap:8px; border-radius:8px; user-select:none; }
   .panel details.cat > summary::-webkit-details-marker { display:none; }
   .panel details.cat > summary:hover { background:var(--btnh); }
   .panel details.cat > summary::after { content:'▼'; margin-left:auto; font-size:9px; opacity:.6; transition:transform .15s; }
   .panel details.cat:not([open]) > summary::after { transform:rotate(-90deg); }
   .panel details.cat > summary small { text-transform:none; letter-spacing:0; font-weight:400; opacity:.55; }
-  .panel details.subcat { margin:0 0 6px; border-radius:6px; background:#1f2232; }
+  .panel details.subcat { margin:0 0 6px; border-radius:6px; background:var(--inset); }
   .panel details.subcat > summary { list-style:none; cursor:pointer; padding:6px 8px; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; opacity:.85; display:flex; align-items:center; gap:6px; border-radius:6px; user-select:none; }
   .panel details.subcat > summary::-webkit-details-marker { display:none; }
   .panel details.subcat > summary:hover { background:var(--btnh); }
@@ -82,7 +85,7 @@
   .panel details.subcat > .body { padding:4px 8px 2px; }
   .panel details.cat > .body { padding:2px 10px 6px; }
   .panel details.cat .body > h4.sub:first-child, .panel details.cat .body > .sub:first-child { margin-top:4px; padding-top:0; border-top:0; }
-  #charPanel h4.sub { margin:14px 0 8px; padding-top:10px; border-top:1px solid #444a66; font-size:11px; text-transform:uppercase; letter-spacing:.06em; opacity:.7; }
+  #charPanel h4.sub { margin:14px 0 8px; padding-top:10px; border-top:1px solid var(--line); font-size:11px; text-transform:uppercase; letter-spacing:.06em; opacity:.7; }
   #movePanel, #springPanel { left:10px; width:280px; }
   .panel .seg { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px; }
   .panel .seg button { flex:1; background:var(--btn); color:var(--txt); border:2px solid transparent; border-radius:6px; padding:5px 6px; cursor:pointer; font:inherit; font-size:12px; white-space:nowrap; }
@@ -90,7 +93,7 @@
   .panel .seg button.on { border-color:var(--acc); }
   .panel .sub { font-size:12px; opacity:.85; margin-bottom:4px; }
   #powerPanel, #enemyPanel { right:10px; width:320px; max-height:calc(100vh - 120px); overflow-y:auto; }
-  #powerPanel h4.sub, #enemyPanel h4.sub { margin:14px 0 8px; padding-top:10px; border-top:1px solid #444a66; font-size:11px; text-transform:uppercase; letter-spacing:.06em; opacity:.7; }
+  #powerPanel h4.sub, #enemyPanel h4.sub { margin:14px 0 8px; padding-top:10px; border-top:1px solid var(--line); font-size:11px; text-transform:uppercase; letter-spacing:.06em; opacity:.7; }
   .plist { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px; }
   .plist button { display:flex; align-items:center; gap:5px; background:var(--btn); color:var(--txt); border:2px solid transparent; border-radius:6px; padding:3px 7px 3px 4px; cursor:pointer; font:inherit; font-size:12px; }
   .plist button:hover { background:var(--btnh); }
@@ -102,7 +105,7 @@
   .panel input[type=color] { width:36px; height:30px; padding:0; border:0; background:none; cursor:pointer; }
   .panel label.chk { display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer; margin:2px 0 6px; }
   .panel label.chk input { accent-color:var(--acc); width:16px; height:16px; margin:0; }
-  .panel .ability { padding:6px 8px 1px; margin-bottom:8px; border-radius:6px; background:#1f2232; }
+  .panel .ability { padding:6px 8px 1px; margin-bottom:8px; border-radius:6px; background:var(--inset); }
   .panel .ability .row { margin-bottom:6px; }
   .panel .ability.off .row { display:none; }
   .panel [hidden] { display:none !important; }
@@ -110,36 +113,36 @@
   /* In-game guide (same content as README.md) */
   /* Title screen shown at launch */
   #titleScreen { position:fixed; inset:0; z-index:40; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; overflow:hidden; cursor:pointer;
-    background:linear-gradient(#6ec3f4, #cdeefe 70%); transition:opacity .35s; }
+    background:linear-gradient(var(--gs-purple-dk), var(--gs-purple) 45%, var(--gs-blue) 100%); transition:opacity .35s; }
   #titleScreen.hide { opacity:0; pointer-events:none; }
-  #titleScreen .hills { position:absolute; left:-10%; right:-10%; bottom:64px; height:180px; background:radial-gradient(ellipse 260px 180px at 15% 100%, #9fd8a0 98%, transparent), radial-gradient(ellipse 300px 160px at 55% 100%, #9fd8a0 98%, transparent), radial-gradient(ellipse 240px 200px at 90% 100%, #9fd8a0 98%, transparent); }
-  #titleScreen .ground { position:absolute; left:0; right:0; bottom:0; height:64px; background:repeating-linear-gradient(90deg, #7a5532 0 32px, #6b4a2b 32px 64px); border-top:8px solid #4caf50; }
-  #titleScreen .hero { position:absolute; bottom:64px; left:-40px; width:22px; height:28px; background:#4da3ff; border-radius:4px; box-shadow:inset 0 -6px #2b6fc0; animation:heroRun 7s linear infinite, heroHop .7s ease-out infinite alternate; }
+  #titleScreen .hills { position:absolute; left:-10%; right:-10%; bottom:64px; height:180px; background:radial-gradient(ellipse 260px 180px at 15% 100%, #2f1f42 98%, transparent), radial-gradient(ellipse 300px 160px at 55% 100%, #2f1f42 98%, transparent), radial-gradient(ellipse 240px 200px at 90% 100%, #2f1f42 98%, transparent); }
+  #titleScreen .ground { position:absolute; left:0; right:0; bottom:0; height:64px; background:repeating-linear-gradient(90deg, #3f2a56 0 32px, #34234a 32px 64px); border-top:8px solid var(--gs-cyan); }
+  #titleScreen .hero { position:absolute; bottom:64px; left:-40px; width:22px; height:28px; background:var(--gs-orange); border-radius:4px; box-shadow:inset 0 -6px #c46f1e; animation:heroRun 7s linear infinite, heroHop .7s ease-out infinite alternate; }
   #titleScreen .hero::after { content:''; position:absolute; top:7px; right:4px; width:4px; height:5px; background:#fff; border-radius:1px; }
   @keyframes heroRun { to { left:calc(100% + 40px); } }
   @keyframes heroHop { from { transform:translateY(0); } to { transform:translateY(-70px); } }
-  #titleScreen h1 { position:relative; margin:0; font:900 clamp(40px, 9vw, 96px)/1 system-ui, sans-serif; letter-spacing:.02em; color:#ffcc4d; text-align:center;
-    text-shadow:0 4px 0 #b5562f, 0 8px 0 #6b4a2b, 0 14px 24px #0005; -webkit-text-stroke:2px #6b4a2b; animation:titleIn .6s cubic-bezier(.2,1.6,.4,1) both; }
-  #titleScreen .presents { position:relative; color:#fff; font:700 clamp(14px, 2.4vw, 22px) system-ui, sans-serif; letter-spacing:.25em; text-transform:uppercase; text-shadow:0 2px 0 #2b6fc0, 0 4px 12px #0004; animation:titleIn .6s ease-out both; }
-  #titleScreen h1 small { font-size:.4em; vertical-align:middle; -webkit-text-stroke:1px #6b4a2b; }
-  #titleScreen .tag { position:relative; color:#1b1d2a; font-size:clamp(14px, 2.2vw, 20px); font-weight:600; opacity:.75; }
-  #titleScreen button { position:relative; margin-top:10px; background:#2f8f4e; color:#fff; border:0; border-radius:10px; padding:14px 34px; font:700 20px system-ui, sans-serif; cursor:pointer; box-shadow:0 5px 0 #1d5e33; }
-  #titleScreen button:hover { background:#38a65b; }
-  #titleScreen button:active { transform:translateY(3px); box-shadow:0 2px 0 #1d5e33; }
-  #titleScreen .hint { position:relative; color:#1b1d2a; font-size:13px; opacity:.6; animation:blink 1.4s ease-in-out infinite; }
+  #titleScreen h1 { position:relative; margin:0; font:900 clamp(40px, 9vw, 96px)/1 system-ui, sans-serif; letter-spacing:.02em; color:var(--gs-orange); text-align:center;
+    text-shadow:6px 6px 0 var(--gs-blue2), 0 14px 28px #0006; -webkit-text-stroke:2px var(--gs-purple-dk); animation:titleIn .6s cubic-bezier(.2,1.6,.4,1) both; }
+  #titleScreen .presents { position:relative; color:var(--gs-cyan); font:700 clamp(14px, 2.4vw, 22px) system-ui, sans-serif; letter-spacing:.25em; text-transform:uppercase; text-shadow:0 2px 0 var(--gs-purple-dk), 0 4px 12px #0006; animation:titleIn .6s ease-out both; }
+  #titleScreen h1 small { font-size:.4em; vertical-align:middle; -webkit-text-stroke:1px var(--gs-purple-dk); }
+  #titleScreen .tag { position:relative; color:#fff; font-size:clamp(14px, 2.2vw, 20px); font-weight:600; opacity:.75; }
+  #titleScreen button { position:relative; margin-top:10px; background:var(--gs-orange); color:var(--gs-purple); border:4px solid var(--gs-purple); border-radius:999px; padding:12px 36px; font:800 20px system-ui, sans-serif; cursor:pointer; box-shadow:6px 6px 0 var(--gs-purple); }
+  #titleScreen button:hover { background:#f5a958; }
+  #titleScreen button:active { transform:translate(4px, 4px); box-shadow:2px 2px 0 var(--gs-purple); }
+  #titleScreen .hint { position:relative; color:#fff; font-size:13px; opacity:.6; animation:blink 1.4s ease-in-out infinite; }
   @keyframes titleIn { from { transform:scale(.4); opacity:0; } }
   @keyframes blink { 50% { opacity:.2; } }
   @media (prefers-reduced-motion: reduce) { #titleScreen * { animation:none !important; } }
   #guide { position:fixed; inset:0; z-index:20; background:#000a; display:flex; align-items:center; justify-content:center; padding:16px; }
   #guide[hidden] { display:none; }
-  #guide .box { width:min(980px, 100%); height:min(86vh, 900px); display:flex; flex-direction:column; background:var(--panel); border:1px solid #444a66; border-radius:10px; box-shadow:0 12px 40px #000a; overflow:hidden; }
-  #guide header { display:flex; align-items:center; gap:10px; padding:10px 14px; border-bottom:1px solid #444a66; }
+  #guide .box { width:min(980px, 100%); height:min(86vh, 900px); display:flex; flex-direction:column; background:var(--panel); border:1px solid var(--line); border-radius:10px; box-shadow:0 12px 40px #000a; overflow:hidden; }
+  #guide header { display:flex; align-items:center; gap:10px; padding:10px 14px; border-bottom:1px solid var(--line); }
   #guide header h2 { margin:0; font-size:16px; flex:1; }
   #guide header small { opacity:.55; }
   #guide header button { background:none; border:0; color:var(--txt); font-size:18px; cursor:pointer; opacity:.7; }
   #guide header button:hover { opacity:1; }
   #guide .body { flex:1; display:flex; min-height:0; }
-  #guide nav { width:190px; flex:none; overflow-y:auto; padding:8px; border-right:1px solid #444a66; }
+  #guide nav { width:190px; flex:none; overflow-y:auto; padding:8px; border-right:1px solid var(--line); }
   #guide nav button { display:block; width:100%; text-align:left; background:none; border:0; border-radius:6px; color:var(--txt); padding:6px 8px; font:inherit; font-size:13px; cursor:pointer; opacity:.8; }
   #guide nav button:hover { background:var(--btnh); opacity:1; }
   #guide nav button.on { background:var(--btn); opacity:1; box-shadow:inset 3px 0 0 var(--acc); }
@@ -149,11 +152,11 @@
   #guide article p, #guide article ul { margin:6px 0; }
   #guide article ul { padding-left:20px; }
   #guide table { border-collapse:collapse; width:100%; margin:8px 0 12px; font-size:13px; }
-  #guide th, #guide td { text-align:left; padding:5px 8px; border-bottom:1px solid #3a3f58; vertical-align:top; }
+  #guide th, #guide td { text-align:left; padding:5px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
   #guide th { font-size:11px; text-transform:uppercase; letter-spacing:.05em; opacity:.6; font-weight:600; }
   #guide td:first-child { white-space:nowrap; font-weight:600; }
-  #guide kbd { font:12px ui-monospace, monospace; background:#1f2232; border:1px solid #444a66; border-bottom-width:2px; border-radius:4px; padding:0 5px; white-space:nowrap; }
-  #guide code { font:12px ui-monospace, monospace; background:#1f2232; border-radius:4px; padding:1px 4px; }
+  #guide kbd { font:12px ui-monospace, monospace; background:var(--inset); border:1px solid var(--line); border-bottom-width:2px; border-radius:4px; padding:0 5px; white-space:nowrap; }
+  #guide code { font:12px ui-monospace, monospace; background:var(--inset); border-radius:4px; padding:1px 4px; }
   #guide .tile { display:flex; align-items:center; gap:8px; }
   #guide .tile canvas { width:24px; height:24px; flex:none; }
   @media (max-width:640px) { #guide nav { display:none; } #guide article { padding:6px 14px 20px; } }
