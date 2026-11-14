@@ -266,7 +266,10 @@ CHAR_FIELDS.forEach(f => {
   row.innerHTML = `<label>${f.name} <span style="opacity:.6">(${f.unit})</span></label>
     <input type="range" min="${f.min}" max="${f.max}" step="${f.step}"><input type="number" min="${f.min}" max="${f.max}" step="${f.step}">`;
   const [range, num] = row.querySelectorAll('input');
-  const onInput = e => { setCharCfg({ [f.k]: e.target.value }); saveCharCfg(); };
+  const onInput = e => {
+    setCharCfg({ [f.k]: e.target.value }); saveCharCfg();
+    if (game?.p) game.phys = charPhys();   // apply live while playing
+  };
   range.oninput = onInput;
   num.onchange = e => { onInput(e); num.value = charCfg[f.k]; };
   charInputs[f.k] = { range, num };
@@ -371,6 +374,7 @@ updateScreenUI();
 function resize() {
   const wrap = document.getElementById('wrap');
   wrap.style.top = document.getElementById('bar').offsetHeight + 'px';
+  document.getElementById('charPanel').style.top = document.getElementById('bar').offsetHeight + 6 + 'px';
   wrap.style.bottom = document.getElementById('palette').offsetHeight + 'px';
   const aw = wrap.clientWidth, ah = wrap.clientHeight;
   if (screenSize === 'fit') {
